@@ -187,29 +187,41 @@ export async function applyUserSelection() {
     console.warn('[User Curation] Note on report loading:', err.message);
   }
 
-  // 5. Load experiences_image_map.json to apply any manual user images (e.g. Unsplash)
+  // 5. Load experiences_image_map.json to apply manual user images and strictly restrict active catalog
   try {
     const mapPath = path.resolve(__dirname, '../../../experiences_image_map.json');
     if (fs.existsSync(mapPath)) {
       const rawMap = fs.readFileSync(mapPath, 'utf8');
       const userMap = JSON.parse(rawMap);
-      let customImageCount = 0;
+      const userWithLinks = userMap.filter(
+        (item) => item.id && item.image_url && item.image_url.trim().length > 0
+      );
+      const validUserIds = userWithLinks.map((item) => item.id);
 
-      for (const item of userMap) {
-        if (!item.id || !item.image_url || !item.image_url.trim()) continue;
-        const cleanUrl = item.image_url.trim();
+      console.log(`[User Curation] Found ${validUserIds.length} experiences with user-added links.`);
+
+      if (validUserIds.length > 0) {
+        // Strictly deactivate all other experiences in the database
+        const placeholders = validUserIds.map(() => '?').join(',');
         await dbRun(
-          `UPDATE experiences 
-           SET image_urls = ?, 
-               source = 'user_curated_unsplash',
-               is_active = 1
-           WHERE id = ?`,
-          [JSON.stringify([cleanUrl]), item.id]
+          `UPDATE experiences SET is_active = 0 WHERE id NOT IN (${placeholders})`,
+          validUserIds
         );
-        customImageCount++;
-      }
-      if (customImageCount > 0) {
-        console.log(`[User Curation] Applied ${customImageCount} custom user image URLs from experiences_image_map.json.`);
+
+        // Activate and save exact user links
+        for (const item of userWithLinks) {
+          const cleanUrl = item.image_url.trim();
+          await dbRun(
+            `UPDATE experiences 
+             SET image_urls = ?, 
+                 source = 'user_curated_unsplash',
+                 is_active = 1,
+                 notability_score = 100
+             WHERE id = ?`,
+            [JSON.stringify([cleanUrl]), item.id]
+          );
+        }
+        console.log(`[User Curation] Successfully activated ONLY the ${validUserIds.length} user-curated experiences.`);
       }
     }
   } catch (err) {

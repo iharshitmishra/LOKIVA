@@ -182,12 +182,15 @@ experiencesRouter.get('/', async (req, res) => {
     const rows = await dbAll(sql, params);
     const formattedRows = rows.map(formatExperience);
 
-    // Enrich and strictly deduplicate images so no two cards or locations ever repeat an image
-    const usedImages = new Set();
+    // Preserve user curated images without Pexels fallback replacements
     const enrichedList = [];
     for (const exp of formattedRows) {
-      const enriched = await enrichExperienceWithPexels(exp, usedImages);
-      enrichedList.push(enriched);
+      if (exp.image_url && exp.image_url.trim().length > 0) {
+        enrichedList.push(exp);
+      } else {
+        const enriched = await enrichExperienceWithPexels(exp);
+        enrichedList.push(enriched);
+      }
     }
 
     res.json(enrichedList);

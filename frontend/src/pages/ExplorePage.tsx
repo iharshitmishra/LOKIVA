@@ -20,15 +20,17 @@ import {
   ChevronUp,
   RotateCcw,
 } from 'lucide-react';
+import { USER_VERIFIED_PLACE_IDS } from '../data/userVerifiedPlaceIds';
 
 const ENCLAVES = [
-  { name: 'Jaipur', label: 'Jaipur' },
   { name: 'Varanasi', label: 'Varanasi' },
-  { name: 'Kochi', label: 'Kochi' },
-  { name: 'Almora', label: 'Almora' },
+  { name: 'Jaipur', label: 'Jaipur' },
+  { name: 'Mumbai', label: 'Mumbai' },
+  { name: 'Delhi', label: 'Delhi' },
   { name: 'Udaipur', label: 'Udaipur' },
-  { name: 'Delhi', label: 'Old Delhi' },
-  { name: 'Goa', label: 'Goa Hinterlands' },
+  { name: 'Kolkata', label: 'Kolkata' },
+  { name: 'Almora', label: 'Almora' },
+  { name: 'Agra', label: 'Agra' },
 ];
 
 const THEMATIC_PERSPECTIVES = [
@@ -85,7 +87,15 @@ export function ExplorePage() {
           is_indoor: rainSafeOnly || undefined,
           search: query.trim() || undefined,
         });
-        const deduped = deduplicateExperienceList(data || []);
+
+        // Strictly show only places for which the user manually added verified links
+        const verifiedOnly = (data || []).filter(
+          (exp) =>
+            USER_VERIFIED_PLACE_IDS.has(exp.id) ||
+            exp.source === 'user_curated_unsplash'
+        );
+
+        const deduped = deduplicateExperienceList(verifiedOnly);
         setExperiences(deduped);
 
         if (loc.trim() && deduped.length === 0) {
