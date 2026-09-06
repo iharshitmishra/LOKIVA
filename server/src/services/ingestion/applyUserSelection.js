@@ -183,7 +183,36 @@ export async function applyUserSelection() {
     console.warn('[User Curation] Note on report loading:', err.message);
   }
 
-  console.log('[User Curation] 36 unwanted experiences removed. 18 selected experiences active with authentic terminal photos.');
+  // 5. Load experiences_image_map.json to apply any manual user images (e.g. Unsplash)
+  try {
+    const mapPath = path.resolve(__dirname, '../../../experiences_image_map.json');
+    if (fs.existsSync(mapPath)) {
+      const rawMap = fs.readFileSync(mapPath, 'utf8');
+      const userMap = JSON.parse(rawMap);
+      let customImageCount = 0;
+
+      for (const item of userMap) {
+        if (!item.id || !item.image_url || !item.image_url.trim()) continue;
+        const cleanUrl = item.image_url.trim();
+        await dbRun(
+          `UPDATE experiences 
+           SET image_urls = ?, 
+               source = 'user_curated_unsplash',
+               is_active = 1
+           WHERE id = ?`,
+          [JSON.stringify([cleanUrl]), item.id]
+        );
+        customImageCount++;
+      }
+      if (customImageCount > 0) {
+        console.log(`[User Curation] Applied ${customImageCount} custom user image URLs from experiences_image_map.json.`);
+      }
+    }
+  } catch (err) {
+    console.warn('[User Curation] Error loading experiences_image_map.json:', err.message);
+  }
+
+  console.log('[User Curation] Curation & custom image mapping applied successfully.');
 }
 
 if (process.argv[1]?.endsWith('applyUserSelection.js')) {

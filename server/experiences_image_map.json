@@ -1,0 +1,2802 @@
+[
+  {
+    "id": 1087,
+    "title": "Taj Mahal (UNESCO World Heritage Site)",
+    "city": "Agra",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=1200&q=80"
+  },
+  {
+    "id": 1094,
+    "title": "Hawa Mahal (Palace of Winds)",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": "https://images.unsplash.com/photo-1650530777057-3a7dbc24bf6c?q=80&w=801&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  },
+  {
+    "id": 497,
+    "title": "Khatyari",
+    "city": "Almora",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 743,
+    "title": "Ganga Mahal Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://plus.unsplash.com/premium_photo-1746809049966-d9d01dd2469f?q=80&w=1224&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  },
+  {
+    "id": 744,
+    "title": "Lali Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://images.unsplash.com/photo-1712510817140-917938f92e5b?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  },
+  {
+    "id": 745,
+    "title": "Babua Pandey Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://images.unsplash.com/photo-1719324083356-43e7d63268e5?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  },
+  {
+    "id": 760,
+    "title": "Hotel Royal Orchid",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 764,
+    "title": "Vaishali Nagar",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": "https://jaipurlove.com/vaishali-nagar-jaipur/"
+  },
+  {
+    "id": 773,
+    "title": "Hawa Mahal",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 777,
+    "title": "Sun Temple, Jaipur",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 781,
+    "title": "Juneja Art Gallery",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": "https://images.unsplash.com/photo-1554907984-15263bfd63bd?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  },
+  {
+    "id": 1215,
+    "title": "The Woods of Kausani by Moustache",
+    "city": "Almora",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTLh8YIUD2qEWemVbwA66az5kLDoHJZueEHHtl5IoE7fQ&s"
+  },
+  {
+    "id": 1491,
+    "title": "Marine Drive (Queen's Necklace Promenade)",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Nature & Wildlife",
+    "image_url": "https://images.unsplash.com/photo-1642233803470-00129cdeba8f?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  },
+  {
+    "id": 1492,
+    "title": "Gateway of India",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1495,
+    "title": "Shree Siddhivinayak Ganpati Temple",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1497,
+    "title": "Kanheri Caves & Sanjay Gandhi National Park",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 3932,
+    "title": "Chhatrapati Shivaji Maharaj Terminus (CSMT)",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 4000,
+    "title": "Amer Fort & Sheesh Mahal (Mirror Palace)",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 3752,
+    "title": "India Gate & Kartavya Path",
+    "city": "Delhi",
+    "state": "Delhi",
+    "category": "Heritage & History",
+    "image_url": "https://images.indianexpress.com/2022/09/Untitled-design-4-3.jpg"
+  },
+  {
+    "id": 557,
+    "title": "Kashi Vishwanath Jyotirlinga Temple & Corridor",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 559,
+    "title": "Sarnath Dhamek Stupa & Deer Park",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://s7ap1.scene7.com/is/image/incredibleindia/dhamek-stupa-attr-2-hero?qlt=82&ts=1727353589295"
+  },
+  {
+    "id": 1090,
+    "title": "Tomb of I'timad-ud-Daulah (Baby Taj)",
+    "city": "Agra",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1100,
+    "title": "City Palace Udaipur & Lake Pichola Complex",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkTXyp0KgTVWGBJKSY5vACOGj0Y5SXH79oShF_gCRojlSVXJGlKQTzhgc&s=10"
+  },
+  {
+    "id": 3761,
+    "title": "Agrasen Ki Baoli",
+    "city": "Delhi",
+    "state": "Delhi",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 3764,
+    "title": "Chandni Chowk Heritage Food Trail & Paranthe Wali Gali",
+    "city": "Delhi",
+    "state": "Delhi",
+    "category": "Food & Culinary",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtWuEJ4CLu8JmCkyFww4Fbu7bLmq_vwcUDL56HdcrP_vUtow08Qxznrbev&s=10"
+  },
+  {
+    "id": 3922,
+    "title": "Akshardham Temple Complex",
+    "city": "Delhi",
+    "state": "Delhi",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSRdx0K-UFWZovtVEskdABx6KV_beRdGIHew2o5RINDuxMDwyfv7keZZYo&s=10"
+  },
+  {
+    "id": 3924,
+    "title": "Purana Qila (Old Fort & Indraprastha)",
+    "city": "Delhi",
+    "state": "Delhi",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyVhgevicW4J3BWtsHjtuGAQlYfE-udY7N66VOY4swBQ&s=10"
+  },
+  {
+    "id": 3927,
+    "title": "Hazrat Nizamuddin Dargah & Evening Sufi Qawwali",
+    "city": "Delhi",
+    "state": "Delhi",
+    "category": "Music & Dance",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-7sXiYvaStGhJ5u_L0NtT5pg6nX9Rj22cOwV6GBHbmHuQnOuvnnoHwdI_&s=10"
+  },
+  {
+    "id": 1092,
+    "title": "Sadar Bazaar Traditional Agra Petha & Chaat Trail",
+    "city": "Agra",
+    "state": "Uttar Pradesh",
+    "category": "Food & Culinary",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3IstuxPA_MpiXq74psKgv6gI015_uwflSuIOc35lCeA&s=10"
+  },
+  {
+    "id": 1102,
+    "title": "Jagdish Temple",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1103,
+    "title": "Saheliyon-ki-Bari (Courtyard of Maidens)",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Nature & Wildlife",
+    "image_url": ""
+  },
+  {
+    "id": 1108,
+    "title": "Partition Museum at Town Hall",
+    "city": "Amritsar",
+    "state": "Punjab",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQi7Euc6T0Yw_F0FGHkILD-UwM1S2c-DfTr6-nVRrqSfw&s=10"
+  },
+  {
+    "id": 1109,
+    "title": "Traditional Amritsari Kulcha & Lassi Food Trail",
+    "city": "Amritsar",
+    "state": "Punjab",
+    "category": "Food & Culinary",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSmgz61uj-2_FVRALf-9zm5u2igWHQekU5ehr0hdG7emqDjEWgYVyx2Y7Y&s=10"
+  },
+  {
+    "id": 1112,
+    "title": "Chowmahalla Palace of the Nizams",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQeCBvGLN77aCGjkRS6AAQkzyERbfC5wuPm8SHVW9hLQA&s=10"
+  },
+  {
+    "id": 1113,
+    "title": "Authentic Hyderabadi Dum Biryani Culinary Trail",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Food & Culinary",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT88V0w8P9vfU8p6QNPphfgoujJgcx6IA0jHXheQiw0Fg&s=10"
+  },
+  {
+    "id": 1502,
+    "title": "Girgaon Chowpatty Pav Bhaji & Kulfi Trail",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Food & Culinary",
+    "image_url": "https://imgstaticcontent.lbb.in/lbbnew/wp-content/uploads/sites/7/2016/09/08092016_ChowpattyFood09_AP.jpg"
+  },
+  {
+    "id": 1503,
+    "title": "Kyani & Co. Heritage Irani Chai & Bun Maska (Est. 1904)",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Food & Culinary",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYjWPSPLA4nlnb8mh0s0enb3EJF_arme4Nw7mgBq9KjSh19bX4wnCgTVCb&s=10"
+  },
+  {
+    "id": 1504,
+    "title": "Britannia & Co. Heritage Parsi Berry Pulao (Est. 1923)",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Food & Culinary",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSl_9CQrQPTbWypxR8ojcZM28xI5CuV1pKyNiKO6U9EQzpboi5YOX00c7kH&s=10"
+  },
+  {
+    "id": 1505,
+    "title": "Mohammed Ali Road Mughlai & Sweets Trail",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Food & Culinary",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQYR8VssHLZg_D2H4j2MdVHv_YQsPyTa-KKzooRIJSqyA&s=10"
+  },
+  {
+    "id": 1506,
+    "title": "Ashok Vada Pav Prabhadevi (The Original Mumbai Vada Pav)",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Food & Culinary",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbQEPrPTEU8UJ5ykwI4RCHEgdpv9tAun-IV63BbrFO1g&s=10"
+  },
+  {
+    "id": 1507,
+    "title": "K. Rustom & Co. Heritage Ice Cream Sandwiches (Est. 1953)",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Food & Culinary",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRc6MRpkk252m2fDfYggDBtNQhf1t-AywohYlpFxWuds6kHcsyUWiJ11sI&s=10"
+  },
+  {
+    "id": 1508,
+    "title": "Sardar Refreshments Extra-Butter Pav Bhaji (Tardeo)",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Food & Culinary",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzv7S_EbxEYuPcSd-kfrAHvt_j7ZQ3gm5kbgZ_ffTNjw&s=10"
+  },
+  {
+    "id": 1509,
+    "title": "Bademiya Late-Night Seekh Kebab & Roll Stall (Est. 1946)",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Food & Culinary",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWq7fBiSQYSN3OsemDR-bkpIjGHiI1xdgX8nIlBHVEcRNOLpLq9Sh6ywbv&s=10"
+  },
+  {
+    "id": 1510,
+    "title": "Juhu Beach Bhelpuri, Sevpuri & Gola Chowk",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Food & Culinary",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT9o3INwIekk-CwHBEhJzllslFx6H4MGhJBbazaJEM0RxY0k_bRrg-fQQY&s=10"
+  },
+  {
+    "id": 3955,
+    "title": "Chhatrapati Shivaji Maharaj Terminus (CSMT / Victoria Terminus)",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRM0c9wfBit49ZVfts6cwZmpGrit4rPranvswp9w6fGDA&s=10"
+  },
+  {
+    "id": 3957,
+    "title": "Dhobi Ghat (Mahalaxmi Open Air Laundry)",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Workshops & Craft",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQFegMnHBoE53Un2nBO_16hbsiDvoMkdUKmZf04-ddIbg&s=10"
+  },
+  {
+    "id": 3958,
+    "title": "Mount Mary Basilica & Bandra Heritage Walk",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 4003,
+    "title": "Nahargarh Fort Sunset Point",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbgmUInTH7bca9qCAwhOwRrypdyQwultM5gzsR042I0ZqfCm3nBrRy3mrr&s=10"
+  },
+  {
+    "id": 4005,
+    "title": "Bagore Ki Haveli & Dharohar Rajasthani Folk Show",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Music & Dance",
+    "image_url": ""
+  },
+  {
+    "id": 4006,
+    "title": "Golden Temple (Harmandir Sahib & Amrit Sarovar)",
+    "city": "Amritsar",
+    "state": "Punjab",
+    "category": "Spiritual & Wellness",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfDMT4obKsB6rzvqW9yMLApBtlEtLOn4fhxUowZnrzaw&s=10"
+  },
+  {
+    "id": 4020,
+    "title": "Bandra-Worli Sea Link & Promenade View",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Nature & Wildlife",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSwiy5UaM6V4Jftme5WolQ7-4iR930YHK8oOAWKkdYHQ&s=10"
+  },
+  {
+    "id": 4038,
+    "title": "Elephanta Caves (Gharapuri Island)",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 282,
+    "title": "Aipan Folk Geometric Art Workshop",
+    "city": "Almora",
+    "state": "Uttarakhand",
+    "category": "Art & Craft",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlTgZwIGTspuFxJpy0cS_4DFabQMZ5-ll6SaSzlK94IA&s"
+  },
+  {
+    "id": 284,
+    "title": "Varanasi Zari & Kadhwa Silk Weaving Guild",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Art & Craft",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBd_2m6EYArQY9xOSFmEo2OcZsRbArdREkIQFcyqPm4ibOe2vFzywDlMs&s=10"
+  },
+  {
+    "id": 309,
+    "title": "Sikkimese Thangka Buddhist Scroll Painting Academy",
+    "city": "Gangtok",
+    "state": "Sikkim",
+    "category": "Art & Craft",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHyd0YdWUROBSvGFSWXBPgTubuuxgKFm2vjDZQr-r-xg&s=10"
+  },
+  {
+    "id": 718,
+    "title": "Jayapur",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdv6Oiqf51zjzKs6HNLCcnHUy8cLcl_5uhbKmDuZ0ZSg&s=10"
+  },
+  {
+    "id": 719,
+    "title": "Birbhanpur",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcgz9tK6UGM9JshRdFZcOVeZTkaxVA39UXQAgrBjmjWRBCn6tpQXFfk5Y&s=10"
+  },
+  {
+    "id": 720,
+    "title": "Indian Institute of Vegetable Research",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1wh7L9c_29gK8k_jjNl0Ok5d7FS_Gwu846631RCwn9GcapQZqjk1phyg&s=10"
+  },
+  {
+    "id": 721,
+    "title": "Chaudharipur",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKut_1qSteXgzV8e3OzJbKOPgPATaQx0wlgR8Rb40bIg&s"
+  },
+  {
+    "id": 722,
+    "title": "Basantpur Minor",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2b/b0/b6/a1/caption.jpg?w=1200&h=-1&s=1"
+  },
+  {
+    "id": 723,
+    "title": "Jamālpur Minor",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRVQ8n21_9RXytvUeua5qfmsxQ7ZWo-Mdi_ksZhyuJwnA&s"
+  },
+  {
+    "id": 724,
+    "title": "Salempur Minor",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMQFGje5HtxQ7ZbzeSuJ-recFziZwHwIeBj67r1uYrrA&s=10"
+  },
+  {
+    "id": 725,
+    "title": "Sikandarpur Minor",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ6r2CECNxamZ0fW_OIEcL1ZgTWdeZ0UcYqHQIaG-Q_utk_MebGQ7qThck&s=10"
+  },
+  {
+    "id": 726,
+    "title": "Dayālpur Minor",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTklZFetgKYi1iK42aQovL44l-er5jAS5ojpjrpYDHzqw&s=10"
+  },
+  {
+    "id": 727,
+    "title": "Mustafāpur Minor",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnU56T5aaB-bBOn5Mpu5ZEWjmo46HIuT_FQ_203aqNPDjZP8PFTQC17-s&s=10"
+  },
+  {
+    "id": 728,
+    "title": "Madanpura",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://images.indianexpress.com/2016/11/old-bombay-480.jpg"
+  },
+  {
+    "id": 729,
+    "title": "Rupaundha",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://content.jdmagicbox.com/v2/comp/mirzapur/e3/9999p5442.5442.250510210836.j8e3/catalogue/shubham-ent-udyog-rupaundha-mirzapur-brick-manufacturers-skajd28afv-250.jpg"
+  },
+  {
+    "id": 730,
+    "title": "Baraila Nāla",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYrx1D1yLGBpP5Em0NZNazr8JJpz1_sqso890bZObTYOxeCWieHW-KfPFc&s=10"
+  },
+  {
+    "id": 731,
+    "title": "Sankat Mochan Hanuman Temple (Mandir)",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Spiritual & Wellness",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqVQmCGA8WcrZbfAsdWKEW4mjlgQzT47UdpZ_71EEe8CfEK_2w3JGv0Sk&s=10"
+  },
+  {
+    "id": 732,
+    "title": "Baba Keenaram Ashram",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Spiritual & Wellness",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_rFsFzFsFeTZGj-9zVljm5lluUzF5M4EnPULK5_RiAw&s=10"
+  },
+  {
+    "id": 733,
+    "title": "Hanuman Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTC2l1dVfaoOYsHVurDk7KiSrhxBXnKII8H-PQ7BSP7YxkbZ7eoI1NB4MU&s=10"
+  },
+  {
+    "id": 734,
+    "title": "St Marys Church",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Spiritual & Wellness",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdDzbuxzwIEr7sK-yTJNHAVr-cHfzsMdacTcBm0JvExA&s=10"
+  },
+  {
+    "id": 735,
+    "title": "Lal Girja CNI Church",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Spiritual & Wellness",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJXsjG9PJe8BSWfaIVQSdnKETM64ENrYwOwXcSSh_eCA&s"
+  },
+  {
+    "id": 736,
+    "title": "Ahilyabai Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcROm_X6v8JaFojw0f3uWzJ1vd45aJLf0RbUPIGSkmtPHQ&s=10"
+  },
+  {
+    "id": 737,
+    "title": "Raja Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Raja_Ghat%2C_Varanasi.JPG/250px-Raja_Ghat%2C_Varanasi.JPG?utm_source=en.wikiversity.org&utm_campaign=parser&utm_content=thumbnail"
+  },
+  {
+    "id": 738,
+    "title": "Ranamahal Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 739,
+    "title": "Manasarowa Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 740,
+    "title": "Manmandir Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 741,
+    "title": "Kedar Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 742,
+    "title": "Badhaini Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 746,
+    "title": "Munshi Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 747,
+    "title": "Karnataka Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 748,
+    "title": "Narad Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 749,
+    "title": "Chousatti Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 750,
+    "title": "Ganesh Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 751,
+    "title": "Dr. Rajendra Prasad Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 752,
+    "title": "Tulsi Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 753,
+    "title": "Sankatha Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 754,
+    "title": "Zoo Ticket Office",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 755,
+    "title": "Giant Buddha Statue",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 756,
+    "title": "Ramnagar Fort",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 757,
+    "title": "Kriti Gallery",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 758,
+    "title": "Anandamayee Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 759,
+    "title": "Chauki Ghat",
+    "city": "Varanasi",
+    "state": "Uttar Pradesh",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 766,
+    "title": "Sarovar Portico Jaipur",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKeQp7AO36FgcnuMmqg0cn2Fbr7dgB6QEy-R06_Y9bt-TVEzPBSUIz9UM7&s=10"
+  },
+  {
+    "id": 779,
+    "title": "Sawai Jai Singh II",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSO-5XVgP15P8t64i9OZxwOmAj2r7tLrrMegE9PAzd1tGtWkA_FyEWLM2Cs&s=10"
+  },
+  {
+    "id": 780,
+    "title": "Jain Temple",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 782,
+    "title": "Albert Hall",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS6FVXJgzx5mLE0X6aYYhP5wFx1MA8E9Vqd-ldLRBj7Ew&s=10"
+  },
+  {
+    "id": 783,
+    "title": "Amber Fort",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 786,
+    "title": "Iswari Minar Swarga Sali (Isarlat)",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Nature & Wildlife",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnhlc_YNBUk0NFmWV98x3VccnpRfDYBkMvah3CtygycUuMlp7YFYCU_siB&s=10"
+  },
+  {
+    "id": 787,
+    "title": "bomiyaji mandir",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Spiritual & Wellness",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9clW6kFSzX0ikaoxV5wOdNEFQhmvzSc7551K_Ym_N6BrrUDNeQsNfhRtx&s=10"
+  },
+  {
+    "id": 789,
+    "title": "Ninder Hill Point View",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Nature & Wildlife",
+    "image_url": ""
+  },
+  {
+    "id": 792,
+    "title": "Govind Dev Ji Ka Mandir",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 794,
+    "title": "Doodh Misthan Bhandar",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Food & Culinary",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrZgVNi74Ki_8CS8deehSsaD7r5VwonId0UB5vhIR99A&s=10"
+  },
+  {
+    "id": 798,
+    "title": "Khatu Shyam Mandir",
+    "city": "Jaipur",
+    "state": "Rajasthan",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 799,
+    "title": "Moti Magri",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSLVV2_c1QqTxq_j0Zd25ZSwIJFPErFLxdFwZrDjtod2R92vLAYtdTvRA&s=10"
+  },
+  {
+    "id": 800,
+    "title": "Aloukik Homestay",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREhpVWsm_RwkJFv_Eku3WxYW6nF1kmJWQW3shH7NxLPa3T49uUbE5yYf_Z&s=10"
+  },
+  {
+    "id": 801,
+    "title": "Hotel Royal Dezire",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ2nCOf6a2TKzJBL_7Hk1xhUwIcDs1KXQKxGJkE3Mx00Q&s=10"
+  },
+  {
+    "id": 802,
+    "title": "Little Peepal House",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSK1vOjEiWiTHxmUtxedF7r_Es7spP4oNGWZEqcdp51cw&s"
+  },
+  {
+    "id": 803,
+    "title": "Mount View Retreat",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 806,
+    "title": "Shilpgram",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Art & Craft",
+    "image_url": ""
+  },
+  {
+    "id": 807,
+    "title": "Bargaon, Udaipur",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 808,
+    "title": "Udaipur",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 809,
+    "title": "Chandpole",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 810,
+    "title": "Farmstead",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 811,
+    "title": "Bunkyard Udaipur",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 812,
+    "title": "Amantra Shilpi Resort & Spa Udaipur",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 815,
+    "title": "Moustache Udaipur",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 816,
+    "title": "Kotra Haveli",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 820,
+    "title": "Shalom Backpackers Udaipur",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 822,
+    "title": "Soham Haveli Udaipur",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 823,
+    "title": "Zostel Udaipur",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 824,
+    "title": "Mahendra Prakash",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 825,
+    "title": "Madri Haveli",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 826,
+    "title": "Rampratap Palace by Fateh Collection",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 828,
+    "title": "Ambamata Temple",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 829,
+    "title": "Sajjangarh Wildlife Sanctuary",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Nature & Wildlife",
+    "image_url": ""
+  },
+  {
+    "id": 830,
+    "title": "Pala Ganesh Temple",
+    "city": "Udaipur",
+    "state": "Rajasthan",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1141,
+    "title": "Jākhan Main Canal",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1142,
+    "title": "Dholānī Nadi",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1143,
+    "title": "Dhaluwala",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1144,
+    "title": "Makhlanu",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1145,
+    "title": "Comfort Hotel Dewa Retreat",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1146,
+    "title": "Divine Ganga Cottage",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1148,
+    "title": "Arctic Hills By Opulence",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1150,
+    "title": "goSTOPS Rishikesh Tapovan",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1154,
+    "title": "Moustache Rishikesh",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1155,
+    "title": "Namaste by KarwaanLife",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1156,
+    "title": "Rishikesh Sadan A Yoga & Spiritual Retreat",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1157,
+    "title": "Soul Haven",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1158,
+    "title": "Narendranagar Vidhan Sabha constituency",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1159,
+    "title": "Ramnagar Danda",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1167,
+    "title": "Saccha Dam Shiva Temple",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1168,
+    "title": "Blue Shiva",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1169,
+    "title": "Shiva Statue",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1170,
+    "title": "Paintings hall",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1171,
+    "title": "Beatles room",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1172,
+    "title": "Moksha Asram Mandir",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1173,
+    "title": "Radha Govinda Temple",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1174,
+    "title": "Rajharokha Ashram",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1175,
+    "title": "Balyoga Premvarni Ashram",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1176,
+    "title": "Hanuman",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1177,
+    "title": "Parmart Niketan Ghat",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1178,
+    "title": "Fruit & veg market",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Food & Culinary",
+    "image_url": ""
+  },
+  {
+    "id": 1179,
+    "title": "Laxman",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1180,
+    "title": "Bharam Mata Mandir",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1181,
+    "title": "Ganga Nivash Shram ashram",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1182,
+    "title": "Bal Vidya Nikatan Swang ashram",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1183,
+    "title": "Abhiram Shri Baba Mast Ram Babaji Tapasthali",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1184,
+    "title": "Kalptaru Yoga",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1185,
+    "title": "Surya Ganga Needam Ashram",
+    "city": "Rishikesh",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1213,
+    "title": "Chevron Mountain Villa",
+    "city": "Almora",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1214,
+    "title": "Kausani",
+    "city": "Almora",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1216,
+    "title": "Jhandikot",
+    "city": "Almora",
+    "state": "Uttarakhand",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1217,
+    "title": "Umang Shop",
+    "city": "Almora",
+    "state": "Uttarakhand",
+    "category": "Art & Craft",
+    "image_url": ""
+  },
+  {
+    "id": 1218,
+    "title": "Maa Dunagiri Temple",
+    "city": "Almora",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1219,
+    "title": "Someshwar Mahadev Temple",
+    "city": "Almora",
+    "state": "Uttarakhand",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1362,
+    "title": "The Table",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1363,
+    "title": "Regal Cinema",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Art & Craft",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdbQ1NKpCTaHoh1Qixg0qjehsctDstWBsTlcHXiGeTNMQHbwOn_cZOpOGP&s=10"
+  },
+  {
+    "id": 1367,
+    "title": "Tata Institute of Fundamental Research",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQnfv9tyKmAIxCZV4RVZ71ZulllfzshvAehsyN5vwuSLpez7FATsvVtE4&s=10"
+  },
+  {
+    "id": 1371,
+    "title": "Taj Mahal Palace Hotel",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1374,
+    "title": "INHS Asvini",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": "https://salute.co.in/wp-content/uploads/2016/02/vijayeta-395x221-1.jpg"
+  },
+  {
+    "id": 1375,
+    "title": "Mora, Maharashtra",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1376,
+    "title": "Fariyas Hotel Mumbai",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1377,
+    "title": "President - Ihcl SeleQtions",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1378,
+    "title": "Prongs Reef",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1379,
+    "title": "Karanja Reefs",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1381,
+    "title": "Karanja",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1385,
+    "title": "Dhanraj Mahal",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1387,
+    "title": "Colaba",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbL88QtYDlaIXMcBhRqIj-XTafXokmxKuKlyKrvU_xCA&s=10"
+  },
+  {
+    "id": 1388,
+    "title": "Cuffe Parade",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSYTaQY1nXaOkdOJVeQQg5JSAjmx6f6gyhfbgcUfuCQIg&s=10"
+  },
+  {
+    "id": 1391,
+    "title": "Union Biblical Seminary",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQomtcMMoxen6U1lq46C78NxBcQT9VSi7gIZw0xyp4RbtE8ZVcBrklQAWU&s=10"
+  },
+  {
+    "id": 1393,
+    "title": "Rajaram Bridge",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSVcHycXY5bvgDC77MAwL0FGjn9xHPKTW2kYGt4Y6tDg&s=10"
+  },
+  {
+    "id": 1394,
+    "title": "Bharati Vidyapeeth",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1395,
+    "title": "Indian Institute of Information Technology, Pune",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1396,
+    "title": "Dhankawadi",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1397,
+    "title": "Vishwakarma Institute of Technology",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1399,
+    "title": "Advanced Center for Water Resources Development and Management",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1400,
+    "title": "Vishwakarma University",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1511,
+    "title": "Bellagio Rezidencia",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1512,
+    "title": "Bloomrooms @ Candolim",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1514,
+    "title": "di Casa",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1515,
+    "title": "Laliguras Villa",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1518,
+    "title": "Acron Candolim Regina",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1519,
+    "title": "Casa Severina",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1520,
+    "title": "Hyatt Centric Candolim Goa",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1521,
+    "title": "Le Méridien Goa, Calangute",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1523,
+    "title": "Park Inn by Radisson Goa Candolim",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Nature & Wildlife",
+    "image_url": ""
+  },
+  {
+    "id": 1524,
+    "title": "Quality Inn Ocean Palms Goa",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1525,
+    "title": "Resort de Coracao by First Halt - Calangute, Goa",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1526,
+    "title": "Radisson Goa Candolim",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1528,
+    "title": "The Acacia Hotel & Spa Goa",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1529,
+    "title": "The Park Calangute Goa",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Nature & Wildlife",
+    "image_url": ""
+  },
+  {
+    "id": 1531,
+    "title": "PerAvel Beach Holiday Home",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1533,
+    "title": "House of Memories",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1537,
+    "title": "Riad M Goa",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1538,
+    "title": "Hilton Garden Inn Goa Calangute",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1539,
+    "title": "Karishma Grand",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1540,
+    "title": "Saikunj Holiday Homes",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1542,
+    "title": "Panjim city view point",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Nature & Wildlife",
+    "image_url": ""
+  },
+  {
+    "id": 1543,
+    "title": "St. John's Church",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1544,
+    "title": "Dona paula",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1545,
+    "title": "Miramar Beach",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Nature & Wildlife",
+    "image_url": ""
+  },
+  {
+    "id": 1546,
+    "title": "Church of the Rosary",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1547,
+    "title": "Shree Maharudhra Sansthan Temple",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1548,
+    "title": "Hanuman Natyagraha",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Music & Dance",
+    "image_url": ""
+  },
+  {
+    "id": 1549,
+    "title": "Shri Shantadurga Temple",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1550,
+    "title": "Laxmi's Home",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1551,
+    "title": "Siddeshwar Devasthan",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1552,
+    "title": "Jaws Bakery",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Food & Culinary",
+    "image_url": ""
+  },
+  {
+    "id": 1553,
+    "title": "Dayanand Bandodkar Statue",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1554,
+    "title": "Povitr Khuris",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1555,
+    "title": "Our Lady of Candelaria Chapel",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1556,
+    "title": "Dr. Jack de Sequeira",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1557,
+    "title": "Sti Ganesh Mandir",
+    "city": "Goa",
+    "state": "Goa",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1652,
+    "title": "BHEL Gurdwara Ramachandrapram Hyderabad",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1653,
+    "title": "Lemon Tree Premier, Hitec City, Hyderabad",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1654,
+    "title": "Radisson Hyderabad Hitec City",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1655,
+    "title": "Red Fox Hotel, Hitec City, Hyderabad",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1656,
+    "title": "The Westin Hyderabad Mindspace",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1657,
+    "title": "International Institute of Information Technology, Hyderabad",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1658,
+    "title": "Gagnikunta Vodka",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1659,
+    "title": "Remedy Publications LLC",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1660,
+    "title": "Tellapur",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1661,
+    "title": "Maisamma Vāgu",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1662,
+    "title": "Association of Management Development Institutions in South Asia",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1663,
+    "title": "University of Hyderabad",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1664,
+    "title": "Nallagandla",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1666,
+    "title": "HITEC City",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1667,
+    "title": "Shilpa Kala Vedika",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Music & Dance",
+    "image_url": ""
+  },
+  {
+    "id": 1668,
+    "title": "Shilparamam Crafts Village",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Music & Dance",
+    "image_url": ""
+  },
+  {
+    "id": 1669,
+    "title": "Clock Tower",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1670,
+    "title": "Tagore Auditorium",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Music & Dance",
+    "image_url": ""
+  },
+  {
+    "id": 1671,
+    "title": "saraswathi temple",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1672,
+    "title": "MGJSO Church Mettuguda",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1673,
+    "title": "Yellamma Temple Balkampet;Balkampet Yellamma Temple Jn",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1674,
+    "title": "Anjaneya Swami Temple",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1675,
+    "title": "Mountain Bakery",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Food & Culinary",
+    "image_url": ""
+  },
+  {
+    "id": 1676,
+    "title": "Durga Devi temple",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1677,
+    "title": "Darga kamli wale shah sahab",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1678,
+    "title": "shaik faiz kaman",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1681,
+    "title": "Saath Gudi",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1684,
+    "title": "Manju miya tabela playground",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1685,
+    "title": "alawa bibi",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1686,
+    "title": "The Nizam's Museum",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1689,
+    "title": "State Library",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1690,
+    "title": "High Court of Telangana",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1692,
+    "title": "Dabeerpura darwaza",
+    "city": "Hyderabad",
+    "state": "Telangana",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1861,
+    "title": "Arattuvazhi",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1862,
+    "title": "Convent",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1863,
+    "title": "Kadappuram",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1864,
+    "title": "Light House",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1865,
+    "title": "Vimanativu",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1866,
+    "title": "Panchayath",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1867,
+    "title": "St. Mary`s U.P.S. Njarakkal",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1868,
+    "title": "Nayarambalam Grama Panchayat",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1869,
+    "title": "Appangad South",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1870,
+    "title": "Appangad North",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1871,
+    "title": "Jaihind",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1872,
+    "title": "Kallumadam-valiyavattom",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1873,
+    "title": "Manjanakkad",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1874,
+    "title": "Oodarakkal",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1875,
+    "title": "Palli",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1876,
+    "title": "Perumpilly",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1877,
+    "title": "Pozheel",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1878,
+    "title": "Tharishu",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1879,
+    "title": "Kannupillakettu",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Nature & Wildlife",
+    "image_url": ""
+  },
+  {
+    "id": 1880,
+    "title": "Mooripadom",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1881,
+    "title": "Kochi",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1882,
+    "title": "Panchayat Ward",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1883,
+    "title": "Nedungad",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1884,
+    "title": "Kadekuris",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1885,
+    "title": "Janakeeya Palam Ward",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1886,
+    "title": "Kadappuram Ward",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1887,
+    "title": "Kochambalam",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1888,
+    "title": "Karthedom Central Ward",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Art & Craft",
+    "image_url": ""
+  },
+  {
+    "id": 1889,
+    "title": "Manattuparamb West",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1890,
+    "title": "Manattuparamb East",
+    "city": "Kochi",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1915,
+    "title": "Chinnar",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1916,
+    "title": "Irumalakkappu",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1917,
+    "title": "Muniyara South",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1918,
+    "title": "Mullarikudy",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1919,
+    "title": "Perinchamkutty",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1920,
+    "title": "Ancheri",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1922,
+    "title": "Chempakappara",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1923,
+    "title": "Manjappara",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1924,
+    "title": "Murickassery",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1925,
+    "title": "Padamugham",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1926,
+    "title": "Senapathy",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1927,
+    "title": "Thopramkudy",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1928,
+    "title": "Attikkalam",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1929,
+    "title": "Chelachuvadu",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1930,
+    "title": "Churuli",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1931,
+    "title": "Daivammedu",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1932,
+    "title": "Chittadikkavala",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1933,
+    "title": "Josepuram",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1934,
+    "title": "Kathippara",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1935,
+    "title": "Kadakayam",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1936,
+    "title": "Erukootty",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1937,
+    "title": "Ponnama",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1938,
+    "title": "Karikkinmedu",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1939,
+    "title": "Karimban",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1940,
+    "title": "Karimpan",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1941,
+    "title": "Moongappara",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1942,
+    "title": "Melechinnar",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1943,
+    "title": "Maniyarankudy",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1944,
+    "title": "Mulakuvally",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1945,
+    "title": "Pathinaramkandam",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1946,
+    "title": "Poomamkandam",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1947,
+    "title": "Rajamudy",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1948,
+    "title": "Thekkinthandu",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1949,
+    "title": "Temple",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1950,
+    "title": "Tea",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Nature & Wildlife",
+    "image_url": ""
+  },
+  {
+    "id": 1951,
+    "title": "DTPC Tourist Information",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1952,
+    "title": "CSI church",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1953,
+    "title": "Elephant Ride",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1954,
+    "title": "Krishna",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1955,
+    "title": "Honey Tree",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1956,
+    "title": "Photo Point",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Nature & Wildlife",
+    "image_url": ""
+  },
+  {
+    "id": 1957,
+    "title": "Pothamedu",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Nature & Wildlife",
+    "image_url": ""
+  },
+  {
+    "id": 1958,
+    "title": "Flowers house",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1960,
+    "title": "Cheeky river crossing to Latchmi Estate",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1961,
+    "title": "Tea paddies",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Nature & Wildlife",
+    "image_url": ""
+  },
+  {
+    "id": 1962,
+    "title": "Tea paddies panorama",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Nature & Wildlife",
+    "image_url": ""
+  },
+  {
+    "id": 1963,
+    "title": "Chai Bazaar",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Food & Culinary",
+    "image_url": ""
+  },
+  {
+    "id": 1964,
+    "title": "Hill Top View Point",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Nature & Wildlife",
+    "image_url": ""
+  },
+  {
+    "id": 1965,
+    "title": "St Mary's Orthodox Church Munnar",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1966,
+    "title": "LFGHS Munnar",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Spiritual & Wellness",
+    "image_url": ""
+  },
+  {
+    "id": 1967,
+    "title": "Community Hall, Munnar",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1968,
+    "title": "Carmel Auditorium",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1969,
+    "title": "DTPC Kids Adventure Park",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1970,
+    "title": "Fun Forest",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 1971,
+    "title": "Munnar Great Think Adventures",
+    "city": "Munnar",
+    "state": "Kerala",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 2023,
+    "title": "Patharberia",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtNKnOZL_2aTe-E52tKe8lYXxf5cl6XryCf43OmZ0Oxw&s=10"
+  },
+  {
+    "id": 2024,
+    "title": "Alipur",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "category": "Heritage & History",
+    "image_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTDdBbgzBIar2BQ9C0mAPDSQQOEgCWHj31ZVKocsde8wg&s=10"
+  },
+  {
+    "id": 2025,
+    "title": "Hayatnagar Rajarhat",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 2026,
+    "title": "Ajodhyanagar sub-centre",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 2027,
+    "title": "Khelarampur",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 2028,
+    "title": "Bahirchara Panchanan Temple",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "category": "Heritage & History",
+    "image_url": ""
+  },
+  {
+    "id": 2030,
+    "title": "Bahirchara Bibi Matala",
+    "city": "Kolkata",
+    "state": "West Bengal",
+    "category": "Heritage & History",
+    "image_url": ""
+  }
+]
