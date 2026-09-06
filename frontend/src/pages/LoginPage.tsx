@@ -101,13 +101,13 @@ export function LoginPage() {
           <div className="grid grid-cols-3 gap-2 font-mono">
             <button
               onClick={() => {
-                demoLogin('traveler');
+                demoLogin('traveler', 'Piyush Kumar', 'piyush@lokiva.com');
                 navigate(redirectTo);
               }}
               className="p-2 bg-paper-100 hover:bg-paper-200 rounded-xl text-[11px] font-bold text-ink border border-paper-300 flex flex-col items-center gap-1 transition"
             >
               <User className="w-3.5 h-3.5 text-teal" />
-              <span>Sharma Family</span>
+              <span>Piyush Kumar</span>
             </button>
             <button
               onClick={() => {

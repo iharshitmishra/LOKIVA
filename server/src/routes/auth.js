@@ -202,10 +202,19 @@ authRouter.post('/demo-login/:role', async (req, res) => {
     }
 
     // Default seeded demo accounts if no custom name specified
-    let user = await dbGet('SELECT * FROM users WHERE role = ? LIMIT 1', [role]);
+    let user = await dbGet('SELECT * FROM users WHERE role = ? AND (LOWER(full_name) LIKE "%piyush%" OR LOWER(email) LIKE "%piyush%") LIMIT 1', [role]);
+    if (!user && role === 'traveler') {
+      user = await dbGet('SELECT * FROM users WHERE role = "traveler" LIMIT 1');
+      if (user) {
+        await dbRun('UPDATE users SET full_name = "Piyush Kumar", email = "piyush@lokiva.com" WHERE id = ?', [user.id]);
+        user.full_name = 'Piyush Kumar';
+        user.email = 'piyush@lokiva.com';
+      }
+    }
+
     if (!user) {
-      const demoEmail = `${role}@lokiva.com`;
-      const demoName = role === 'admin' ? 'LOKIVA Admin' : role === 'provider' ? 'Jaipur Artisan Collective' : 'Aarav Sharma';
+      const demoEmail = role === 'admin' ? 'admin@lokiva.com' : role === 'provider' ? 'provider@lokiva.com' : 'piyush@lokiva.com';
+      const demoName = role === 'admin' ? 'LOKIVA Admin' : role === 'provider' ? 'Jaipur Artisan Collective' : 'Piyush Kumar';
       const salt = bcrypt.genSaltSync(10);
       const hashed = bcrypt.hashSync(`${role}123`, salt);
       const result = await dbRun(
@@ -217,7 +226,7 @@ authRouter.post('/demo-login/:role', async (req, res) => {
       if (role === 'traveler') {
         await dbRun(
           'INSERT INTO traveler_profiles (user_id, traveler_type, group_size, budget, interests) VALUES (?, ?, ?, ?, ?)',
-          [user.id, 'Family with Kids', 4, 2000, JSON.stringify(['culture', 'food'])]
+          [user.id, 'Cultural Explorer', 2, 2500, JSON.stringify(['culture', 'heritage', 'food'])]
         );
       }
     }

@@ -15,150 +15,15 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 
-gsap.registerPlugin(ScrollTrigger);
+import { USER_LANDING_PLACES } from '../data/userVerifiedPlacesData';
 
-// Curated Landmark Experiences specifically requested for the landing page
-const CURATED_LANDING_EXPERIENCES: Experience[] = [
-  {
-    id: 4000,
-    title: 'Amer Fort & Sheesh Mahal (Mirror Palace)',
-    tagline: '16th-century hilltop Rajput fort with artistic Hindu elements, courtyards, and mirror halls',
-    category: 'Heritage & History',
-    city: 'Jaipur',
-    state: 'Rajasthan',
-    area_name: 'Amer, Jaipur',
-    price: 100,
-    rating: 4.95,
-    review_count: 520,
-    approx_duration_mins: 120,
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/20191219_Fort_Amber%2C_Amer%2C_Jaipur_0955_9481.jpg/1280px-20191219_Fort_Amber%2C_Amer%2C_Jaipur_0955_9481.jpg',
-    image_urls: ['https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/20191219_Fort_Amber%2C_Amer%2C_Jaipur_0955_9481.jpg/1280px-20191219_Fort_Amber%2C_Amer%2C_Jaipur_0955_9481.jpg'],
-    is_active: true,
-    is_family_friendly: true,
-    wheelchair_accessible: false,
-    tags: ['fort', 'unesco', 'rajput', 'heritage'],
-  } as Experience,
-  {
-    id: 1492,
-    title: 'Gateway of India & Apollo Bunder',
-    tagline: '26m Indo-Saracenic basalt arch monument facing the Arabian Sea harbor',
-    category: 'Heritage & History',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    area_name: 'Apollo Bunder, Colaba',
-    price: 0,
-    rating: 4.93,
-    review_count: 480,
-    approx_duration_mins: 60,
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Mumbai_03-2016_30_Gateway_of_India.jpg/1280px-Mumbai_03-2016_30_Gateway_of_India.jpg',
-    image_urls: ['https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Mumbai_03-2016_30_Gateway_of_India.jpg/1280px-Mumbai_03-2016_30_Gateway_of_India.jpg'],
-    is_active: true,
-    is_family_friendly: true,
-    wheelchair_accessible: true,
-    tags: ['monument', 'landmark', 'sea', 'mumbai'],
-  } as Experience,
-  {
-    id: 3932,
-    title: 'Chhatrapati Shivaji Maharaj Terminus (CSMT)',
-    tagline: 'UNESCO Victorian Gothic revival railway station and architectural masterpiece',
-    category: 'Heritage & History',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    area_name: 'Fort, South Mumbai',
-    price: 0,
-    rating: 4.96,
-    review_count: 510,
-    approx_duration_mins: 60,
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Chhatrapati_shivaji_terminus%2C_esterno_01.jpg/1280px-Chhatrapati_shivaji_terminus%2C_esterno_01.jpg',
-    image_urls: ['https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Chhatrapati_shivaji_terminus%2C_esterno_01.jpg/1280px-Chhatrapati_shivaji_terminus%2C_esterno_01.jpg'],
-    is_active: true,
-    is_family_friendly: true,
-    wheelchair_accessible: true,
-    tags: ['unesco', 'architecture', 'gothic', 'heritage'],
-  } as Experience,
-  {
-    id: 1491,
-    title: "Marine Drive (Queen's Necklace Promenade)",
-    tagline: '3.6 km sweeping C-shaped seaside boulevard overlooking the Arabian Sea',
-    category: 'Nature & Wildlife',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    area_name: 'Marine Drive, Netaji Subhash Road',
-    price: 0,
-    rating: 4.92,
-    review_count: 385,
-    approx_duration_mins: 60,
-    image_url: 'https://images.unsplash.com/photo-1642233803470-00129cdeba8f?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    image_urls: ['https://images.unsplash.com/photo-1642233803470-00129cdeba8f?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'],
-    is_active: true,
-    is_family_friendly: true,
-    wheelchair_accessible: true,
-    tags: ['promenade', 'sea', 'sunset', 'mumbai'],
-  } as Experience,
-  {
-    id: 1495,
-    title: 'Shree Siddhivinayak Ganpati Temple',
-    tagline: "1801 CE gold-plated sanctum dedicated to Lord Ganesha, Mumbai's patron deity",
-    category: 'Spiritual & Wellness',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    area_name: 'Prabhadevi, Dadar',
-    price: 0,
-    rating: 4.94,
-    review_count: 490,
-    approx_duration_mins: 60,
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Shree_Siddhivinayak_Temple_Mumbai.jpg/1280px-Shree_Siddhivinayak_Temple_Mumbai.jpg',
-    image_urls: ['https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Shree_Siddhivinayak_Temple_Mumbai.jpg/1280px-Shree_Siddhivinayak_Temple_Mumbai.jpg'],
-    is_active: true,
-    is_family_friendly: true,
-    wheelchair_accessible: true,
-    tags: ['temple', 'spiritual', 'ganesha'],
-  } as Experience,
-  {
-    id: 773,
-    title: 'Hawa Mahal (Palace of Winds)',
-    tagline: 'Iconic 5-story pink honeycomb facade with 953 carved jharokhas (latticed windows)',
-    category: 'Heritage & History',
-    city: 'Jaipur',
-    state: 'Rajasthan',
-    area_name: 'Badi Choupad, Old City',
-    price: 50,
-    rating: 4.91,
-    review_count: 460,
-    approx_duration_mins: 60,
-    image_url: 'https://images.unsplash.com/photo-1650530777057-3a7dbc24bf6c?q=80&w=801&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-    image_urls: ['https://images.unsplash.com/photo-1650530777057-3a7dbc24bf6c?q=80&w=801&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'],
-    is_active: true,
-    is_family_friendly: true,
-    wheelchair_accessible: false,
-    tags: ['palace', 'jaipur', 'architecture', 'heritage'],
-  } as Experience,
-  {
-    id: 1497,
-    title: 'Kanheri Caves & Sanjay Gandhi National Park',
-    tagline: '109 rock-cut Buddhist monastic caves carved into basalt hills from 1st century BCE',
-    category: 'Heritage & History',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    area_name: 'Borivali East, Mumbai',
-    price: 25,
-    rating: 4.86,
-    review_count: 310,
-    approx_duration_mins: 120,
-    image_url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Kanheri_Caves_prayer_hall.JPG/1280px-Kanheri_Caves_prayer_hall.JPG',
-    image_urls: ['https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Kanheri_Caves_prayer_hall.JPG/1280px-Kanheri_Caves_prayer_hall.JPG'],
-    is_active: true,
-    is_family_friendly: true,
-    wheelchair_accessible: false,
-    tags: ['caves', 'buddhist', 'ancient', 'monastery'],
-  } as Experience,
-];
+gsap.registerPlugin(ScrollTrigger);
 
 export function HomePage() {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [experiences, setExperiences] = useState<Experience[]>(CURATED_LANDING_EXPERIENCES);
+  const [experiences, setExperiences] = useState<Experience[]>(USER_LANDING_PLACES);
   const [selectedCity] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState('All');
@@ -168,10 +33,17 @@ export function HomePage() {
       try {
         const list = await api.getLandingExperiences();
         if (list && list.length > 0) {
-          setExperiences(list);
+          // Merge live stats (ratings/reviews) only if title matches user curated places
+          const merged = USER_LANDING_PLACES.map((curated) => {
+            const match = list.find((item) =>
+              item.title.toLowerCase().trim().includes(curated.title.toLowerCase().trim().slice(0, 15))
+            );
+            return match ? { ...curated, rating: match.rating || curated.rating, review_count: match.review_count || curated.review_count } : curated;
+          });
+          setExperiences(merged);
         }
       } catch (err) {
-        console.error('Failed to load landing experiences, using curated default:', err);
+        console.warn('Using user curated landing experiences:', err);
       }
     }
     loadInitial();

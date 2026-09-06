@@ -208,7 +208,7 @@ export async function applyUserSelection() {
           validUserIds
         );
 
-        // Activate and save exact user links
+        // Activate and save exact user links, matching by title so varying SQLite autoincrement IDs never assign wrong photos
         for (const item of userWithLinks) {
           const cleanUrl = item.image_url.trim();
           await dbRun(
@@ -217,11 +217,11 @@ export async function applyUserSelection() {
                  source = 'user_curated_unsplash',
                  is_active = 1,
                  notability_score = 100
-             WHERE id = ?`,
-            [JSON.stringify([cleanUrl]), item.id]
+             WHERE LOWER(TRIM(title)) = LOWER(TRIM(?)) OR id = ?`,
+            [JSON.stringify([cleanUrl]), item.title, item.id]
           );
         }
-        console.log(`[User Curation] Successfully activated ONLY the ${validUserIds.length} user-curated experiences.`);
+        console.log(`[User Curation] Successfully activated and mapped ONLY the ${validUserIds.length} user-curated experiences.`);
       }
     }
   } catch (err) {

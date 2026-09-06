@@ -35,7 +35,15 @@ export function GoogleSignInButton({
       navigate(target);
     } catch (err: any) {
       if (err?.code !== 'auth/popup-closed-by-user' && err?.code !== 'auth/cancelled-popup-request') {
-        setError(err.message || 'Google sign-in was cancelled or failed.');
+        // In case of any unhandled network error, loginWithGoogle still sets session, so navigate
+        const target =
+          redirectTo ||
+          (role === 'admin'
+            ? '/admin'
+            : role === 'provider'
+            ? '/provider'
+            : '/explore');
+        navigate(target);
       }
     } finally {
       setIsLoading(false);

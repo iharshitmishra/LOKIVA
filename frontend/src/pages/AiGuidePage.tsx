@@ -465,7 +465,7 @@ export function AiGuidePage() {
                   {/* Quick 1-Click Demo Traveler */}
                   <button
                     type="button"
-                    onClick={() => demoLogin('traveler')}
+                    onClick={() => demoLogin('traveler', 'Piyush Kumar', 'piyush@lokiva.com')}
                     className="w-full py-2 px-3 bg-paper-100 hover:bg-paper-200 border border-dashed border-paper-400 text-teal rounded-xl text-xs font-mono font-medium transition flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Sparkles className="w-3.5 h-3.5 text-marigold" />

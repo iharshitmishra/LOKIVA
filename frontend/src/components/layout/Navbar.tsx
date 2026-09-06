@@ -148,7 +148,7 @@ export function Navbar() {
                       </p>
                       <button
                         onClick={() => {
-                          demoLogin('traveler');
+                          demoLogin('traveler', 'Piyush Kumar', 'piyush@lokiva.com');
                           setPersonaDropdownOpen(false);
                           navigate('/explore');
                         }}
@@ -263,7 +263,7 @@ export function Navbar() {
                   <button
                     type="button"
                     onClick={() => {
-                      demoLogin('traveler');
+                      demoLogin('traveler', 'Piyush Kumar', 'piyush@lokiva.com');
                       setMobileMenuOpen(false);
                       navigate('/explore');
                     }}

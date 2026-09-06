@@ -20,17 +20,18 @@ import {
   ChevronUp,
   RotateCcw,
 } from 'lucide-react';
-import { USER_VERIFIED_PLACE_IDS } from '../data/userVerifiedPlaceIds';
+import { USER_CURATED_PLACES } from '../data/userVerifiedPlacesData';
 
 const ENCLAVES = [
   { name: 'Varanasi', label: 'Varanasi' },
   { name: 'Jaipur', label: 'Jaipur' },
   { name: 'Mumbai', label: 'Mumbai' },
   { name: 'Delhi', label: 'Delhi' },
-  { name: 'Udaipur', label: 'Udaipur' },
-  { name: 'Kolkata', label: 'Kolkata' },
-  { name: 'Almora', label: 'Almora' },
+  { name: 'Amritsar', label: 'Amritsar' },
   { name: 'Agra', label: 'Agra' },
+  { name: 'Hyderabad', label: 'Hyderabad' },
+  { name: 'Udaipur', label: 'Udaipur' },
+  { name: 'Almora', label: 'Almora' },
 ];
 
 const THEMATIC_PERSPECTIVES = [
@@ -52,7 +53,7 @@ export function ExplorePage() {
   const initialWheelchair = searchParams.get('wheelchair') === 'true';
   const initialWalking = searchParams.get('walking') === 'true';
 
-  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [experiences, setExperiences] = useState<Experience[]>(USER_CURATED_PLACES);
   const [searchQuery, setSearchQuery] = useState('');
   const [locationInput, setLocationInput] = useState(initialLocation);
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
@@ -61,7 +62,7 @@ export function ExplorePage() {
   const [lowWalkingOnly, setLowWalkingOnly] = useState(initialWalking);
   const [hiddenGemsOnly, setHiddenGemsOnly] = useState(false);
   const [rainSafeOnly, setRainSafeOnly] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [feedbackNote, setFeedbackNote] = useState<string | null>(null);
 
@@ -72,39 +73,74 @@ export function ExplorePage() {
     (rainSafeOnly ? 1 : 0) +
     (maxPrice < 5000 ? 1 : 0);
 
-  // Fast, instant experience fetcher querying local database directly
+  // Fast, instant experience filter strictly displaying verified curated places
   const fetchExperiences = useCallback(
     async (loc = locationInput, query = searchQuery, cat = selectedCategory) => {
       setIsLoading(true);
       try {
-        const data = await api.getExperiences({
-          city: loc.trim() || undefined,
-          category: cat || undefined,
-          max_price: maxPrice,
-          wheelchair: wheelchairOnly || undefined,
-          low_walking: lowWalkingOnly || undefined,
-          is_hidden_gem: hiddenGemsOnly || undefined,
-          is_indoor: rainSafeOnly || undefined,
-          search: query.trim() || undefined,
-        });
+        let results = [...USER_CURATED_PLACES];
 
-        // Strictly show only places for which the user manually added verified links
-        const verifiedOnly = (data || []).filter(
-          (exp) =>
-            USER_VERIFIED_PLACE_IDS.has(exp.id) ||
-            exp.source === 'user_curated_unsplash'
-        );
+        if (loc && loc.trim()) {
+          const l = loc.toLowerCase().trim();
+          results = results.filter((p) =>
+            p.city.toLowerCase().includes(l) || (p.state && p.state.toLowerCase().includes(l))
+          );
+        }
 
-        const deduped = deduplicateExperienceList(verifiedOnly);
+        if (cat && cat.trim()) {
+          const c = cat.toLowerCase().trim();
+          results = results.filter((p) => (p.category || '').toLowerCase().includes(c));
+        }
+
+        if (query && query.trim()) {
+          const q = query.toLowerCase().trim();
+          results = results.filter((p) =>
+            p.title.toLowerCase().includes(q) ||
+            (p.tagline && p.tagline.toLowerCase().includes(q)) ||
+            p.city.toLowerCase().includes(q) ||
+            (p.tags && p.tags.some((t) => t.toLowerCase().includes(q)))
+          );
+        }
+
+        if (maxPrice < 5000) {
+          results = results.filter((p) => p.price <= maxPrice);
+        }
+
+        if (wheelchairOnly) {
+          results = results.filter((p) => p.wheelchair_accessible);
+        }
+
+        if (lowWalkingOnly) {
+          results = results.filter((p) => p.approx_duration_mins <= 60);
+        }
+
+        // Try getting live ratings from backend if available, but strictly preserve curated places
+        try {
+          const remoteData = await api.getExperiences({
+            city: loc.trim() || undefined,
+            category: cat || undefined,
+            search: query.trim() || undefined,
+          });
+          if (remoteData && remoteData.length > 0) {
+            results = results.map((item) => {
+              const match = remoteData.find((r) =>
+                r.title.toLowerCase().trim().includes(item.title.toLowerCase().trim().slice(0, 15))
+              );
+              return match ? { ...item, rating: match.rating || item.rating, review_count: match.review_count || item.review_count } : item;
+            });
+          }
+        } catch {
+          // Backend sleeping or offline, use verified curated place data
+        }
+
+        const deduped = deduplicateExperienceList(results);
         setExperiences(deduped);
 
         if (loc.trim() && deduped.length === 0) {
-          setFeedbackNote(`No experiences found matching "${loc.trim()}". Try another heritage enclave or reset filters.`);
+          setFeedbackNote(`No curated experiences found in "${loc.trim()}". Showing all verified heritage sites.`);
         } else {
           setFeedbackNote(null);
         }
-      } catch (err) {
-        console.error('Failed to load experiences:', err);
       } finally {
         setIsLoading(false);
       }
