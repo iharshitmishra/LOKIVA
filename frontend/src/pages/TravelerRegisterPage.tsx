@@ -61,7 +61,7 @@ export function TravelerRegisterPage() {
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              placeholder="e.g. Harshit Mishra"
+              placeholder="e.g. Piyush Kumar"
               className="w-full bg-paper-100 border border-paper-300 rounded-xl p-3 text-xs text-ink focus:outline-none focus:border-marigold font-sans"
             />
           </div>
