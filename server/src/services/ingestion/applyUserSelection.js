@@ -83,8 +83,8 @@ export const AUTHENTIC_TERMINAL_IMAGES = {
   760: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Patrika_Gate_Jawahar_Circle_Jaipur_2022-07.jpg/1280px-Patrika_Gate_Jawahar_Circle_Jaipur_2022-07.jpg',
   // 764: Vaishali Nagar - Chitrakoot Colony, Jaipur
   764: 'https://upload.wikimedia.org/wikipedia/commons/4/44/Chitrakoot_colony%2C_Jaipur.jpg',
-  // 773: Hawa Mahal, Jaipur
-  773: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/East_facade_Hawa_Mahal_Jaipur_from_ground_level_%28July_2022%29_-_img_01.jpg/1280px-East_facade_Hawa_Mahal_Jaipur_from_ground_level_%28July_2022%29_-_img_01.jpg',
+  // 773: Hawa Mahal, Jaipur (Curated Unsplash)
+  773: 'https://images.unsplash.com/photo-1650530777057-3a7dbc24bf6c?q=80&w=801&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
   // 777: Sun Temple, Jaipur - Sisodiya Rani Bagh
   777: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Rani_Sisodia_Garden.jpg/1280px-Rani_Sisodia_Garden.jpg',
   // 781: Juneja Art Gallery, Jaipur - Raj Mandir Cinema
@@ -103,8 +103,12 @@ export const AUTHENTIC_TERMINAL_IMAGES = {
   3932: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Chhatrapati_shivaji_terminus%2C_esterno_01.jpg/1280px-Chhatrapati_shivaji_terminus%2C_esterno_01.jpg',
   // 1495: Shree Siddhivinayak Ganpati Temple, Mumbai
   1495: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Shree_Siddhivinayak_Temple_Mumbai.jpg/1280px-Shree_Siddhivinayak_Temple_Mumbai.jpg',
-  // 1491: Marine Drive (Queen\'s Necklace Promenade), Mumbai
-  1491: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Mumbai_03-2016_27_skyline_at_Marine_Drive.jpg/1280px-Mumbai_03-2016_27_skyline_at_Marine_Drive.jpg',
+  // 1491: Marine Drive (Queen\'s Necklace Promenade), Mumbai (Curated Unsplash)
+  1491: 'https://images.unsplash.com/photo-1642233803470-00129cdeba8f?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  // 1497: Kanheri Caves & Sanjay Gandhi National Park, Mumbai
+  1497: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Kanheri_Caves_prayer_hall.JPG/1280px-Kanheri_Caves_prayer_hall.JPG',
+  // 1492: Gateway of India, Mumbai
+  1492: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Mumbai_03-2016_30_Gateway_of_India.jpg/1280px-Mumbai_03-2016_30_Gateway_of_India.jpg',
   // 1497: Kanheri Caves & Sanjay Gandhi National Park, Mumbai
   1497: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Kanheri_Caves_prayer_hall.JPG/1280px-Kanheri_Caves_prayer_hall.JPG',
   // 1492: Gateway of India, Mumbai

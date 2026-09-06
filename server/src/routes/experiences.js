@@ -7,7 +7,7 @@ export const experiencesRouter = express.Router();
 function formatExperience(e) {
   if (!e) return null;
   const parsedImageUrls = typeof e.image_urls === 'string' ? JSON.parse(e.image_urls || '[]') : e.image_urls || [];
-  let primaryImg = e.image_url || (parsedImageUrls.length > 0 ? parsedImageUrls[0] : null);
+  let primaryImg = (parsedImageUrls.length > 0 && parsedImageUrls[0]) ? parsedImageUrls[0] : (e.image_url || null);
 
   // If primary image is a Wikimedia URL, proxy it to guarantee successful browser delivery
   if (primaryImg && primaryImg.includes('upload.wikimedia.org') && !primaryImg.includes('/api/v1/experiences/proxy-image')) {

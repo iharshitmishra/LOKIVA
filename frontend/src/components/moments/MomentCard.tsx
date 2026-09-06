@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Experience } from '../../types';
 import {
@@ -53,6 +53,14 @@ export function MomentCard({ experience }: MomentCardProps) {
       ? getCardFallback(experience.category, experience.id)
       : resolvedImage
   );
+
+  useEffect(() => {
+    if (resolvedImage && resolvedImage !== currentSrc) {
+      setCurrentSrc(resolvedImage);
+      setImageError(false);
+      setImageLoaded(false);
+    }
+  }, [resolvedImage, experience.id]);
 
   const rating = experience.rating ? experience.rating.toFixed(1) : '4.8';
   const duration = experience.approx_duration_mins

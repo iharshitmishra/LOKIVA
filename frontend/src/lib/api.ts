@@ -22,12 +22,14 @@ import {
 } from '../types';
 
 export const API_BASE =
-  import.meta.env.VITE_API_URL ||
-  (typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  typeof window !== 'undefined' &&
+  window.location.hostname !== 'localhost' &&
+  window.location.hostname !== '127.0.0.1'
     ? '/api/v1'
-    : typeof window !== 'undefined' && window.location.port === '3000'
-    ? '/api/v1'
-    : 'http://localhost:8000/api/v1');
+    : import.meta.env.VITE_API_URL ||
+      (typeof window !== 'undefined' && window.location.port === '3000'
+        ? '/api/v1'
+        : 'http://localhost:8000/api/v1');
 
 /**
  * Resolves an image URL to an absolute URL pointing to the live Render backend
@@ -41,14 +43,18 @@ export function resolveImageUrl(url?: string | null): string {
     return url;
   }
 
-  const backendOrigin =
-    import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.startsWith('http')
-      ? import.meta.env.VITE_API_URL.replace(/\/api\/v1\/?$/, '')
-      : typeof window !== 'undefined' &&
-        window.location.hostname !== 'localhost' &&
-        window.location.hostname !== '127.0.0.1'
-      ? 'https://lokiva.onrender.com'
-      : '';
+  const isProduction =
+    typeof window !== 'undefined' &&
+    window.location.hostname !== 'localhost' &&
+    window.location.hostname !== '127.0.0.1';
+
+  // On production (e.g. lokiva.vercel.app), use relative path so Vercel rewrites /api/* to Render
+  // On localhost, point to local backend if running on 8000
+  const backendOrigin = isProduction
+    ? ''
+    : import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.startsWith('http')
+    ? import.meta.env.VITE_API_URL.replace(/\/api\/v1\/?$/, '')
+    : 'http://localhost:8000';
 
   // If it's already a proxy path
   if (url.startsWith('/api/v1/experiences/proxy-image')) {
