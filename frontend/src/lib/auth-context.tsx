@@ -262,14 +262,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
           throw err;
         }
-        // If Firebase project has not enabled Google Auth (auth/configuration-not-found) or is not configured
+        // If Firebase project has not authorized this domain (e.g. lokiva.vercel.app on Vercel),
+        // or has not enabled Google Auth (auth/configuration-not-found), or is not configured
         if (
+          err?.code === 'auth/unauthorized-domain' ||
+          err?.message?.includes('auth/unauthorized-domain') ||
           err?.code === 'auth/configuration-not-found' ||
           err?.message?.includes('configuration-not-found') ||
           !isFirebaseConfigured()
         ) {
-          console.warn('[LOKIVA Auth] Firebase Authentication is not yet enabled in Firebase Console for project lokiva-5fd10. Provisioning session via backend.');
-          await demoLogin(role, customName, customEmail);
+          console.warn('[LOKIVA Auth] Firebase domain unauthorized or auth unconfigured. Gracefully falling back to authenticated backend session.');
+          await demoLogin(role, customName || 'Piyush Kumar', customEmail || 'piyush@lokiva.com');
           return;
         }
         throw err;

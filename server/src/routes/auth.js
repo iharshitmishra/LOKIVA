@@ -120,8 +120,9 @@ authRouter.post('/firebase-login', async (req, res) => {
       }
     }
 
-    if (user && full_name && full_name.trim()) {
-      await dbRun('UPDATE users SET full_name = ? WHERE id = ?', [full_name.trim(), user.id]);
+    const newName = (full_name && full_name.trim()) || verified.name;
+    if (user && newName) {
+      await dbRun('UPDATE users SET full_name = ? WHERE id = ?', [newName, user.id]);
     }
 
     if (!user) {
@@ -234,11 +235,6 @@ authRouter.get('/me', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      const defaultTraveler = await dbGet('SELECT * FROM users WHERE role = "traveler" LIMIT 1');
-      if (defaultTraveler) {
-        const fullUser = await getUserWithProfile(defaultTraveler.id);
-        return res.json(fullUser);
-      }
       return res.status(401).json({ detail: 'Not authenticated' });
     }
 
