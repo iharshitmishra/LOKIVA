@@ -102,6 +102,8 @@ export function formatMinutesTo12h(totalMinutes: number): string {
   return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')} ${meridian}`;
 }
 
+export const formatMinutesTo12Hr = formatMinutesTo12h;
+
 // Determine slot based on start minute
 export function getSlotForMinutes(minutes: number, category: string = ''): TimeOfDaySlot {
   const cat = category.toLowerCase();
@@ -166,6 +168,15 @@ export function recalculateDaySchedule(
     act.visitDurationMinutes = visitDuration;
     act.durationMins = visitDuration;
     act.duration = `${visitDuration} mins`;
+
+    // Support custom start time overrides and calculate unscripted breather buffers
+    const naturalArrivalMin = currentClockMinutes;
+    if (act.customStartMinutes !== undefined && act.customStartMinutes >= naturalArrivalMin) {
+      act.breatherBeforeMinutes = act.customStartMinutes - naturalArrivalMin;
+      currentClockMinutes = act.customStartMinutes;
+    } else {
+      act.breatherBeforeMinutes = 0;
+    }
 
     const startMin = currentClockMinutes;
     const endMin = startMin + visitDuration;

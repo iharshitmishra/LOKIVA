@@ -78,6 +78,8 @@ export interface ItineraryActivity {
   wheelchair_accessible?: boolean;
   lat?: number;
   lng?: number;
+  customStartMinutes?: number;
+  breatherBeforeMinutes?: number;
 }
 
 export interface ItineraryDay {

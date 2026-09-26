@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Compass,
@@ -15,6 +15,7 @@ import {
   Clock,
   Sparkles,
   ShieldCheck,
+  CheckCircle2,
 } from 'lucide-react';
 import L from 'leaflet';
 import {
@@ -23,6 +24,9 @@ import {
   ItineraryPracticalInfo,
 } from '../../types/itinerary';
 import { generateCurvedFlightArc } from './ItineraryMapRoute';
+import { usePassWalletStore } from '../../store/usePassWalletStore';
+import { FullItineraryCheckoutSheet } from './FullItineraryCheckoutSheet';
+import { SaveAndProceedDock } from './SaveAndProceedDock';
 
 const HARDCODED_CARTO_API_KEY = 'cb1_2x3k_2_130ef72eae12cbf223f5381d';
 
@@ -79,6 +83,12 @@ export function ItinerarySidebar({
   const finalGrandTotal =
     grandTotal !== undefined ? grandTotal : totalTicketsCost + totalTransitCost + totalMealsCost;
   const perPersonTotal = Math.round(finalGrandTotal / travelers);
+
+  const { isFullItineraryBooked, setActiveViewingReceipt } = usePassWalletStore();
+  const [isCheckoutSheetOpen, setIsCheckoutSheetOpen] = useState(false);
+
+  const destinationCity = tripDetails?.destination || (days[0]?.activities[0]?.city || '');
+  const bookedItineraryReceipt = isFullItineraryBooked(destinationCity, days.length);
 
   // Spatial Cadence & Energy Telemetry
   const totalTransitMins = activities.reduce((sum, a) => sum + (a.transitToNextMinutes || 15), 0);
@@ -472,27 +482,69 @@ export function ItinerarySidebar({
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="space-y-2 pt-2 border-t border-[#E6DAC6]">
-          <button
-            type="button"
-            onClick={onShare}
-            className="w-full py-2.5 px-4 bg-gradient-to-r from-[#B84A27] to-[#D47A39] hover:opacity-95 text-[#FFFDF9] rounded-xl text-xs font-heading font-bold uppercase tracking-wider transition flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-[#B84A27]/20 hover:scale-[1.01] active:scale-[0.99]"
-          >
-            <Share2 className="w-3.5 h-3.5" />
-            <span>Share via WhatsApp</span>
-          </button>
+        {/* Primary Checkout CTA & Action Buttons */}
+        <div className="space-y-2.5 pt-2 border-t border-[#E6DAC6]">
+          {bookedItineraryReceipt ? (
+            <button
+              type="button"
+              onClick={() => setActiveViewingReceipt(bookedItineraryReceipt)}
+              className="w-full py-3.5 px-4 bg-gradient-to-r from-[#FAF0DF] to-[#FAF6F0] hover:bg-[#FAF4ED] border border-[#F2D5A7] text-[#9E5414] rounded-2xl text-xs font-heading font-extrabold uppercase tracking-wide transition flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:border-[#B84A27]"
+            >
+              <CheckCircle2 className="w-4 h-4 text-[#B84A27]" />
+              <span>Full Itinerary Pass Unlocked · View QR</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsCheckoutSheetOpen(true)}
+              className="w-full py-4 px-4 bg-gradient-to-r from-[#B84A27] via-[#C85A32] to-[#D47A39] hover:from-[#9E3C1D] hover:to-[#B84A27] text-[#FFFDF9] rounded-2xl text-xs sm:text-sm font-heading font-extrabold uppercase tracking-wider transition flex items-center justify-center gap-2 cursor-pointer shadow-[0_12px_24px_-4px_rgba(184,74,39,0.35)] hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Proceed to Book Full Itinerary (₹{finalGrandTotal.toLocaleString('en-IN')}) →</span>
+            </button>
+          )}
 
-          <button
-            type="button"
-            onClick={onPrint}
-            className="w-full py-2 px-4 bg-[#FFFDF9] hover:bg-[#F3ECE1] border border-[#E6DAC6] text-[#3B2316] rounded-xl text-xs font-heading font-bold uppercase tracking-wider transition flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Printer className="w-3.5 h-3.5" />
-            <span>Print / Export Field PDF</span>
-          </button>
+          <div className="grid grid-cols-2 gap-2 pt-1">
+            <button
+              type="button"
+              onClick={onShare}
+              className="w-full py-2.5 px-3 bg-[#FAF6F0] hover:bg-[#FAF0DF] border border-[#DFCBB2] hover:border-[#B84A27] text-[#3B2316] rounded-xl text-xs font-heading font-bold uppercase tracking-wider transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+            >
+              <Share2 className="w-3.5 h-3.5 text-[#B84A27]" />
+              <span>Share Plan</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onPrint}
+              className="w-full py-2.5 px-3 bg-[#FFFDF9] hover:bg-[#FAF0DF] border border-[#DFCBB2] text-[#3B2316] rounded-xl text-xs font-heading font-bold uppercase tracking-wider transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+            >
+              <Printer className="w-3.5 h-3.5 text-[#7A5C49]" />
+              <span>Export PDF</span>
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* ── 3. DATE-LOCKED SCHEDULE COMMIT & PROCEED DOCK ── */}
+      <SaveAndProceedDock
+        city={destinationCity}
+        state={tripDetails?.state}
+        title={(tripDetails as any)?.tripTitle || (tripDetails as any)?.title}
+        days={days}
+        grandTotal={finalGrandTotal}
+        onProceedToPayment={() => setIsCheckoutSheetOpen(true)}
+      />
+
+      {/* Full Itinerary Checkout Review & Razorpay Sheet */}
+      <FullItineraryCheckoutSheet
+        isOpen={isCheckoutSheetOpen}
+        onClose={() => setIsCheckoutSheetOpen(false)}
+        days={days}
+        tripDetails={tripDetails}
+        categoryBreakdown={categoryBreakdown}
+        grandTotal={finalGrandTotal}
+      />
     </aside>
   );
 }

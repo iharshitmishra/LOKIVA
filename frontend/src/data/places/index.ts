@@ -1,4 +1,5 @@
 import { Experience } from '../../types';
+import { USER_CURATED_PLACES } from '../userVerifiedPlacesData';
 import { POPULAR_CITIES_PLACES } from './popularCitiesData';
 import { NORTH_REGIONAL_PLACES } from './northPlacesData';
 import { SOUTH_REGIONAL_PLACES } from './southPlacesData';
@@ -10,14 +11,35 @@ import { INDIAN_STATES_AND_CITIES, POPULAR_CITIES_LIST, StateCityInfo, getStateF
 export { INDIAN_STATES_AND_CITIES, POPULAR_CITIES_LIST, getStateForCity, ALL_INDIAN_STATES_BY_ZONE };
 export type { StateCityInfo, IndianStateZoneInfo };
 
-export const ALL_LOKIVA_PLACES: Experience[] = [
-  ...POPULAR_CITIES_PLACES,
-  ...NORTH_REGIONAL_PLACES,
-  ...SOUTH_REGIONAL_PLACES,
-  ...WEST_REGIONAL_PLACES,
-  ...EAST_REGIONAL_PLACES,
-  ...CENTRAL_REGIONAL_PLACES,
-];
+function deduplicateExperiences(lists: Experience[][]): Experience[] {
+  const seenIds = new Set<number>();
+  const seenTitles = new Set<string>();
+  const merged: Experience[] = [];
+
+  for (const list of lists) {
+    for (const place of list) {
+      if (!place || !place.title) continue;
+      const titleKey = `${(place.city || '').toLowerCase().trim()}_${place.title.toLowerCase().trim()}`;
+      if (!seenIds.has(place.id) && !seenTitles.has(titleKey)) {
+        seenIds.add(place.id);
+        seenTitles.add(titleKey);
+        merged.push(place);
+      }
+    }
+  }
+
+  return merged;
+}
+
+export const ALL_LOKIVA_PLACES: Experience[] = deduplicateExperiences([
+  USER_CURATED_PLACES,
+  POPULAR_CITIES_PLACES,
+  NORTH_REGIONAL_PLACES,
+  SOUTH_REGIONAL_PLACES,
+  WEST_REGIONAL_PLACES,
+  EAST_REGIONAL_PLACES,
+  CENTRAL_REGIONAL_PLACES,
+]);
 
 // O(1) indexed lookup tables for instant UI filtering
 const PLACES_BY_CITY = new Map<string, Experience[]>();

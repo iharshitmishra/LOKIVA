@@ -22,10 +22,14 @@ import {
   Sun,
   Camera,
   Users,
+  Ticket,
 } from 'lucide-react';
+import { usePassWalletStore } from '../store/usePassWalletStore';
+import { SinglePlacePassModal } from '../components/pass/SinglePlacePassModal';
 
 export function ExperienceDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { isPlaceBooked, setActiveViewingReceipt } = usePassWalletStore();
   const [experience, setExperience] = useState<Experience | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -33,6 +37,7 @@ export function ExperienceDetailPage() {
   const [copiedLink, setCopiedLink] = useState(false);
   const [partySize, setPartySize] = useState(2);
   const [isBooked, setIsBooked] = useState(false);
+  const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -104,6 +109,7 @@ export function ExperienceDetailPage() {
   const BadgeIcon = isGeotagged ? MapPin : experience.provider_id ? CheckCircle2 : Sparkles;
 
   const localImpact = Math.min(98, 85 + ((experience.id * 7) % 14));
+  const bookedPass = experience ? (isPlaceBooked(experience.id) || isPlaceBooked(experience.title)) : undefined;
 
   const handleShare = () => {
     if (navigator.share) {
@@ -385,17 +391,33 @@ export function ExperienceDetailPage() {
 
                 {/* CTA Buttons */}
                 <div className="space-y-2 pt-1">
-                  <button
-                    type="submit"
-                    className="w-full py-3.5 bg-marigold hover:bg-marigold-600 text-ink font-bold rounded-2xl transition shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
-                  >
-                    {isBooked ? <Check className="w-4 h-4 text-teal" /> : <Calendar className="w-4 h-4" />}
-                    <span>{isBooked ? 'Slot Reserved' : experience.price === 0 ? 'Confirm & Reserve Slot' : 'Reserve Experience Slot'}</span>
-                  </button>
+                  {bookedPass ? (
+                    <button
+                      type="button"
+                      onClick={() => setActiveViewingReceipt(bookedPass)}
+                      className="w-full py-3.5 bg-gradient-to-r from-[#FAF0DF] to-[#FAF6F0] hover:bg-[#FAF4ED] border border-[#F2D5A7] text-[#9E5414] font-heading font-extrabold uppercase tracking-wide text-xs sm:text-sm rounded-2xl transition shadow-sm flex items-center justify-center gap-2 cursor-pointer hover:border-[#B84A27]"
+                    >
+                      <CheckCircle2 className="w-4 h-4 text-[#B84A27]" />
+                      <span>Verified Pass Unlocked · View QR &amp; Receipt</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsPassModalOpen(true)}
+                      className="w-full py-3.5 bg-gradient-to-r from-[#B84A27] via-[#C85A32] to-[#D47A39] hover:from-[#9E3C1D] hover:to-[#B84A27] text-[#FFFDF9] font-heading font-extrabold uppercase tracking-wide text-xs sm:text-sm rounded-2xl transition shadow-md shadow-[#B84A27]/25 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                    >
+                      <Ticket className="w-4 h-4" />
+                      <span>
+                        {experience.price === 0
+                          ? 'Confirm & Reserve Free Pass'
+                          : `Proceed to Book Pass (₹${(experience.price * partySize).toLocaleString('en-IN')}) →`}
+                      </span>
+                    </button>
+                  )}
 
                   <Link
                     to="/itinerary"
-                    className="w-full py-3 bg-paper-200 hover:bg-paper-300 text-ink font-bold rounded-2xl transition text-center block active:scale-[0.98]"
+                    className="w-full py-3 bg-[#FAF6F0] hover:bg-[#FAF0DF] border border-[#DFCBB2] text-[#3B2316] font-heading font-bold text-xs uppercase tracking-wider rounded-2xl transition text-center block active:scale-[0.98]"
                   >
                     Add to Day Itinerary
                   </Link>
@@ -550,18 +572,40 @@ export function ExperienceDetailPage() {
           <button
             type="button"
             onClick={() => {
-              const el = document.getElementById('booking-section');
-              if (el) {
-                el.scrollIntoView({ behavior: 'smooth' });
+              if (bookedPass) {
+                setActiveViewingReceipt(bookedPass);
+              } else {
+                setIsPassModalOpen(true);
               }
             }}
-            className="px-4 py-2.5 bg-marigold hover:bg-marigold-600 text-ink text-xs font-mono font-bold rounded-xl shadow-md flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
+            className="px-4 py-2.5 bg-gradient-to-r from-[#B84A27] to-[#D47A39] text-[#FFFDF9] text-xs font-heading font-extrabold uppercase tracking-wider rounded-xl shadow-md flex items-center gap-1.5 whitespace-nowrap cursor-pointer"
           >
-            <Calendar className="w-3.5 h-3.5" />
-            <span>Reserve Slot</span>
+            <Ticket className="w-3.5 h-3.5" />
+            <span>{bookedPass ? 'View Pass' : experience.price === 0 ? 'Free Pass' : `Book Pass · ₹${experience.price}`}</span>
           </button>
         </div>
       </div>
+      {/* Inline Single Place Pass Modal */}
+      {experience && (
+        <SinglePlacePassModal
+          isOpen={isPassModalOpen}
+          onClose={() => setIsPassModalOpen(false)}
+          place={{
+            id: experience.id,
+            title: experience.title,
+            city: experience.city,
+            state: experience.state,
+            category: experience.category,
+            price: experience.price,
+            durationMins: experience.approx_duration_mins || experience.duration_mins || 60,
+            photo: currentDisplayImage || undefined,
+            custodianName: (experience as any).provider_name || (experience as any).provider_id,
+          }}
+          defaultTravelers={partySize}
+        />
+      )}
     </div>
   );
 }
+
+export default ExperienceDetailPage;

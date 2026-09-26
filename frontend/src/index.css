@@ -388,23 +388,29 @@ input[type=range].custom-slider:active::-moz-range-thumb {
 
 /* Print Stylesheet for Itinerary PDF Export */
 @media print {
-  nav, footer, .no-print, button, [role="navigation"] {
+  nav, footer, .no-print, button:not(.print-include), [role="navigation"] {
     display: none !important;
   }
   body, main, #root {
     background: #FFFFFF !important;
-    color: #000000 !important;
+    color: #3B2316 !important;
     padding: 0 !important;
     margin: 0 !important;
+  }
+  #lokiva-receipt-modal-backdrop {
+    position: static !important;
+    background: transparent !important;
+    padding: 0 !important;
+    backdrop-filter: none !important;
+    display: block !important;
   }
   .print-only {
     display: block !important;
   }
-  article, section {
+  article, section, .print-card {
     break-inside: avoid !important;
     page-break-inside: avoid !important;
     box-shadow: none !important;
-    border: 1px solid #D0D7CF !important;
   }
   * {
     -webkit-print-color-adjust: exact !important;

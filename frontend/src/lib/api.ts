@@ -54,14 +54,19 @@ export function resolveImageUrl(url?: string | null, fallbackList?: (string | un
     try {
       const parsed = new URL(targetUrl);
       const imgurl = parsed.searchParams.get('imgurl');
-      if (imgurl) return imgurl;
+      if (imgurl) return decodeURIComponent(imgurl);
     } catch {
       // ignore
     }
   }
 
-  // Direct Pexels / Unsplash / external CDN images work as-is
-  if (targetUrl.startsWith('http') && !targetUrl.includes('upload.wikimedia.org')) {
+  // Direct HTTPS/HTTP URLs (Unsplash, Pexels, Wikimedia, Google, etc.) load directly
+  if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
+    return targetUrl;
+  }
+
+  // Direct local / static assets
+  if (targetUrl.startsWith('/') && !targetUrl.startsWith('/api/')) {
     return targetUrl;
   }
 
@@ -70,24 +75,11 @@ export function resolveImageUrl(url?: string | null, fallbackList?: (string | un
     window.location.hostname !== 'localhost' &&
     window.location.hostname !== '127.0.0.1';
 
-  // On production (e.g. lokiva.vercel.app), use relative path so Vercel rewrites /api/* to Render
-  // On localhost, point to local backend if running on 8000
   const backendOrigin = isProduction
     ? ''
     : import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.startsWith('http')
     ? import.meta.env.VITE_API_URL.replace(/\/api\/v1\/?$/, '')
-    : 'http://localhost:8000';
-
-  // If it's already a proxy path
-  if (targetUrl.startsWith('/api/v1/experiences/proxy-image')) {
-    return backendOrigin ? `${backendOrigin}${targetUrl}` : targetUrl;
-  }
-
-  // If it's a raw Wikimedia image, wrap it through our proxy
-  if (targetUrl.includes('upload.wikimedia.org')) {
-    const proxyPath = `/api/v1/experiences/proxy-image?url=${encodeURIComponent(targetUrl)}`;
-    return backendOrigin ? `${backendOrigin}${proxyPath}` : proxyPath;
-  }
+    : '';
 
   if (targetUrl.startsWith('/api/')) {
     return backendOrigin ? `${backendOrigin}${targetUrl}` : targetUrl;

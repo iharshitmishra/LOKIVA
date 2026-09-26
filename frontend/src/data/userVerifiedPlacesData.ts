@@ -1,5 +1,4 @@
 import { Experience } from '../types';
-import { ALL_LOKIVA_PLACES } from './places';
 
 export const AGRA_POPULAR_DESTINATIONS: Experience[] = [
   {
@@ -2209,7 +2208,6 @@ export const RAJASTHAN_POPULAR_DESTINATIONS: Experience[] = [
 ];
 
 export const USER_CURATED_PLACES: Experience[] = [
-  ...ALL_LOKIVA_PLACES,
   ...AGRA_POPULAR_DESTINATIONS,
   ...GOA_POPULAR_DESTINATIONS,
   ...SHIMLA_POPULAR_DESTINATIONS,

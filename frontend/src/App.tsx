@@ -27,6 +27,8 @@ import { ProviderAuthPage } from './pages/ProviderAuthPage';
 import { GroupTripHubPage } from './pages/GroupTripHubPage';
 import { RequireAuth } from './components/auth/RequireAuth';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { VerifyPassPage } from './pages/VerifyPassPage';
+import { CulturalPassportReceiptModal } from './components/pass/CulturalPassportReceiptModal';
 
 function AppShell() {
   const location = useLocation();
@@ -60,6 +62,7 @@ function AppShell() {
           <Route path="/saved" element={<SavedPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/discovery-map" element={<DiscoveryMapPage />} />
+          <Route path="/verify-pass/:passId" element={<VerifyPassPage />} />
 
           {/* Lokiva Group Hub Routes - Protected by RequireAuth */}
           <Route
@@ -102,6 +105,9 @@ function AppShell() {
 
       {/* First-visit onboarding modal */}
       <LocationDecisionModal isOpen={showModal} onClose={closeModal} />
+
+      {/* Global Cultural Passport Receipt & QR Modal */}
+      <CulturalPassportReceiptModal />
     </div>
   );
 }
