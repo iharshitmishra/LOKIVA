@@ -313,7 +313,7 @@ export function ExplorePage() {
         {/* 2. Classical Sitar / Veena (Music & Oral Traditions) - Upper Right */}
         <div className="absolute right-0 xl:right-4 top-2 xl:top-3 w-32 lg:w-40 xl:w-48 rotate-6 transition-transform duration-700 ease-out hover:rotate-0">
           <img
-            src="/assets/cultural/sitar-veena-cutout.png"
+            src="/assets/cultural/sitar-veena-cutout.svg"
             alt="Classical sitar veena musical instrument cutout"
             loading="lazy"
             className="w-full h-auto object-contain opacity-75 xl:opacity-85 filter drop-shadow-[0_8px_20px_rgba(18,33,59,0.06)]"
@@ -333,7 +333,7 @@ export function ExplorePage() {
         {/* 4. Royal Peacock / Mayura (Sacred Folklore) - Mid Right Accent */}
         <div className="hidden xl:block absolute right-6 top-[250px] w-28 lg:w-32 rotate-4 transition-transform duration-700 ease-out hover:rotate-0">
           <img
-            src="/assets/cultural/royal-peacock-cutout.png"
+            src="/assets/cultural/royal-peacock-cutout.svg"
             alt="Royal peacock cultural motif cutout"
             loading="lazy"
             className="w-full h-auto object-contain opacity-70 xl:opacity-80 filter drop-shadow-[0_8px_16px_rgba(18,33,59,0.06)]"
