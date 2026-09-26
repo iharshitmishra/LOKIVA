@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Sloping Naalukettu Gabled Timber Roofline -->
+  <path d="M20 120 L100 40 L180 120" stroke-width="2"/>
+  <path d="M35 120 L100 55 L165 120"/>
+  <line x1="100" y1="40" x2="100" y2="25" stroke-width="2"/>
+  <circle cx="100" cy="22" r="3" fill="currentColor"/>
+  <!-- Decorative Lotus Mandala in Heart -->
+  <circle cx="100" cy="130" r="28" stroke-width="1.5"/>
+  <circle cx="100" cy="130" r="10" stroke-width="1.5"/>
+  <circle cx="100" cy="130" r="4" fill="currentColor"/>
+  <!-- Lotus Petals -->
+  <path d="M100 102 C90 114 90 120 100 120 C110 120 110 114 100 102 Z"/>
+  <path d="M100 158 C90 146 90 140 100 140 C110 140 110 146 100 158 Z"/>
+  <path d="M72 130 C84 120 90 120 90 130 C90 140 84 140 72 130 Z"/>
+  <path d="M128 130 C116 120 110 120 110 130 C110 140 116 140 128 130 Z"/>
+  <!-- Water Waves / Lagoon Ripples -->
+  <path d="M40 175 Q60 168 80 175 T120 175 T160 175"/>
+  <path d="M50 185 Q70 178 90 185 T130 185 T170 185"/>
+</svg>
