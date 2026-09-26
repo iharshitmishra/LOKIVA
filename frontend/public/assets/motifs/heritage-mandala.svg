@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Universal Indian Heritage Mandala & Torana Arch -->
+  <circle cx="100" cy="100" r="70" stroke-width="1.5"/>
+  <circle cx="100" cy="100" r="50" stroke-width="1.5"/>
+  <circle cx="100" cy="100" r="25" stroke-width="1.5"/>
+  <circle cx="100" cy="100" r="8" fill="currentColor"/>
+  <!-- 8-fold Petal Rays -->
+  <path d="M100 30 C90 45 90 50 100 50 C110 50 110 45 100 30 Z"/>
+  <path d="M100 170 C90 155 90 150 100 150 C110 150 110 155 100 170 Z"/>
+  <path d="M30 100 C45 90 50 90 50 100 C50 110 45 110 30 100 Z"/>
+  <path d="M170 100 C155 90 150 90 150 100 C150 110 155 110 170 100 Z"/>
+  <!-- Diagonal Petals -->
+  <path d="M50 50 C65 55 68 62 62 68 C55 65 50 58 50 50 Z"/>
+  <path d="M150 50 C135 55 132 62 138 68 C145 65 150 58 150 50 Z"/>
+  <path d="M50 150 C65 145 68 138 62 132 C55 135 50 142 50 150 Z"/>
+  <path d="M150 150 C135 145 132 138 138 132 C145 135 150 142 150 150 Z"/>
+</svg>

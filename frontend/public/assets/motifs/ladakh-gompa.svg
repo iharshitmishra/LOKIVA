@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Buddhist Stupa (Chorten) & High Himalayan Pass -->
+  <!-- Stupa Crown / Spire -->
+  <circle cx="100" cy="25" r="3" fill="currentColor"/>
+  <path d="M92 35 C92 30 108 30 108 35"/>
+  <line x1="94" y1="42" x2="106" y2="42"/>
+  <line x1="92" y1="48" x2="108" y2="48"/>
+  <line x1="90" y1="54" x2="110" y2="54"/>
+  <!-- Harmika / Dome -->
+  <path d="M82 65 C82 54 118 54 118 65 Z"/>
+  <circle cx="100" cy="80" r="18" stroke-width="1.5"/>
+  <!-- Tiered Base / Throne -->
+  <path d="M72 105 H128 V115 H72 Z"/>
+  <path d="M64 115 H136 V128 H64 Z"/>
+  <path d="M55 128 H145 V145 H55 Z" stroke-width="2"/>
+  <!-- Prayer Flags Waves -->
+  <path d="M30 160 Q65 145 100 160 T170 160" stroke-dasharray="4 3"/>
+  <path d="M30 172 Q65 157 100 172 T170 172" stroke-dasharray="4 3"/>
+  <polygon points="50,154 58,154 54,162" fill="currentColor" fill-opacity="0.2"/>
+  <polygon points="80,154 88,154 84,162" fill="currentColor" fill-opacity="0.2"/>
+  <polygon points="110,154 118,154 114,162" fill="currentColor" fill-opacity="0.2"/>
+  <polygon points="140,154 148,154 144,162" fill="currentColor" fill-opacity="0.2"/>
+</svg>

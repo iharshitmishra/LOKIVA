@@ -8,7 +8,7 @@ import {
   MapPin,
   Building2,
   Sparkles,
-  Layers,
+  Compass,
   X,
 } from 'lucide-react';
 import { SHOWCASE_DESTINATIONS, ShowcaseDestination } from '../data/destinationsShowcaseData';
@@ -279,18 +279,18 @@ export function DestinationsPage() {
                 </Link>
               </div>
 
-              {/* Directory Trigger: Explore 10 More States */}
+              {/* Directory Trigger: Browse All States */}
               <button
                 type="button"
                 onClick={() => setIsShowingDirectory(true)}
                 className="w-full flex items-center justify-between p-2.5 rounded-xl border border-white/20 hover:border-[#FFC067] bg-white/5 hover:bg-white/15 text-xs font-heading font-semibold text-white/90 hover:text-white transition cursor-pointer backdrop-blur-sm"
               >
                 <div className="flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-[#FFC067]" />
-                  <span>Browse 10 More States</span>
+                  <Compass className="w-4 h-4 text-[#FFC067]" />
+                  <span>Browse All States</span>
                 </div>
                 <span className="text-[10px] font-mono font-bold bg-white/15 px-2 py-0.5 rounded border border-white/20 text-white">
-                  +{OTHER_DESTINATIONS.length}
+                  {SHOWCASE_DESTINATIONS.length} States
                 </span>
               </button>
             </div>
@@ -300,9 +300,9 @@ export function DestinationsPage() {
               {/* Directory Header */}
               <div className="flex items-center justify-between pb-2 border-b border-white/15">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-[#FFC067]" />
+                  <Compass className="w-4 h-4 text-[#FFC067]" />
                   <h3 className="text-sm font-heading font-bold text-white uppercase tracking-wider">
-                    Select Indian State
+                    Browse All Indian States
                   </h3>
                 </div>
                 <button
@@ -321,7 +321,7 @@ export function DestinationsPage() {
 
               {/* Scrollable State List */}
               <div className="overflow-y-auto space-y-2 pr-1 max-h-[290px] scrollbar-thin">
-                {OTHER_DESTINATIONS.map((dest) => (
+                {SHOWCASE_DESTINATIONS.map((dest) => (
                   <div
                     key={dest.id}
                     onClick={() => handleSelectOtherDestination(dest)}
@@ -359,7 +359,7 @@ export function DestinationsPage() {
                 }}
                 className="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-xs font-heading font-bold text-white transition text-center cursor-pointer backdrop-blur-sm"
               >
-                Return to 4 Video Showcase States
+                Return to Featured Video States
               </button>
             </div>
           )}
@@ -375,10 +375,6 @@ export function DestinationsPage() {
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-
-          <span className="text-xs font-mono font-bold text-white/70 bg-black/35 px-3 py-1.5 rounded-full border border-white/20 backdrop-blur-xl">
-            {selectedOtherDestination ? 'PHOTO' : `${String(activeIndex + 1).padStart(2, '0')} / ${String(VIDEO_DESTINATIONS.length).padStart(2, '0')}`}
-          </span>
 
           <button
             onClick={handleNext}

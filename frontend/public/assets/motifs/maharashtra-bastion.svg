@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Sahyadri Mountain Bastion Rampart -->
+  <path d="M20 180 L40 140 L70 140 L85 110 L115 110 L130 140 L160 140 L180 180" stroke-width="2"/>
+  <!-- Fort Merlons (Battlements) -->
+  <path d="M40 140 V125 H50 V140 H60 V125 H70 V140"/>
+  <path d="M130 140 V125 H140 V140 H150 V125 H160 V140"/>
+  <path d="M85 110 V95 H95 V110 H105 V95 H115 V110"/>
+  <!-- Maratha Saffron Flagpole & Flag -->
+  <line x1="100" y1="95" x2="100" y2="40" stroke-width="2"/>
+  <path d="M100 40 L135 52 L100 65 Z" fill="currentColor" fill-opacity="0.15" stroke-width="1.5"/>
+  <!-- Warli Solar Circle and Rays -->
+  <circle cx="100" cy="150" r="16" stroke-width="1.5"/>
+  <circle cx="100" cy="150" r="6" fill="currentColor"/>
+  <line x1="100" y1="128" x2="100" y2="132"/>
+  <line x1="100" y1="168" x2="100" y2="172"/>
+  <line x1="78" y1="150" x2="82" y2="150"/>
+  <line x1="118" y1="150" x2="122" y2="150"/>
+  <line x1="84" y1="134" x2="88" y2="138"/>
+  <line x1="112" y1="162" x2="116" y2="166"/>
+  <line x1="84" y1="166" x2="88" y2="162"/>
+  <line x1="112" y1="138" x2="116" y2="134"/>
+</svg>

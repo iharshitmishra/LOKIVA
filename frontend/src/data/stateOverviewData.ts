@@ -31,6 +31,193 @@ export interface FestivalItem {
   description: string;
   image: string;
   highlightTag: string;
+  ritualDetail?: string;
+  sacredDelicacy?: string;
+  bestLocation?: string;
+}
+
+export interface HistoryEra {
+  eraName: string;
+  timePeriod: string;
+  headline: string;
+  narrative: string;
+  image?: string;
+  imageCaption?: string;
+  monumentsBuilt?: string[];
+  impactOnToday: string;
+}
+
+export interface StateThemePalette {
+  primaryAccent: string;
+  primaryAccentHover: string;
+  secondaryAccent: string;
+  secondaryAccentBg: string;
+  darkInk: string;
+  bgParchment: string;
+  cardBg: string;
+  cardBgAlt: string;
+  borderHue: string;
+  borderAccent: string;
+  badgeBg: string;
+  badgeText: string;
+  motifAsset: string;
+  motifName: string;
+  accentGradient: string;
+}
+
+export function getStateThemePalette(stateId: string, stateName?: string): StateThemePalette {
+  const s = (stateId || '').toLowerCase().trim();
+  if (s.includes('rajasthan') || s === 'rj') {
+    return {
+      primaryAccent: '#B84A27',
+      primaryAccentHover: '#9E3B1C',
+      secondaryAccent: '#D49B35',
+      secondaryAccentBg: '#FBF1DF',
+      darkInk: '#1E140F',
+      bgParchment: '#FAF6EE',
+      cardBg: '#FFFFFF',
+      cardBgAlt: '#FAF2E4',
+      borderHue: '#EAE0D0',
+      borderAccent: '#DFC8A8',
+      badgeBg: '#F9EFE5',
+      badgeText: '#A63A1E',
+      motifAsset: '/assets/motifs/rajasthan-jharokha.svg',
+      motifName: 'Jharokha Lattice & Sun Arch',
+      accentGradient: 'from-[#B84A27] via-[#D47A39] to-[#D49B35]',
+    };
+  }
+  if (s.includes('maharashtra') || s === 'mh') {
+    return {
+      primaryAccent: '#C1443B',
+      primaryAccentHover: '#A8362E',
+      secondaryAccent: '#D47A39',
+      secondaryAccentBg: '#FAF0E6',
+      darkInk: '#12213B',
+      bgParchment: '#FAF7F2',
+      cardBg: '#FFFFFF',
+      cardBgAlt: '#FAF4ED',
+      borderHue: '#E5DFD5',
+      borderAccent: '#D8C8B5',
+      badgeBg: '#FBF0E8',
+      badgeText: '#B83E36',
+      motifAsset: '/assets/motifs/maharashtra-bastion.svg',
+      motifName: 'Maratha Bastion & Warli Solar Ring',
+      accentGradient: 'from-[#C1443B] via-[#D47A39] to-[#E09D3E]',
+    };
+  }
+  if (s.includes('kerala') || s === 'kl') {
+    return {
+      primaryAccent: '#1E6B52',
+      primaryAccentHover: '#16533F',
+      secondaryAccent: '#C48F2A',
+      secondaryAccentBg: '#F5EEDC',
+      darkInk: '#0E231B',
+      bgParchment: '#F6F9F6',
+      cardBg: '#FFFFFF',
+      cardBgAlt: '#EEF5F0',
+      borderHue: '#DDE8DE',
+      borderAccent: '#B8D4BF',
+      badgeBg: '#E7F3ED',
+      badgeText: '#165A44',
+      motifAsset: '/assets/motifs/kerala-lotus.svg',
+      motifName: 'Naalukettu Gabled Arch & Lotus',
+      accentGradient: 'from-[#1E6B52] via-[#2A8F6E] to-[#C48F2A]',
+    };
+  }
+  if (s.includes('ladakh') || s === 'la' || s === 'leh') {
+    return {
+      primaryAccent: '#9B382A',
+      primaryAccentHover: '#7E2C20',
+      secondaryAccent: '#2D728F',
+      secondaryAccentBg: '#E6F2F7',
+      darkInk: '#141C24',
+      bgParchment: '#F8F9FA',
+      cardBg: '#FFFFFF',
+      cardBgAlt: '#F1F4F7',
+      borderHue: '#E1E7ED',
+      borderAccent: '#BACAD6',
+      badgeBg: '#F6EBE9',
+      badgeText: '#8A2E22',
+      motifAsset: '/assets/motifs/ladakh-gompa.svg',
+      motifName: 'Himalayan Gompa & Cloud Wave',
+      accentGradient: 'from-[#9B382A] via-[#C96B3B] to-[#2D728F]',
+    };
+  }
+  if (s.includes('tamil') || s === 'tn') {
+    return {
+      primaryAccent: '#9A3412',
+      primaryAccentHover: '#7C2D12',
+      secondaryAccent: '#D97706',
+      secondaryAccentBg: '#FEF3C7',
+      darkInk: '#1C130E',
+      bgParchment: '#FAF6EE',
+      cardBg: '#FFFFFF',
+      cardBgAlt: '#FAF1E1',
+      borderHue: '#EBE0CF',
+      borderAccent: '#D8C6AC',
+      badgeBg: '#FBECE5',
+      badgeText: '#8C2C0B',
+      motifAsset: '/assets/motifs/tamilnadu-gopuram.svg',
+      motifName: 'Dravidian Gopuram & Sacred Kolam',
+      accentGradient: 'from-[#9A3412] via-[#C2410C] to-[#D97706]',
+    };
+  }
+  if (s.includes('himachal') || s === 'hp') {
+    return {
+      primaryAccent: '#2C5E7A',
+      primaryAccentHover: '#1F475E',
+      secondaryAccent: '#B45309',
+      secondaryAccentBg: '#FDF2E9',
+      darkInk: '#131F28',
+      bgParchment: '#F8F9FA',
+      cardBg: '#FFFFFF',
+      cardBgAlt: '#EEF3F7',
+      borderHue: '#DEE5EC',
+      borderAccent: '#B8CAD8',
+      badgeBg: '#E7F0F6',
+      badgeText: '#224E66',
+      motifAsset: '/assets/motifs/mountain-pine.svg',
+      motifName: 'Deodar Woodwork & Alpine Crest',
+      accentGradient: 'from-[#2C5E7A] via-[#4A7F9D] to-[#B45309]',
+    };
+  }
+  if (s.includes('goa') || s === 'ga') {
+    return {
+      primaryAccent: '#C45911',
+      primaryAccentHover: '#A7490A',
+      secondaryAccent: '#0F766E',
+      secondaryAccentBg: '#E0F2FE',
+      darkInk: '#13222B',
+      bgParchment: '#FDF9F3',
+      cardBg: '#FFFFFF',
+      cardBgAlt: '#F6EFE6',
+      borderHue: '#E8DDD0',
+      borderAccent: '#CEBEAA',
+      badgeBg: '#FAEDE2',
+      badgeText: '#B04C0A',
+      motifAsset: '/assets/motifs/coastal-wave.svg',
+      motifName: 'Portuguese Balcão & Ocean Surge',
+      accentGradient: 'from-[#C45911] via-[#D97706] to-[#0F766E]',
+    };
+  }
+  // Universal Heritage Theme
+  return {
+    primaryAccent: '#B84A27',
+    primaryAccentHover: '#9E3B1C',
+    secondaryAccent: '#D49B35',
+    secondaryAccentBg: '#FBF1DF',
+    darkInk: '#1E140F',
+    bgParchment: '#FAF6EE',
+    cardBg: '#FFFFFF',
+    cardBgAlt: '#FAF2E4',
+    borderHue: '#EAE0D0',
+    borderAccent: '#DFC8A8',
+    badgeBg: '#F9EFE5',
+    badgeText: '#A63A1E',
+    motifAsset: '/assets/motifs/heritage-mandala.svg',
+    motifName: 'Universal Heritage Mandala',
+    accentGradient: 'from-[#B84A27] via-[#D47A39] to-[#D49B35]',
+  };
 }
 
 export interface FoodItem {
@@ -40,6 +227,7 @@ export interface FoodItem {
   description: string;
   image: string;
   badge?: string;
+  regionalOrigin?: string;
 }
 
 export interface PlaceItem {
@@ -90,14 +278,18 @@ export interface StateOverview {
   heroVideo?: string;
   heroImage: string;
   primaryCity: string;
+  palette?: StateThemePalette;
   introduction: {
     headline: string;
     subheadline: string;
     description: string;
+    quotePull?: string;
+    signatureStat?: { label: string; value: string };
   };
   snapshot: StateSnapshot;
   whyVisitHighlights: StateHighlight[];
   culture: CulturalItem[];
+  historyThroughline?: HistoryEra[];
   festivals: FestivalItem[];
   foods: FoodItem[];
   places: PlaceItem[];
@@ -127,10 +319,27 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
     snapshot: {
       region: 'North-West India',
       capital: 'Jaipur',
-      bestTime: 'Oct – Mar',
-      duration: '5 – 8 Days',
+      bestTime: 'Oct - Mar',
+      duration: '5 - 8 Days',
       bestFor: ['Heritage', 'Culture', 'Desert', 'Food'],
-      climate: 'Arid desert climate with mild, sunny winters (10°C – 28°C) and fiery summers.',
+      climate: 'Arid desert climate with mild, sunny winters (10°C - 28°C) and fiery summers.',
+    },
+    palette: {
+      primaryAccent: '#B84A27',
+      primaryAccentHover: '#9E3B1C',
+      secondaryAccent: '#D49B35',
+      secondaryAccentBg: '#FBF1DF',
+      darkInk: '#1E140F',
+      bgParchment: '#FAF6EE',
+      cardBg: '#FFFFFF',
+      cardBgAlt: '#FAF2E4',
+      borderHue: '#EAE0D0',
+      borderAccent: '#DFC8A8',
+      badgeBg: '#F9EFE5',
+      badgeText: '#A63A1E',
+      motifAsset: '/assets/motifs/rajasthan-jharokha.svg',
+      motifName: 'Jharokha Lattice & Sun Arch',
+      accentGradient: 'from-[#B84A27] via-[#D47A39] to-[#D49B35]',
     },
     whyVisitHighlights: [
       {
@@ -156,6 +365,38 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
         description: 'Savor fiery game curries, hand-ground desert spices, and melt-in-mouth churma prepared over slow wood embers.',
         image: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?auto=format&fit=crop&w=1000&q=80',
         tag: 'Epicurean Legacy',
+      },
+    ],
+    historyThroughline: [
+      {
+        eraName: 'The Rajput Princely Clans & Fortress Citadels',
+        timePeriod: '8th Century - 16th Century CE',
+        headline: 'Rathore, Sisodia, and Kachwaha chivalry engineered into impregnable hilltop bastions',
+        narrative: 'Across the jagged Aravalli crags and Thar dunes, warrior clans built living fortresses that housed entire medieval cities. Mehrangarh, Kumbhalgarh with its 36km continuous wall, and Chittorgarh became legendary sanctuaries of Rajput valor, water-harvesting stepwells, and unyielding resistance.',
+        image: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=1200&q=80',
+        imageCaption: 'Mehrangarh Fortress Ramparts, Jodhpur',
+        monumentsBuilt: ['Kumbhalgarh Fortress Ramparts', 'Mehrangarh Citadel', 'Chittorgarh Fort', 'Chand Baori Stepwell'],
+        impactOnToday: 'Gave Rajasthan its world-famous hill fort circuit, royal hospitality traditions, and timeless desert architecture.',
+      },
+      {
+        eraName: 'The Mughal-Rajput Synthesis & Courtly Arts',
+        timePeriod: '16th Century - 18th Century CE',
+        headline: 'A golden era of Pichwai miniatures, astronomical observatories, and palace mirrorwork',
+        narrative: 'The alliance and cultural exchange between Mughal emperors and Rajput kings catalyzed an explosion of fine arts. Maharaja Sawai Jai Singh II founded Jaipur on Vedic Vastu principles and built the monumental Jantar Mantar, while Shekhawati merchants painted open-air havelis with vibrant frescoes.',
+        image: 'https://images.unsplash.com/photo-1609946850989-138378732e79?auto=format&fit=crop&w=1200&q=80',
+        imageCaption: 'Hawa Mahal & Courtly Sandstone Facades, Jaipur',
+        monumentsBuilt: ['Amer Palace & Sheesh Mahal', 'Jantar Mantar Observatory', 'Hawa Mahal Palace of Winds', 'Shekhawati Painted Havelis'],
+        impactOnToday: 'Forms Jaipur\'s UNESCO World Heritage core, the miniature painting tradition, and vibrant bazaar streetscapes.',
+      },
+      {
+        eraName: 'The Desert Guilds & Living Artisan Renaissance',
+        timePeriod: '19th Century - Present',
+        headline: 'From princely patronage to world-renowned textile, stonecraft, and folk musical lineages',
+        narrative: 'As princely states acceded to modern India, ancestral artisan guilds flourished globally. Hereditary Manganiyar and Langa bards carry oral desert poetry, while Bagru natural-dye block printers and Jaipur blue-pottery artisans maintain unbroken generational mastercrafts.',
+        image: 'https://images.unsplash.com/photo-1606293926075-69a00dbfde81?auto=format&fit=crop&w=1200&q=80',
+        imageCaption: 'Bagru Hand-Block Printing & Living Master Guilds',
+        monumentsBuilt: ['Umaid Bhawan Palace', 'Albert Hall Museum', 'Bagru & Sanganer Artisan Guilds', 'Pushkar Sacred Ghats'],
+        impactOnToday: 'Drives Rajasthan\'s position as India\'s premier artisanal capital, luxury heritage stay destination, and international festival hub.',
       },
     ],
     culture: [
@@ -314,45 +555,45 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
     seasons: [
       {
         season: 'Winter',
-        months: 'October – March',
+        months: 'October - March',
         weather: 'Pleasant, crisp, clear blue skies with cool desert evenings.',
-        temperature: '10°C – 26°C',
+        temperature: '10°C - 26°C',
         experiences: ['Desert camping in Jaisalmer', 'Heritage walking tours in Jaipur', 'Outdoor lake dining in Udaipur'],
         festivals: ['Pushkar Camel Fair', 'Desert Festival', 'Jaipur Lit Fest'],
         isRecommended: true,
       },
       {
         season: 'Spring',
-        months: 'February – March',
+        months: 'February - March',
         weather: 'Comfortable sunny days with blooming palace gardens.',
-        temperature: '18°C – 32°C',
+        temperature: '18°C - 32°C',
         experiences: ['Wildlife safaris in Ranthambore', 'Fort rampart photography', 'Holi palace celebrations'],
         festivals: ['Elephant Festival', 'Holika Dahan'],
         isRecommended: true,
       },
       {
         season: 'Summer',
-        months: 'April – June',
+        months: 'April - June',
         weather: 'Intense dry desert heat; uncrowded palaces and budget luxury stay rates.',
-        temperature: '32°C – 45°C',
+        temperature: '32°C - 45°C',
         experiences: ['Early morning palace visits', 'Mount Abu hill retreat', 'Luxury indoor spa sanctuaries'],
         festivals: ['Mount Abu Summer Fest'],
         isRecommended: false,
       },
       {
         season: 'Monsoon',
-        months: 'July – September',
+        months: 'July - September',
         weather: 'Lush greenery awakens across the Aravalli hills with pleasant rainfall showers.',
-        temperature: '24°C – 35°C',
+        temperature: '24°C - 35°C',
         experiences: ['Romantic monsoon boat rides in Udaipur', 'Peacock sightings in Jaipur gardens'],
         festivals: ['Teej Procession', 'Kajli Teej'],
         isRecommended: false,
       },
       {
         season: 'Autumn',
-        months: 'September – October',
+        months: 'September - October',
         weather: 'Gentle cooling breeze, low humidity, transition to peak travel.',
-        temperature: '22°C – 33°C',
+        temperature: '22°C - 33°C',
         experiences: ['Old bazaar shopping', 'Rooftop dining with fort views', 'Early season desert trips'],
         festivals: ['Navratri Garba', 'Marwar Festival'],
         isRecommended: true,
@@ -484,10 +725,27 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
     snapshot: {
       region: 'South India',
       capital: 'Thiruvananthapuram',
-      bestTime: 'Sep – Mar',
-      duration: '6 – 9 Days',
+      bestTime: 'Sep - Mar',
+      duration: '6 - 9 Days',
       bestFor: ['Backwaters', 'Ayurveda', 'Spices', 'Nature'],
-      climate: 'Tropical maritime climate with rejuvenating monsoons and balmy winter breezes (22°C – 32°C).',
+      climate: 'Tropical maritime climate with rejuvenating monsoons and balmy winter breezes (22°C - 32°C).',
+    },
+    palette: {
+      primaryAccent: '#1E6B52',
+      primaryAccentHover: '#16533F',
+      secondaryAccent: '#C48F2A',
+      secondaryAccentBg: '#F5EEDC',
+      darkInk: '#0E231B',
+      bgParchment: '#F6F9F6',
+      cardBg: '#FFFFFF',
+      cardBgAlt: '#EEF5F0',
+      borderHue: '#DDE8DE',
+      borderAccent: '#B8D4BF',
+      badgeBg: '#E7F3ED',
+      badgeText: '#165A44',
+      motifAsset: '/assets/motifs/kerala-lotus.svg',
+      motifName: 'Naalukettu Gabled Arch & Lotus',
+      accentGradient: 'from-[#1E6B52] via-[#2A8F6E] to-[#C48F2A]',
     },
     whyVisitHighlights: [
       {
@@ -513,6 +771,38 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
         description: 'Wander Fort Kochi’s pastel colonial streets, Chinese fishing nets, and ancient Jewish spice warehouses.',
         image: 'https://images.unsplash.com/photo-1588096344356-9b441f71df44?auto=format&fit=crop&w=1000&q=80',
         tag: 'Coastal Heritage',
+      },
+    ],
+    historyThroughline: [
+      {
+        eraName: 'The Ancient Muziris Harbor & Spice Corridors',
+        timePeriod: '3rd Century BCE - 12th Century CE',
+        headline: 'The global maritime trade epicenter linking Rome, Arabia, and the Malabar coast',
+        narrative: 'Centuries before modern ports, Muziris was the world\'s greatest spice emporium, exporting black gold (pepper), cardamom, and cinnamon to the Roman Empire, Phoenicians, and Arabian merchants, fostering ancient cosmopolitan settlements.',
+        image: 'https://images.unsplash.com/photo-1593693397690-362cb9666fc2?auto=format&fit=crop&w=1200&q=80',
+        imageCaption: 'Padmanabhaswamy Temple & Ancient Malabar Shrines',
+        monumentsBuilt: ['Muziris Ancient Port Shrines', 'Cheraman Juma Mosque', 'St. Thomas Mar Thoma Shrines', 'Kodungallur Bhagavathy Temple'],
+        impactOnToday: 'Established Kerala\'s open multicultural ethos, ancient spice agriculture, and the historic Muziris Heritage Project corridor.',
+      },
+      {
+        eraName: 'The Travancore & Zamorin Sovereign Kingdoms',
+        timePeriod: '14th Century - 18th Century CE',
+        headline: 'Naval victories, temple architecture without iron nails, and Kathakali royal courts',
+        narrative: 'Under the Zamorins of Kozhikode and King Marthanda Varma of Travancore, Kerala defended its spice sovereignty, notably defeating the Dutch East India Company at the Battle of Colachel in 1741. Royal courts nurtured Kathakali dance dramas, Kalaripayattu martial academies, and Naalukettu wooden architecture.',
+        image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1200&q=80',
+        imageCaption: 'Historic Fort Kochi Malabar Spice Port & Timber Architecture',
+        monumentsBuilt: ['Padmanabhaswamy Temple Vaults', 'Padmanabhapuram Wooden Palace', 'Bekal Coastal Bastion', 'Mattancherry Dutch Palace'],
+        impactOnToday: 'Preserved authentic 5,000-year Ayurveda lineages, classical temple arts, and distinctive sloping-roof timber architecture.',
+      },
+      {
+        eraName: 'The Emerald Backwaters & Eco-Cultural Renaissance',
+        timePeriod: '19th Century - Present',
+        headline: 'Transforming inland trade waterways into the world\'s most peaceful sanctuary of water and wellness',
+        narrative: 'The ancient Kettuvallam grain barges evolved into luxurious handcrafted houseboats drifting through 900 km of palm-fringed canals. Today, Kerala leads global responsible eco-tourism, high-altitude spice and tea plantations, and the world-renowned Kochi-Muziris Art Biennale.',
+        image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1200&q=80',
+        imageCaption: 'Traditional Thatched Kettuvallam Houseboat on Alleppey Backwaters',
+        monumentsBuilt: ['Fort Kochi Heritage Quarter', 'Vembanad Waterway Network', 'Munnar High-Altitude Tea Estates', 'Kochi Biennale Pavilions'],
+        impactOnToday: 'Makes Kerala "God\'s Own Country", the global destination for holistic wellness, tranquil backwater slow travel, and contemporary arts.',
       },
     ],
     culture: [
@@ -570,7 +860,7 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
       {
         id: 'fk1',
         name: 'Onam Harvest Festival',
-        monthSeason: 'August – September',
+        monthSeason: 'August - September',
         description: 'Ten days of breathtaking floral carpets (Pookkalam), grand feasts (Sadya), tiger dances (Pulikali), and snake boat races celebrating King Mahabali.',
         image: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=800&q=80',
         highlightTag: 'Harvest Euphoria',
@@ -586,7 +876,7 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
       {
         id: 'fk3',
         name: 'Thrissur Pooram',
-        monthSeason: 'April – May',
+        monthSeason: 'April - May',
         description: 'The mother of all temple festivals featuring caparisoned elephants, changing silk parasols (Kudamattom), and world-class percussion fireworks.',
         image: 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=800&q=80',
         highlightTag: 'Temple Splendor',
@@ -594,7 +884,7 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
       {
         id: 'fk4',
         name: 'Kochi-Muziris Biennale',
-        monthSeason: 'December – March (Biennial)',
+        monthSeason: 'December - March (Biennial)',
         description: 'South Asia’s largest contemporary art festival, transforming historic waterfront warehouses into international galleries.',
         image: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=800&q=80',
         highlightTag: 'Global Contemporary Art',
@@ -677,45 +967,45 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
     seasons: [
       {
         season: 'Winter',
-        months: 'November – February',
+        months: 'November - February',
         weather: 'Pleasant, dry, sunny days with cool evening breezes by the ocean.',
-        temperature: '22°C – 30°C',
+        temperature: '22°C - 30°C',
         experiences: ['Houseboat cruises in Alleppey', 'Fort Kochi art walks', 'Munnar hill hikes'],
         festivals: ['Kochi Biennale', 'Christmas Festivities', 'Theyyam Season'],
         isRecommended: true,
       },
       {
         season: 'Monsoon',
-        months: 'June – August',
+        months: 'June - August',
         weather: 'Lush torrential monsoon downpours; ideal natural climate for Ayurvedic cures.',
-        temperature: '22°C – 28°C',
+        temperature: '22°C - 28°C',
         experiences: ['Ayurvedic Panchakarma therapies', 'Waterfalls in full glory', 'Lush rain retreats'],
         festivals: ['Nehru Trophy Race', 'Onam Preparations'],
         isRecommended: true,
       },
       {
         season: 'Spring',
-        months: 'February – March',
+        months: 'February - March',
         weather: 'Warm sunny weather, clear seas, perfect for beach stays.',
-        temperature: '24°C – 32°C',
+        temperature: '24°C - 32°C',
         experiences: ['Varkala beach relaxation', 'Periyar wildlife sanctuaries', 'Spice plantation walks'],
         festivals: ['Attukal Pongala', 'Maha Shivaratri'],
         isRecommended: true,
       },
       {
         season: 'Autumn',
-        months: 'September – October',
+        months: 'September - October',
         weather: 'Fresh post-monsoon emerald scenery, vibrant skies, cool water levels.',
-        temperature: '23°C – 31°C',
+        temperature: '23°C - 31°C',
         experiences: ['Village canoe explorations', 'Onam festivities', 'Birdwatching at Kumarakom'],
         festivals: ['Onam Carnival', 'Pulikali Tiger Dance'],
         isRecommended: true,
       },
       {
         season: 'Summer',
-        months: 'April – May',
+        months: 'April - May',
         weather: 'Warm and humid along the coast; cool and refreshing in Munnar highlands.',
-        temperature: '26°C – 36°C',
+        temperature: '26°C - 36°C',
         experiences: ['Highland tea estate stays', 'Indoor spice cooking sessions', 'Waterfalls dipping'],
         festivals: ['Thrissur Pooram', 'Vishu New Year'],
         isRecommended: false,
@@ -839,18 +1129,37 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
     heroImage: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=2000&q=85',
     primaryCity: 'Mumbai',
     quickEscapeCity: 'Mumbai, Maharashtra',
+    palette: {
+      primaryAccent: '#C1443B',
+      primaryAccentHover: '#A8362E',
+      secondaryAccent: '#D47A39',
+      secondaryAccentBg: '#FAF0E6',
+      darkInk: '#12213B',
+      bgParchment: '#FAF7F2',
+      cardBg: '#FFFFFF',
+      cardBgAlt: '#FAF4ED',
+      borderHue: '#E5DFD5',
+      borderAccent: '#D8C8B5',
+      badgeBg: '#FBF0E8',
+      badgeText: '#B83E36',
+      motifAsset: '/assets/motifs/maharashtra-bastion.svg',
+      motifName: 'Maratha Bastion & Warli Solar Ring',
+      accentGradient: 'from-[#C1443B] via-[#D47A39] to-[#E09D3E]',
+    },
     introduction: {
       headline: 'The Heartland of Chhatrapati Kings, Rock-Cut Marvels, and Infinite Energy',
       subheadline: 'From the soaring stone ramparts of the Sahyadri mountains to UNESCO rock-cut cave shrines and the unstoppable heartbeat of Mumbai.',
       description: 'Maharashtra is an exhilarating contrast of timeless heroism and forward-looking dynamism. Here, mighty Maratha hill fortresses pierce monsoon clouds, 2,000-year-old basalt monasteries at Ajanta and Ellora amaze the world, and coastal Arabian fishing villages sit alongside global metropolises.',
+      quotePull: 'Where 2,000-year-old basalt monasteries pierce monsoon mist and maritime fortress walls rise out of the Arabian Sea.',
+      signatureStat: { label: 'UNESCO World Heritage Sites & Hill Bastions', value: '350+ Forts & Shrines' },
     },
     snapshot: {
       region: 'West India',
       capital: 'Mumbai',
-      bestTime: 'Oct – Mar (Monsoon for Treks)',
-      duration: '4 – 7 Days',
+      bestTime: 'Oct - Mar (Monsoon for Treks)',
+      duration: '4 - 7 Days',
       bestFor: ['Forts', 'Trekking', 'Street Food', 'UNESCO Heritage'],
-      climate: 'Tropical coastal climate in Konkan; breezy Deccan plateau (16°C – 34°C).',
+      climate: 'Tropical coastal climate in Konkan; breezy Deccan plateau (16°C - 34°C).',
     },
     whyVisitHighlights: [
       {
@@ -861,7 +1170,7 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
       },
       {
         title: 'UNESCO Basalt Rock-Cut Wonders',
-        description: 'Stand in awe before Kailasa Temple at Ellora—the world’s largest monolithic sculpture carved top-down from a single rock.',
+        description: 'Stand in awe before Kailasa Temple at Ellora, the world’s largest monolithic sculpture carved top-down from a single rock.',
         image: 'https://images.unsplash.com/photo-1600100397608-f010f44383c2?auto=format&fit=crop&w=1000&q=80',
         tag: 'Ancient Genius',
       },
@@ -876,6 +1185,38 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
         description: 'Golden sandy coves, Murud Janjira sea fortress, and authentic coconut Malvani seafood cooked in clay pots.',
         image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80',
         tag: 'Coastal Escape',
+      },
+    ],
+    historyThroughline: [
+      {
+        eraName: 'The Basalt Monasteries & Rock-Cut Genesis',
+        timePeriod: '2nd Century BCE - 8th Century CE',
+        headline: 'Monumental shrines carved top-down from volcanic rock',
+        narrative: 'Across the volcanic Deccan traps, ancient guilds of Buddhist, Hindu, and Jain artisans achieved the pinnacle of stone engineering. At Ellora, master sculptors removed over 200,000 tonnes of basalt rock to reveal the monolithic Kailasa Temple from a single cliff face without scaffolding, creating one of humanity’s greatest architectural feats.',
+        image: 'https://images.unsplash.com/photo-1600100397608-f010e4796eb0?auto=format&fit=crop&w=1200&q=80',
+        imageCaption: 'Kailasa Monolithic Basalt Temple, Ellora Caves',
+        monumentsBuilt: ['Kailasa Temple (Ellora)', 'Ajanta Cave Frescoes', 'Elephanta Island Shrines', 'Karla & Bhaja Chaityas'],
+        impactOnToday: 'Established the sacred stone aesthetic and rock-cut architectural lineage that still defines Maharashtra’s hill monasteries and pilgrimage corridors.',
+      },
+      {
+        eraName: 'The Swarajya Fortress Realm & Naval Sovereignty',
+        timePeriod: '1630 - 1680 CE',
+        headline: 'Chhatrapati Shivaji Maharaj and the 350 mountain bastions',
+        narrative: 'Born at Shivneri, Chhatrapati Shivaji Maharaj revolutionized mountain warfare and maritime defense. Transforming the Sahyadri ranges into an impenetrable chain of over 350 hill and sea forts, he established "Hindavi Swarajya" and built one of India’s earliest organized naval fleets based out of Sindhudurg and Vijaydurg.',
+        image: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?auto=format&fit=crop&w=1200&q=80',
+        imageCaption: 'Sahyadri Mountain Fortress Bastions & Chhatrapati Shivaji Ramparts',
+        monumentsBuilt: ['Raigad Fort Capital', 'Sindhudurg Island Bastion', 'Pratapgad Ramparts', 'Sinhagad Fort'],
+        impactOnToday: 'The valor, maritime independence, and decentralized hill fortress culture form the core of modern Maharashtrian cultural identity and trek heritage.',
+      },
+      {
+        eraName: 'The Deccan Silk Capital & Maximum City Renaissance',
+        timePeriod: '18th Century - Present',
+        headline: 'From Peshwa artisanal capitals to India’s financial and cinematic epicenter',
+        narrative: 'Under the Peshwas, Pune evolved into a flourishing capital of scholarship, music, and the Paithani gold-silk weaving guilds. Later, the reclamation of seven islands forged Mumbai into India’s premier port, commercial powerhouse, and the birthplace of Indian cinema, home to the Six-Sigma Dabbawala logistics network.',
+        image: 'https://images.unsplash.com/photo-1566552881560-0be862a7c445?auto=format&fit=crop&w=1200&q=80',
+        imageCaption: 'Gateway of India & Historic Marine Precinct, Mumbai',
+        monumentsBuilt: ['Shaniwar Wada Palace', 'Chhatrapati Shivaji Maharaj Terminus', 'Marine Drive Promenade', 'Kala Ghoda Heritage Precinct'],
+        impactOnToday: 'Creates the signature juxtaposition of centuries-old Maratha artisan traditions and the relentless, cosmopolitan forward energy of Maximum City.',
       },
     ],
     culture: [
@@ -933,34 +1274,57 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
       {
         id: 'fm1',
         name: 'Ganesh Chaturthi',
-        monthSeason: 'August – September',
+        monthSeason: 'August - September',
         description: 'The monumental soul festival of Maharashtra; giant idols, high-decibel Dhol Tasha drums, and emotional sea immersions at Girgaon Chowpatty.',
         image: 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=800&q=80',
         highlightTag: 'Unrivaled Energy',
+        ritualDetail: '500-member synchronized Dhol Tasha troupes pounding high-octane rhythms; royal evening aartis at Lalbaugcha Raja and Shrimant Dagdusheth; and grand Visarjan processions into the Arabian Sea.',
+        sacredDelicacy: 'Steamed Ukdiche Modak made with fresh grated coconut, nutmeg, and organic jaggery drizzled with pure desi ghee.',
+        bestLocation: 'Girgaon Chowpatty & Lalbaug (Mumbai), Kasba Peth (Pune).',
       },
       {
         id: 'fm2',
-        name: 'Gudi Padwa',
-        monthSeason: 'March – April',
+        name: 'Gudi Padwa & Shobha Yatra',
+        monthSeason: 'March - April',
         description: 'The Marathi New Year marked by silk-draped Gudi flags raised from balconies, Shobha Yatra bike rallies in traditional attire, and sweet Shrikhand.',
         image: 'https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=800&q=80',
         highlightTag: 'New Year Awakening',
+        ritualDetail: 'Hoisting the auspicious Gudi flag adorned with neem twigs, mango leaves, and an inverted copper kalash; colorful morning street processions with women riding in Nauvari sarees and saffron Phetas.',
+        sacredDelicacy: 'Bittersweet neem-jaggery prasadam followed by festive Shrikhand Puri.',
+        bestLocation: 'Girgaon Heritage Precinct (Mumbai) & Laxmi Road (Pune).',
       },
       {
         id: 'fm3',
-        name: 'Ellora Heritage Festival',
-        monthSeason: 'January',
-        description: 'World-renowned classical singers and dancers perform directly before the floodlit monolithic Kailasa temple under starry skies.',
-        image: 'https://images.unsplash.com/photo-1600100397608-f010f44383c2?auto=format&fit=crop&w=800&q=80',
-        highlightTag: 'Classical Splendor',
+        name: 'Pandharpur Wari Palkhi Pilgrimage',
+        monthSeason: 'June - July (Ashadhi Ekadashi)',
+        description: '800-year-old 250-km walking pilgrimage of over 1 million barefoot Warkari devotees carrying sacred palanquins of saint-poets to Lord Vitthal.',
+        image: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?auto=format&fit=crop&w=800&q=80',
+        highlightTag: 'Spiritual Epic',
+        ritualDetail: 'Carrying silver palanquins (Palkhis) of Sant Dnyaneshwar and Sant Tukaram; playing the Chipli and Taal cymbals while singing Abhangas; circular horse sprints (Ringan) in open fields.',
+        sacredDelicacy: 'Simple nutritious Jowar Bhakri, crushed green chili Thecha, and Shenga peanut chutney shared along walking trails.',
+        bestLocation: 'Alandi to Pandharpur trail (Pune - Solapur highway corridor).',
       },
       {
         id: 'fm4',
-        name: 'Kala Ghoda Arts Festival',
-        monthSeason: 'February',
-        description: 'Mumbai’s historic heritage precinct transforms into an open-air carnival of street installations, theater, indie cinema, and craft stalls.',
-        image: 'https://images.unsplash.com/photo-1566552881560-0be86c53e56f?auto=format&fit=crop&w=800&q=80',
-        highlightTag: 'Urban Culture',
+        name: 'Narali Purnima & Koli Coastal Festival',
+        monthSeason: 'August (Shravan Full Moon)',
+        description: 'Indigenous Koli fisherfolk offering coconuts to the Arabian Sea to mark the end of the monsoon storm season and safe reopening of sea voyages.',
+        image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+        highlightTag: 'Maritime Heritage',
+        ritualDetail: 'Offering gold-leaf wrapped coconuts (Naral) to the ocean deity Varuna; painting wooden fishing boats in vivid ochre, yellow, and cyan; spirited Koli folk dances with rhythmic arm gestures.',
+        sacredDelicacy: 'Sweet coconut-infused Narali Bhaat steamed with cloves, cardamom, and roasted cashews.',
+        bestLocation: 'Versova, Worli, and Sassoon Dock Koliwadas (Mumbai).',
+      },
+      {
+        id: 'fm5',
+        name: 'Ellora Heritage Festival',
+        monthSeason: 'January',
+        description: 'World-renowned classical musicians and dancers perform directly before the floodlit monolithic Kailasa temple under starlit skies.',
+        image: 'https://images.unsplash.com/photo-1600100397608-f010f44383c2?auto=format&fit=crop&w=800&q=80',
+        highlightTag: 'Classical Splendor',
+        ritualDetail: 'Open-air nighttime classical sitar, sarod, and Kathak performances staged against the 1,200-year-old rock-cut facade with dramatic warm heritage illumination.',
+        sacredDelicacy: 'Aurangabad Naan Qalia and creamy seasonal Sitaphal (custard apple) rabdi.',
+        bestLocation: 'Kailasa Temple Courtyard, Ellora Caves (Chhatrapati Sambhajinagar).',
       },
     ],
     foods: [
@@ -1040,45 +1404,45 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
     seasons: [
       {
         season: 'Winter',
-        months: 'November – February',
+        months: 'November - February',
         weather: 'Pleasant, dry, sunny days and cool evening sea breezes.',
-        temperature: '16°C – 28°C',
+        temperature: '16°C - 28°C',
         experiences: ['Heritage walks in South Mumbai', 'Exploring Ajanta & Ellora caves', 'Wine tasting in Nashik'],
         festivals: ['Kala Ghoda Festival', 'Banganga Music Fest', 'Ellora Festival'],
         isRecommended: true,
       },
       {
         season: 'Monsoon',
-        months: 'June – September',
+        months: 'June - September',
         weather: 'Lush, misty downpours that transform the Sahyadri mountains into green paradise with hundreds of waterfalls.',
-        temperature: '22°C – 28°C',
+        temperature: '22°C - 28°C',
         experiences: ['Sahyadri fortress monsoon trekking', 'Chasing waterfalls in Lonavala & Malshej', 'Hot tea and kanda bhajjis'],
         festivals: ['Ganesh Chaturthi', 'Dahi Handi'],
         isRecommended: true,
       },
       {
         season: 'Spring',
-        months: 'February – March',
+        months: 'February - March',
         weather: 'Sunny and warm, perfect for Konkan coastal beaches.',
-        temperature: '22°C – 32°C',
+        temperature: '22°C - 32°C',
         experiences: ['Scuba diving in Tarkarli', 'Murud Janjira boat rides', 'Alphonso mango farm visits'],
         festivals: ['Gudi Padwa', 'Holi'],
         isRecommended: true,
       },
       {
         season: 'Autumn',
-        months: 'October – November',
+        months: 'October - November',
         weather: 'Post-monsoon freshness, lush green valleys, pleasant travel conditions.',
-        temperature: '22°C – 32°C',
+        temperature: '22°C - 32°C',
         experiences: ['Hill fortress photography', 'Vineyard tours in Nashik', 'Coastal Konkan drives'],
         festivals: ['Diwali Pahat', 'Kojagiri Purnima'],
         isRecommended: true,
       },
       {
         season: 'Summer',
-        months: 'April – May',
+        months: 'April - May',
         weather: 'Hot and humid along the coast; cool retreats available in Mahabaleshwar and Matheran.',
-        temperature: '28°C – 38°C',
+        temperature: '28°C - 38°C',
         experiences: ['Highland strawberry picking in Mahabaleshwar', 'Sunset viewpoints at Arthur Seat'],
         festivals: ['Maharashtra Day'],
         isRecommended: false,
@@ -1210,10 +1574,27 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
     snapshot: {
       region: 'Northern Himalayas',
       capital: 'Leh',
-      bestTime: 'May – Sep',
-      duration: '6 – 10 Days',
+      bestTime: 'May - Sep',
+      duration: '6 - 10 Days',
       bestFor: ['High Passes', 'Ancient Gompas', 'Glacial Lakes', 'Stargazing'],
       climate: 'High-altitude cold desert with crisp, sunlit days and freezing starry nights (-10°C to 24°C).',
+    },
+    palette: {
+      primaryAccent: '#9B382A',
+      primaryAccentHover: '#7E2C20',
+      secondaryAccent: '#2D728F',
+      secondaryAccentBg: '#E6F2F7',
+      darkInk: '#141C24',
+      bgParchment: '#F8F9FA',
+      cardBg: '#FFFFFF',
+      cardBgAlt: '#F1F4F7',
+      borderHue: '#E1E7ED',
+      borderAccent: '#BACAD6',
+      badgeBg: '#F6EBE9',
+      badgeText: '#8A2E22',
+      motifAsset: '/assets/motifs/ladakh-gompa.svg',
+      motifName: 'Himalayan Gompa & Cloud Wave',
+      accentGradient: 'from-[#9B382A] via-[#C96B3B] to-[#2D728F]',
     },
     whyVisitHighlights: [
       {
@@ -1239,6 +1620,38 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
         description: 'Hanle and Nubra offer world-class dark skies with zero light pollution, revealing shooting stars and the Milky Way core.',
         image: 'https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?auto=format&fit=crop&w=1000&q=80',
         tag: 'Celestial Wonder',
+      },
+    ],
+    historyThroughline: [
+      {
+        eraName: 'The Silk Road Trading Kingdoms & Early Buddhist Inscriptions',
+        timePeriod: '1st Century - 9th Century CE',
+        headline: 'Caravan kingdoms at the crossroads of Central Asia, Kashmir, and Tibet',
+        narrative: 'Ladakh was a crucial crossroads on the ancient Silk Route network connecting the Punjab plains to Kashgar and Yarkand. Early Buddhist missionaries and Kashmiri scholars carved colossal rock reliefs and established cave viharas at Mulbekh and Drass.',
+        image: 'https://images.unsplash.com/photo-1581793745862-99fde7fa73d2?auto=format&fit=crop&w=1200&q=80',
+        imageCaption: 'Leh Royal Palace overlooking the Ancient Silk Road Valley',
+        monumentsBuilt: ['Mulbekh Rock-Cut Maitreya', 'Ancient Silk Route Chortens', 'Drass Rock Inscriptions'],
+        impactOnToday: 'Established the sacred crossroads heritage and mountain hospitality that defines Ladakhi homestays today.',
+      },
+      {
+        eraName: 'The Namgyal Royal Dynasty & Cliff-Hanging Gompas',
+        timePeriod: '10th Century - 18th Century CE',
+        headline: 'Lhachen and Namgyal kings constructing monumental cliffside fortress monasteries',
+        narrative: 'King Sengge Namgyal unified the kingdom and built the iconic 9-story Leh Palace overlooking the Indus Valley. Monastic foundations like Hemis, Thiksey, and Alchi flourished under royal patronage, preserving rare 11th-century Kashmiri-style Buddhist murals and gold-illuminated manuscripts.',
+        image: 'https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?auto=format&fit=crop&w=1200&q=80',
+        imageCaption: 'Thiksey 12-Story Cliffside Monastery & Gompa Shrines',
+        monumentsBuilt: ['Leh Royal Palace', 'Hemis Gompa Monastery', 'Thiksey 12-Story Monastery', 'Alchi Ancient Murals'],
+        impactOnToday: 'Created Ladakh\'s world-famous monastery festival circuit, monastic scholastic lineages, and architectural landmarks.',
+      },
+      {
+        eraName: 'High Alpine Stargazing & Sustainable Himalayan Frontiers',
+        timePeriod: '19th Century - Present',
+        headline: 'From Himalayan trade outpost to global haven of high-altitude culture and dark skies',
+        narrative: 'Today, Ladakh is celebrated globally for its crystalline high-altitude night skies, zero-carbon passive solar architecture pioneered by local changemakers, and protected alpine wildlife reserves home to the elusive snow leopard.',
+        image: 'https://images.unsplash.com/photo-1593693411515-c20261bcad6e?auto=format&fit=crop&w=1200&q=80',
+        imageCaption: 'Pangong Tso Alpine Glacial Waters & High Himalayan Passes',
+        monumentsBuilt: ['Shanti Stupa (Leh)', 'Hanle Dark Sky Reserve', 'Nubra Sand Dunes Trail', 'Pangong Tso Conservation Area'],
+        impactOnToday: 'Drives Ladakh as the foremost destination for transformative high-altitude mindfulness, stargazing expeditions, and ecological trekking.',
       },
     ],
     culture: [
@@ -1296,7 +1709,7 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
       {
         id: 'fl1',
         name: 'Hemis Tsechu Festival',
-        monthSeason: 'June – July',
+        monthSeason: 'June - July',
         description: 'Commemorating Guru Padmasambhava at Hemis Monastery with colossal silk thangkas unfurled, sacred Cham mask dances, and brass fanfares.',
         image: 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?auto=format&fit=crop&w=800&q=80',
         highlightTag: 'Monastic Miracle',
@@ -1320,7 +1733,7 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
       {
         id: 'fl4',
         name: 'Losar (Ladakhi New Year)',
-        monthSeason: 'December – January',
+        monthSeason: 'December - January',
         description: 'Homes illuminated with butter oil lamps, prayer flags hoisted on rooftops, and community feasts marking the Himalayan new dawn.',
         image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80',
         highlightTag: 'Winter Renewal',
@@ -1403,45 +1816,45 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
     seasons: [
       {
         season: 'Summer',
-        months: 'June – August',
+        months: 'June - August',
         weather: 'Pleasant, dry, warm sunny days and cool nights. Roads and mountain passes fully open.',
-        temperature: '15°C – 26°C',
+        temperature: '15°C - 26°C',
         experiences: ['Pangong Tso & Nubra road expeditions', 'Monastery festival attendances', 'High-altitude trekking'],
         festivals: ['Hemis Festival', 'Yuru Kabgyat'],
         isRecommended: true,
       },
       {
         season: 'Autumn',
-        months: 'September – October',
+        months: 'September - October',
         weather: 'Crisp sunny days, golden poplar foliage, clear crystalline lakes, and low tourist footfall.',
-        temperature: '5°C – 18°C',
+        temperature: '5°C - 18°C',
         experiences: ['Landscape photography with golden trees', 'Stargazing at Hanle dark reserve', 'Peaceful monastery meditation'],
         festivals: ['Ladakh Festival', 'Diskit Gustor'],
         isRecommended: true,
       },
       {
         season: 'Spring',
-        months: 'April – May',
+        months: 'April - May',
         weather: 'Snow starts thawing; apricot blossoms bloom across lower valleys like Turtuk.',
-        temperature: '8°C – 18°C',
+        temperature: '8°C - 18°C',
         experiences: ['Apricot blossom trails in Turtuk', 'Leh heritage town walks', 'Acclimatization excursions'],
         festivals: ['Apricot Blossom Festival'],
         isRecommended: true,
       },
       {
         season: 'Winter',
-        months: 'November – February',
+        months: 'November - February',
         weather: 'Extreme Siberian cold; frozen lakes and snow blankets. Only for extreme adventure travelers.',
-        temperature: '-15°C – 2°C',
+        temperature: '-15°C - 2°C',
         experiences: ['Chadar Trek over frozen Zanskar river', 'Snow leopard tracking in Hemis National Park'],
         festivals: ['Losar New Year', 'Spituk Gustor'],
         isRecommended: false,
       },
       {
         season: 'Monsoon',
-        months: 'July – August',
+        months: 'July - August',
         weather: 'Ladakh lies in the rain shadow zone! Receives virtually zero monsoon rain, making it India’s premier monsoon haven.',
-        temperature: '15°C – 25°C',
+        temperature: '15°C - 25°C',
         experiences: ['Dry sunny road trips while the rest of India experiences monsoons', 'Lake camping'],
         festivals: ['Karsha Gustor'],
         isRecommended: true,
@@ -1589,6 +2002,7 @@ export function getStateOverview(stateSlug: string): StateOverview | null {
       heroImage: found.bgMedia,
       primaryCity: found.primaryCity,
       quickEscapeCity: `${found.primaryCity}, ${found.name}`,
+      palette: getStateThemePalette(found.id, found.name),
       introduction: {
         headline: `Discover the Living Spirit of ${found.name}`,
         subheadline: found.tagline,
@@ -1597,8 +2011,8 @@ export function getStateOverview(stateSlug: string): StateOverview | null {
       snapshot: {
         region: found.region,
         capital: found.capitalCity,
-        bestTime: 'Oct – Mar',
-        duration: '5 – 7 Days',
+        bestTime: 'Oct - Mar',
+        duration: '5 - 7 Days',
         bestFor: found.highlightExperiences.slice(0, 4),
         climate: 'Mild and pleasant in winter months with bright sunny days.',
       },
@@ -1666,18 +2080,18 @@ export function getStateOverview(stateSlug: string): StateOverview | null {
       seasons: [
         {
           season: 'Winter',
-          months: 'October – March',
+          months: 'October - March',
           weather: 'Cool, sunny, and ideal for outdoor exploration.',
-          temperature: '15°C – 28°C',
+          temperature: '15°C - 28°C',
           experiences: ['Heritage walks', 'City explorations', 'Outdoor festivals'],
           festivals: ['Annual Cultural Festival'],
           isRecommended: true,
         },
         {
           season: 'Monsoon',
-          months: 'July – September',
+          months: 'July - September',
           weather: 'Lush greenery and rain showers.',
-          temperature: '22°C – 30°C',
+          temperature: '22°C - 30°C',
           experiences: ['Lush nature visits', 'Rain retreats'],
           festivals: ['Monsoon Celebration'],
           isRecommended: false,
