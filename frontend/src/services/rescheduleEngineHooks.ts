@@ -3,6 +3,8 @@
  * Provides realistic smart fallback logic and clean hook boundaries for teammates.
  */
 
+import { getLiveStopWeatherStatus } from './weatherService';
+
 export type DisruptionReason =
   | 'temple_or_shop_closed'
   | 'gate_maintenance'
@@ -33,9 +35,8 @@ export interface IntervalReplacementCandidate {
 }
 
 /**
- * 🔌 TEAMMATE WEATHER API INTEGRATION POINT
- * Teammate will replace the body of this function with their live Weather API fetch
- * using (city, lat, lng, dateIso, startTime, endTime).
+ * 🔌 OPEN-METEO LIVE WEATHER INTEGRATION
+ * Fetches hyper-local live weather forecasts using Open-Meteo API.
  */
 export async function checkStopWeatherForecast(params: {
   city: string;
@@ -45,24 +46,7 @@ export async function checkStopWeatherForecast(params: {
   endTime: string;
   simulateRainOverride?: boolean;
 }): Promise<WeatherSlotStatus> {
-  const { city, placeTitle, startTime, endTime, simulateRainOverride } = params;
-
-  if (simulateRainOverride) {
-    return {
-      hasRainAlert: true,
-      conditionLabel: `Monsoon Rain Alert (${startTime} - ${endTime})`,
-      precipitationProbability: 88,
-      temperatureCelsius: 24,
-      advisoryText: `Lokiva Weather Monitor detected active precipitation at ${placeTitle} (${city}) during your ${startTime} - ${endTime} slot. Covered indoor alternatives ready.`,
-    };
-  }
-
-  return {
-    hasRainAlert: false,
-    conditionLabel: `Clear Skies · 28°C (${startTime})`,
-    precipitationProbability: 12,
-    temperatureCelsius: 28,
-  };
+  return getLiveStopWeatherStatus(params);
 }
 
 /**
