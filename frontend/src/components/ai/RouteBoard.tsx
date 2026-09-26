@@ -144,13 +144,21 @@ export const RouteBoard: React.FC<RouteBoardProps> = ({
           {seeded.map((route) => {
             const active = route.id === selectedId;
             const isEditedRoute = Boolean(edited[route.id]);
+            const selectRoute = () => {
+              setSelectedId(route.id);
+              setExpanded((prev) => ({ ...prev, [route.id]: true }));
+            };
             return (
-              <button
+              <div
                 key={route.id}
-                type="button"
-                onClick={() => {
-                  setSelectedId(route.id);
-                  setExpanded((prev) => ({ ...prev, [route.id]: true }));
+                role="button"
+                tabIndex={0}
+                onClick={selectRoute}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    selectRoute();
+                  }
                 }}
                 className={`text-left p-3.5 rounded-2xl border transition shadow-xs cursor-pointer ${
                   active
@@ -158,42 +166,44 @@ export const RouteBoard: React.FC<RouteBoardProps> = ({
                     : 'bg-white border-[#E5DFD5] hover:border-[#F0A63B]'
                 }`}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-dusk-600 font-bold">
-                    {route.pace}
-                  </span>
-                  {active && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-heading font-bold text-[#C1443B]">
-                      <Check className="w-3 h-3" />
-                      <span>Chosen</span>
+                <div className="space-y-1.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-dusk-600 font-bold">
+                      {route.pace}
                     </span>
+                    {active && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-heading font-bold text-[#C1443B]">
+                        <Check className="w-3 h-3" />
+                        <span>Chosen</span>
+                      </span>
+                    )}
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-heading font-bold text-ink leading-snug">
+                    {route.title}
+                  </h4>
+                  <p className="text-[10px] font-sans text-dusk-600 leading-relaxed line-clamp-2">
+                    {route.tagline}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 pt-1 text-[10px] font-mono text-ink">
+                    <span className="font-bold">{route.stop_count} stops</span>
+                    <span className="text-dusk-600">{formatDuration(route.total_duration_mins)}</span>
+                    <span className="text-dusk-600">{route.total_distance_km} km</span>
+                    <span className="text-[#C1443B] font-bold">{route.budget_label}</span>
+                  </div>
+                  {isEditedRoute && (
+                    <div className="inline-flex items-center gap-1 text-[10px] font-heading font-bold text-[#C1443B]">
+                      <Sparkles className="w-3 h-3" />
+                      <span>Modified by you</span>
+                    </div>
+                  )}
+                  {route.limited_by_availability && (
+                    <div className="inline-flex items-center gap-1 text-[10px] font-sans text-dusk-600">
+                      <AlertTriangle className="w-3 h-3" />
+                      <span>Limited by what is verified here</span>
+                    </div>
                   )}
                 </div>
-                <h4 className="text-xs sm:text-sm font-heading font-bold text-ink leading-snug mt-1">
-                  {route.title}
-                </h4>
-                <p className="text-[10px] font-sans text-dusk-600 leading-relaxed mt-1 line-clamp-2">
-                  {route.tagline}
-                </p>
-                <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 mt-2.5 pt-2.5 border-t border-dashed border-[#E5DFD5] text-[10px] font-mono text-ink">
-                  <span className="font-bold">{route.stop_count} stops</span>
-                  <span className="text-dusk-600">{formatDuration(route.total_duration_mins)}</span>
-                  <span className="text-dusk-600">{route.total_distance_km} km</span>
-                  <span className="text-[#C1443B] font-bold">{route.budget_label}</span>
-                </div>
-                {isEditedRoute && (
-                  <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-heading font-bold text-[#C1443B]">
-                    <Sparkles className="w-3 h-3" />
-                    <span>Modified by you</span>
-                  </div>
-                )}
-                {route.limited_by_availability && (
-                  <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-sans text-dusk-600">
-                    <AlertTriangle className="w-3 h-3" />
-                    <span>Limited by what is verified here</span>
-                  </div>
-                )}
-              </button>
+              </div>
             );
           })}
         </div>

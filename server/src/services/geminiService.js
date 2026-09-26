@@ -214,20 +214,136 @@ const INTEREST_LABELS = {
  * High-fidelity intelligent Cultural Concierge Engine when Gemini API is offline or unconfigured.
  * Formulates realistic, culturally authentic recommendations for budget, duration, regional, and city queries.
  */
-/** One line that explains how the routes were shaped by the brief. */
-function buildBriefReasonLine(brief) {
-  const bits = [];
-  if (Array.isArray(brief.interests) && brief.interests.length) {
-    bits.push(`your interest in ${brief.interests.map((i) => INTEREST_LABELS[i] || i).join(', ')}`);
+/**
+ * Pulls the handful of facts a traveler genuinely needs that the route cards
+ * do not already show: any overrun, budget headroom, clustering, transit
+ * burden, exposure and finish time.
+ *
+ * Notes are ranked, not just collected. A route that overruns the traveler's
+ * own time window must survive the three note cap, so warnings carry the
+ * highest priority and the nicest to know facts are dropped first.
+ */
+export function routeInsights(routes, brief) {
+  const ranked = [];
+  const add = (priority, text) => ranked.push({ priority, text });
+  if (!routes.length) return [];
+
+  const primary = routes[0];
+  const costs = routes.map((r) => Number(r.estimated_cost_inr) || 0);
+  const cheapest = Math.min(...costs);
+  const dearest = Math.max(...costs);
+
+  // 0. Overrun is the single most important thing to say, so it always leads
+  if (primary.over_window_by_mins > 0) {
+    add(0, `Runs about ${Math.round(primary.over_window_by_mins / 15) * 15} min past the time you said you had.`);
   }
-  if (brief.time_budget) bits.push(`your ${brief.time_budget.toLowerCase()} window`);
-  if (brief.pace) bits.push(`a ${brief.pace.toLowerCase()} pace`);
-  if (brief.companions) bits.push(`travelling as ${brief.companions}`);
-  if (brief.budget_tier) bits.push(`a ${brief.budget_tier} rupee budget`);
-  if (!bits.length) return 'Based on your brief.';
-  const head = bits.slice(0, -1).join(', ');
-  const tail = bits[bits.length - 1];
-  return `They are shaped by ${head}${bits.length > 1 ? ' and ' : ''}${tail}.`;
+
+  // 1. Then anything that breaks a stated constraint
+  const ceiling = Number(brief?.budget_inr) || 0;
+  const cost = Number(primary.estimated_cost_inr) || 0;
+  if (ceiling > 0 && cost > ceiling) {
+    add(1, `Works out to ${cost.toLocaleString('en-IN')} rupees, above your ${ceiling.toLocaleString('en-IN')} ceiling. Trim one paid stop to bring it in.`);
+  }
+
+  // 2. Transit shape: a compact day needs no advice about riding
+  if (primary.total_distance_km <= 3) {
+    add(2, `Every stop sits within ${primary.total_distance_km} km, so this is a walkable pocket.`);
+  } else if (primary.longest_leg_km > 5) {
+    const worst = primary.stops
+      .map((s) => s.leg_from_previous)
+      .filter(Boolean)
+      .sort((a, b) => b.duration_mins - a.duration_mins)[0];
+    add(2, `Longest hop is ${primary.longest_leg_km} km, about ${worst ? worst.duration_mins : 0} min in transit.`);
+  }
+
+  // 3. Money left over, which means the traveler has room to add a stop
+  if (ceiling > 0 && cost > 0 && cost <= ceiling * 0.6) {
+    add(3, `Comes to ${cost.toLocaleString('en-IN')} rupees against your ${ceiling.toLocaleString('en-IN')} budget, so there is room to add a stop.`);
+  }
+
+  // 4. Comfort and logistics
+  const outdoor = primary.stops.filter((s) => !s.is_indoor).length;
+  if (primary.stops.length >= 2 && outdoor === primary.stops.length) {
+    add(4, 'All open air, so carry water and plan for midday heat.');
+  }
+
+  const endHour = String(primary.end_time || '').match(/(\d{1,2}):\d{2}\s*(AM|PM)/i);
+  if (endHour) {
+    let h = parseInt(endHour[1], 10);
+    if (endHour[2].toUpperCase() === 'PM' && h !== 12) h += 12;
+    if (endHour[2].toUpperCase() === 'AM' && h === 12) h = 0;
+    if (h >= 20) add(4, `Finishes around ${primary.end_time}, so book the last ride ahead of time.`);
+  }
+
+  // 5. A wide cost spread between the options helps when choosing
+  if (cheapest > 0 && dearest > cheapest * 2) {
+    add(5, `Cost ranges from ${cheapest.toLocaleString('en-IN')} to ${dearest.toLocaleString('en-IN')} rupees across the three.`);
+  }
+
+  return ranked
+    .sort((a, b) => a.priority - b.priority)
+    .slice(0, 3)
+    .map((n) => n.text);
+}
+
+/**
+ * Hard ceiling on how much prose reaches the traveler. The route cards carry
+ * the stops, the legs and the timings, so anything longer is the model
+ * ignoring the brief. Truncates on a sentence boundary, never mid sentence.
+ */
+export function condenseConciergeReply(text, maxWords = 90) {
+  if (!text || typeof text !== 'string') return text || '';
+  const words = text.trim().split(/\s+/);
+  if (words.length <= maxWords) return text.trim();
+
+  const sentences = text.trim().match(/[^.!?\n]*[.!?]+(?:\s+|$)|[^.!?\n]+$/g) || [text];
+  const kept = [];
+  let count = 0;
+  for (const sentence of sentences) {
+    const sentenceWords = sentence.trim().split(/\s+/).filter(Boolean).length;
+    if (count + sentenceWords > maxWords && kept.length) break;
+    kept.push(sentence.trim());
+    count += sentenceWords;
+    if (count >= maxWords) break;
+  }
+  return kept.join(' ').trim();
+}
+
+/**
+ * Builds a short, self contained clause that names the factors which actually
+ * shaped the result. Every fragment carries its own preposition so the fragments
+ * can simply be joined with commas, and the list is capped at three because the
+ * brief strip underneath already shows everything else.
+ */
+function briefClause(brief) {
+  const COMPANY = {
+    solo: 'a solo traveller',
+    couple: 'a couple',
+    friends: 'a group of friends',
+    family: 'a family',
+    seniors: 'travelling with elders',
+  };
+
+  const fragments = [];
+  if (Array.isArray(brief.interests) && brief.interests.length) {
+    const labels = brief.interests
+      .slice(0, 2)
+      .map((i) => INTEREST_LABELS[i] || i);
+    fragments.push(`for your interest in ${labels.join(' and ')}`);
+  }
+  if (brief.time_budget) fragments.push(`within your ${brief.time_budget.toLowerCase()} window`);
+  if (brief.companions && COMPANY[String(brief.companions).toLowerCase()]) {
+    fragments.push(`suiting ${COMPANY[String(brief.companions).toLowerCase()]}`);
+  }
+  if (brief.budget_inr) {
+    fragments.push(`under ${Number(brief.budget_inr).toLocaleString('en-IN')} rupees`);
+  } else if (brief.budget_tier) {
+    fragments.push(`on a ${brief.budget_tier} rupee budget`);
+  }
+  if (fragments.length < 3 && brief.pace) fragments.push(`at a ${String(brief.pace).toLowerCase()} pace`);
+
+  if (!fragments.length) return 'matched to what you asked for';
+  return fragments.slice(0, 3).join(', ');
 }
 
 export function generateIntelligentCulturalFallback({
@@ -310,76 +426,45 @@ export function generateIntelligentCulturalFallback({
 Which of these three atmospheres speaks to you most: **Royal Forts & Crafts**, **Mountain Monasteries**, or **Tropical Spice Coast**? Tell me, and I will tailor your step-by-step day plan!`;
   }
 
-  // 0. Routes first. This is the primary answer shape.
+  // 0. Routes first. The cards below carry the whole itinerary, so the prose
+  // only frames it and adds the facts that are not visible on screen.
   const usableRoutes = Array.isArray(routeOptions) ? routeOptions.filter((r) => r && r.stops?.length) : [];
   if (usableRoutes.length) {
-    const blocks = usableRoutes.map((route) => {
-      const legs = route.stops.map((stop, idx) => {
-        const leg = stop.leg_from_previous;
-        const head =
-          idx === 0
-            ? `**${stop.arrival_time}** Start at ${stop.area || stop.title}.`
-            : `**${stop.arrival_time}** ${leg.synopsis}`;
-        const price = stop.price_inr > 0 ? `Rs.${stop.price_inr}` : 'free entry';
-        return `${head} Stay for about ${stop.stay_mins} min at **${stop.title}** (${stop.category}, ${price}).`;
-      });
+    const where = city || 'your destination';
+    const lead = hasBrief
+      ? `${usableRoutes.length} routes through **${where}**, built ${briefClause(brief)}`
+      : `${usableRoutes.length} ways to spend the day in **${where}**`;
 
-      return `### ${route.title}
-${route.tagline}
+    const insights = routeInsights(usableRoutes, brief);
+    const notes = insights.length
+      ? `\n\n${insights.map((n) => `- ${n}`).join('\n')}`
+      : '';
 
-${legs.join('\n\n')}
+    return condenseConciergeReply(
+      `${lead}.${notes}
 
-*Total: ${route.stop_count} stops, ${Math.round((route.total_duration_mins || 0) / 60 * 10) / 10} hours including travel, ${route.total_distance_km} km on the move, ${route.budget_label}.*
-*Why this one: ${route.why_it_works} Trade off: ${route.trade_off}*`;
-    });
-
-    const intent = hasBrief
-      ? buildBriefReasonLine(brief)
-      : 'Based on what you asked for, here are three different ways to spend the day.';
-
-    return `I have built **${usableRoutes.length} distinct routes** through ${city || 'the city'} for you. ${intent}
-
-Pick the one that fits your mood, or tell me what to change and I will rework it.
-
-${blocks.join('\n\n')}`;
+Pick one below, then tell me what to change.`
+    );
   }
 
   // 1b. Confirmed brief with verified places: narrate the shortlist directly
   if (hasBrief && city && Array.isArray(availableExperiences) && availableExperiences.length > 0) {
     const cityName = city.trim();
-    const interestLine = briefInterests.length
-      ? `chosen for your interest in ${briefInterests.map((i) => INTEREST_LABELS[i] || i).join(', ')}`
-      : 'chosen to match what you asked for';
-    const constraintLine = [
-      briefWindow ? `fits your ${briefWindow.toLowerCase()} window` : null,
-      briefBudget ? `inside your ${briefBudget.toLocaleString('en-IN')} rupee budget` : null,
-      briefPace ? `at a ${briefPace.toLowerCase()} pace` : null,
-      briefCompanions ? `suited to ${briefCompanions} travellers` : null,
-      briefStart ? `timed for the ${briefStart.toLowerCase()}` : null,
-      briefCrowd ? `with a ${briefCrowd.toLowerCase()} crowd mood` : null,
-      briefAccess ? `and ${briefAccess.toLowerCase()} routing` : null,
-      briefDiet ? `plus ${briefDiet.toLowerCase()} food stops` : null,
-    ]
-      .filter(Boolean)
-      .join(', ');
+    const cheapest = availableExperiences
+      .slice(0, 3)
+      .reduce((min, e) => Math.min(min, Number(e.price) || 0), Infinity);
+    const costNote = Number.isFinite(cheapest)
+      ? cheapest === 0
+        ? 'Entry is free at every stop.'
+        : `Entry runs from ${cheapest} rupees per person.`
+      : '';
 
-    const lines = availableExperiences.slice(0, 3).map((exp, idx) => {
-      const duration = exp.approx_duration_mins ? `~${exp.approx_duration_mins} mins` : 'a relaxed stop';
-      const price = Number(exp.price) > 0 ? `Rs.${exp.price}` : 'free entry';
-      return `${idx + 1}. **${exp.title}** (${exp.category})
-   - ${duration}, ${price}
-   - ${exp.tagline || exp.description || 'A verified local experience.'}`;
-    });
+    return condenseConciergeReply(
+      `Shortlist for **${cityName}**, ${briefClause(brief)}.
+${costNote}
 
-    const reasonLine = [interestLine, constraintLine].filter(Boolean).join(', ');
-
-    return `Here is your shortlist for **${cityName}**.
-
-${reasonLine.charAt(0).toUpperCase() + reasonLine.slice(1)}. Every stop below is a verified listing, so the fee and duration are accurate as of today.
-
-${lines.join('\n\n')}
-
-Tell me if you want me to swap one out, tighten the route further, or add an evening option.`;
+Pick what you like below, or tell me to swap something out.`
+    );
   }
 
   // 2. Specific City / Destination context
@@ -554,14 +639,23 @@ Would you like me to structure morning and evening schedules for your stay?`;
 Would you like me to tailor this with exact spots, transport advice, or budget estimates for ${cityName}?`;
     }
 
-    // If available experiences exist in the database, weave them in
+    // If available experiences exist in the database, the cards below already
+    // show them, so the prose only frames the pick.
     if (availableExperiences.length > 0) {
-      const expList = availableExperiences.slice(0, 2).map((e) => `• **${e.title}** (${e.category || 'Cultural Spot'}): ₹${e.price || 'Free'}, approx. ${e.approx_duration_mins || 60} mins. ${e.tagline || e.description || ''}`).join('\n');
-      return `Welcome to **${cityName}**! Here are signature verified cultural experiences curated for your time:
+      const prices = availableExperiences.map((e) => Number(e.price) || 0);
+      const free = prices.length > 0 && prices.every((p) => p === 0);
+      const cheapest = Math.min(...prices.filter((p) => p > 0));
+      const costLine = free
+        ? 'Entry is free at every stop.'
+        : Number.isFinite(cheapest)
+        ? `Entry runs from ${cheapest} rupees per person.`
+        : '';
+      return condenseConciergeReply(
+        `Verified spots in **${cityName}**, picked for what you asked for.
+${costLine}
 
-${expList}
-
-Would you like me to reserve time for any of these, or adjust based on your preferred pacing, budget, or dietary interests?`;
+Pick what you like below, or tell me to swap something out.`
+      );
     }
 
     // Only return the initial welcome question if the message was purely a greeting or city name
@@ -663,14 +757,19 @@ Your Core Rules:
 2. If the user mentions an expense (e.g., "I spent 200rs on rickshaw"), acknowledge it naturally and conversationally without generating an unsolicited trip budget breakdown.
 3. If the user asks an off-topic or greeting question, reply warmly and naturally without forcing travel recommendations.
 4. If the traveler is specifically asking about things to do in ${city || 'their destination'} and experiences are provided above, weave in 1 or 2 relevant experiences naturally.
-5. Keep your tone culturally authentic, warm, and concise (2 to 4 readable paragraphs max). Avoid filler or repetitive generic scripts.
+5. BREVITY IS MANDATORY. The traveler sees the itinerary as interactive cards underneath your reply, so your text is a caption, not a description.
+   - Hard limit: 90 words. Aim for 40 to 60.
+   - Never list the stops. Never repeat the travel legs, timings, distances or prices. They are already on the cards.
+   - Never restate the traveler's own brief back to them.
+   - Spend your words only on: the one thing that matters most, timing or seasonal advice, and anything surprising they would get wrong (a booking rule, a closed day, a dress code, a cash only stall, a best hour for light or crowds).
+   - No preamble, no sign off flourish, no "let me know if". Close with one short invitation to pick or adjust.
 6. Always complete all sentences, sections, and paragraphs fully. Never stop mid-thought or mid-sentence.
 ${clarificationRule}
 8. Ground every price, timing and access claim in the provided experiences. If a detail is not available, say so plainly instead of inventing it.
 9. Never use em dashes or double dashes in your writing. Use commas, colons or parentheses instead.${usableRoutes.length ? `
-10. Three routes are attached. Keep them clearly separated, name each one, and give the honest trade off of each in a few words. Never blend stops from different routes into a single itinerary.
-11. Quote the travel legs only as they were computed, for example the mode, the minutes and the distance. Never invent a mode or a duration.
-12. The traveller can pick one route or ask to change it, so end by inviting them to choose or to edit rather than declaring the day settled.` : ''}`;
+10. Three routes are attached. Name them in one line each only if a short framing helps. Never blend stops from different routes.
+11. Never quote a travel leg. Never invent a mode, a duration or a price.
+12. Practical knowledge beats description: a closed day, a cash only stall, the hour the light is best, a dress code, how early to arrive. One or two of these beat a paragraph about atmosphere.` : ''}`;
 
   try {
     const history = sanitizeHistory(chatHistory);
@@ -687,7 +786,7 @@ ${clarificationRule}
     const estimatedTokens = Math.floor((systemPrompt.length + userMessage.length + aiReply.length) / 4);
 
     return {
-      reply: aiReply,
+      reply: condenseConciergeReply(aiReply),
       tokensUsed: estimatedTokens,
       model: modelName,
     };

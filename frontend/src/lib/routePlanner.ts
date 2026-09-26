@@ -105,6 +105,51 @@ export function haversineKm(
   return 2 * R * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
 }
 
+/**
+ * Chains stops into one smooth curved path. Every hop bows outward on a
+ * quadratic Bézier arc perpendicular to the chord, so even short walks read
+ * as natural transit corridors instead of rigid straight lines. Short hops
+ * bow further than long ones so the curve stays visible on tight legs.
+ */
+export function buildCurvedPath(
+  stops: { latitude: number; longitude: number }[],
+  segmentsPerHop = 16
+): [number, number][] {
+  const arcPoints: [number, number][] = [];
+
+  for (let i = 0; i < stops.length - 1; i++) {
+    const p1 = stops[i];
+    const p2 = stops[i + 1];
+
+    const dLat = p2.latitude - p1.latitude;
+    const dLng = p2.longitude - p1.longitude;
+    const dist = Math.sqrt(dLat * dLat + dLng * dLng);
+
+    if (dist < 0.0001) {
+      if (i === 0) arcPoints.push([p1.latitude, p1.longitude]);
+      continue;
+    }
+
+    const midLat = (p1.latitude + p2.latitude) / 2;
+    const midLng = (p1.longitude + p2.longitude) / 2;
+    const curvature = dist < 0.008 ? 0.16 : 0.09;
+    const ctrlLat = midLat - dLng * curvature;
+    const ctrlLng = midLng + dLat * curvature;
+
+    const startIndex = i === 0 ? 0 : 1;
+    for (let step = startIndex; step <= segmentsPerHop; step++) {
+      const t = step / segmentsPerHop;
+      const oneMinusT = 1 - t;
+      arcPoints.push([
+        oneMinusT * oneMinusT * p1.latitude + 2 * oneMinusT * t * ctrlLat + t * t * p2.latitude,
+        oneMinusT * oneMinusT * p1.longitude + 2 * oneMinusT * t * ctrlLng + t * t * p2.longitude,
+      ]);
+    }
+  }
+
+  return arcPoints;
+}
+
 function bearingDeg(
   a: { latitude?: number | null; longitude?: number | null },
   b: { latitude?: number | null; longitude?: number | null }

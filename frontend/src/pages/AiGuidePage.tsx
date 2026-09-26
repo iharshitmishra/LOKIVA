@@ -20,6 +20,8 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { AudioWaveformVisualizer } from '../components/voice/AudioWaveformVisualizer';
 import { VoiceRecordingSheet } from '../components/voice/VoiceRecordingSheet';
 import { FormattedMessageContent } from '../components/ui/FormattedMessageContent';
+import { TypewriterText } from '../components/ui/TypewriterText';
+import { nearestCity, requestCurrentPosition } from '../lib/geo';
 import { ConciergeQuestionPanel } from '../components/ai/ConciergeQuestionPanel';
 import { RouteBoard } from '../components/ai/RouteBoard';
 import { RoutePlan } from '../lib/routePlanner';
@@ -64,6 +66,8 @@ import {
   Compass,
   Loader2,
   Wand2,
+  LocateFixed,
+  AlertTriangle,
 } from 'lucide-react';
 
 // ===========================================================================
@@ -122,9 +126,9 @@ const DEFAULT_WELCOME_MESSAGE: ChatMessage = {
   role: 'assistant',
   timestamp: 'Just now',
   content:
-    'Namaste! Welcome to LOKIVA, your AI Cultural Concierge.\n\nWhere are you heading to in India, and what are your interests? Tell me your destination (like Jaipur, Varanasi, Mumbai, or Goa) and whether you are drawn to royal heritage, street food, artisan workshops, or quiet temples, and I will curate the best spots for you!',
+    'Namaste! I am your LOKIVA cultural concierge. Tell me your city, or tap "Use my location", and I will build three routes with travel details for each one.',
   spokenText:
-    'Namaste! Welcome to Lokiva. Where in India are you heading to, and what are your interests? Tell me your destination and what you want to experience!',
+    'Namaste! I am your Lokiva cultural concierge. Tell me your city, or tap use my location, and I will build three routes with travel details for each one.',
 };
 
 const INTEREST_OPTIONS = [
@@ -809,6 +813,29 @@ export function AiGuidePage() {
 
   const isSendingRef = useRef(false);
 
+  // The assistant reply currently being typed out word by word
+  const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
+
+  // "Use my location" flow state
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
+
+  // Auto-clear the location error notice after a while
+  useEffect(() => {
+    if (!locationError) return;
+    const t = setTimeout(() => setLocationError(null), 6000);
+    return () => clearTimeout(t);
+  }, [locationError]);
+
+  // Type the welcome message out on first load, like a live agent
+  useEffect(() => {
+    if (messages.length === 1 && messages[0]?.id === 'welcome-msg' && !typingMessageId) {
+      setTypingMessageId('welcome-msg');
+    }
+    // Only run on mount: restored chats never re-animate history
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ===========================================================================
   // Unified send handler (typed, chip tap, voice, interview curation)
   // ===========================================================================
@@ -1067,6 +1094,7 @@ export function AiGuidePage() {
       };
 
       setMessages((prev) => [...prev, botMsg]);
+      setTypingMessageId(botMsgId);
 
       // STRICT REQUIREMENT: After every answer through chat or mic, deliver response in both chat and audio
       if (cleanSpokenText) {
@@ -1105,6 +1133,27 @@ export function AiGuidePage() {
       resetTranscript();
     }
   };
+
+  // Reads the traveler's position and rounds it to the nearest known city,
+  // so skipping the city picker never blocks the conversation
+  const handleUseLocation = useCallback(async () => {
+    unlockAudio();
+    setLocationError(null);
+    setIsLocating(true);
+    try {
+      const position = await requestCurrentPosition();
+      const nearest = nearestCity(position.coords.latitude, position.coords.longitude);
+      if (!nearest) throw new Error('no-city');
+      setCurrentCity(nearest.city);
+      handleSend(`I am currently in ${nearest.city}. What authentic experiences do you recommend?`, false);
+    } catch {
+      setLocationError(
+        'Could not detect your location. Pick a city above, or allow location access in your browser.'
+      );
+    } finally {
+      setIsLocating(false);
+    }
+  }, [handleSend]);
 
   // ===========================================================================
   // Concierge interview: ask, record, and curate from a confirmed brief
@@ -1469,8 +1518,16 @@ export function AiGuidePage() {
                           </div>
                         </div>
 
-                        {/* Text content with bold & markdown rendering */}
-                        <FormattedMessageContent content={msg.content} isUser={isUser} />
+                        {/* Text content: assistant replies type out word by word like a live agent */}
+                        {isUser ? (
+                          <FormattedMessageContent content={msg.content} isUser={isUser} />
+                        ) : (
+                          <TypewriterText
+                            content={msg.content}
+                            animate={msg.id === typingMessageId}
+                            onDone={() => setTypingMessageId((cur) => (cur === msg.id ? null : cur))}
+                          />
+                        )}
 
                         {/* Weather data card - distinct inset panel */}
                         {msg.weatherData && (
@@ -1794,10 +1851,27 @@ export function AiGuidePage() {
               <>
                 {/* Active Destination selector row */}
                 {!currentCity ? (
+                  <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full scrollbar-none [-webkit-overflow-scrolling:touch] text-xs">
                     <span className="text-dusk-600 font-mono text-[10px] uppercase tracking-wider flex-shrink-0 font-bold">
                       Destination:
                     </span>
+                    <motion.button
+                      type="button"
+                      whileHover={shouldReduceMotion ? undefined : { y: -1.5, scale: 1.02 }}
+                      whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
+                      transition={{ duration: 0.15 }}
+                      onClick={handleUseLocation}
+                      disabled={isLocating}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#F0A63B] rounded-full text-xs font-heading font-medium text-ink transition flex-shrink-0 shadow-xs cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+                    >
+                      {isLocating ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-[#C1443B]" />
+                      ) : (
+                        <LocateFixed className="w-3.5 h-3.5 text-[#C1443B]" />
+                      )}
+                      <span>{isLocating ? 'Detecting...' : 'Use my location'}</span>
+                    </motion.button>
                     {['Jaipur', 'Varanasi', 'Goa', 'Mumbai', 'Delhi', 'Kochi', 'Udaipur'].map((city) => (
                       <motion.button
                         key={city}
@@ -1818,6 +1892,13 @@ export function AiGuidePage() {
                         <span>{city}</span>
                       </motion.button>
                     ))}
+                  </div>
+                  {locationError && (
+                    <div className="flex items-center gap-2 text-[11px] font-sans font-semibold text-amber-800 bg-amber-50/80 border border-amber-200/80 rounded-xl px-3 py-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>{locationError}</span>
+                    </div>
+                  )}
                   </div>
                 ) : (
                   <div className="space-y-1.5">
