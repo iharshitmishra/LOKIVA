@@ -121,15 +121,6 @@ export function Navbar() {
           {/* Right: Actions (Authenticated State or Sign In) */}
           <div className="flex items-center justify-end gap-2 flex-shrink-0">
             <div className="hidden md:flex items-center gap-2">
-              {/* Host Portal Quick Link */}
-              <Link
-                to="/provider"
-                className="px-2.5 py-1 text-xs font-heading font-semibold text-[#12213B] hover:text-[#C85A32] bg-[#FAF4ED] hover:bg-[#F5EADB] border border-[#E8DEC8] rounded-full transition flex items-center gap-1.5 shadow-2xs"
-                title="Switch to Host / Provider Workspace"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C85A32] animate-pulse" />
-                <span>Host Portal</span>
-              </Link>
 
               {/* User profile or login */}
               {user ? (
@@ -205,20 +196,6 @@ export function Navbar() {
                 </Link>
               ))}
 
-              {/* Host Portal Link in Mobile */}
-              <Link
-                to="/provider"
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-[#FAF4ED] text-[#12213B] border border-[#E8DEC8]"
-              >
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#C85A32] animate-pulse" />
-                  <span className="font-heading font-bold">Host / Provider Portal</span>
-                </span>
-                <span className="text-[10px] font-mono font-bold uppercase bg-white text-[#C85A32] px-2 py-0.5 rounded border border-[#E8DEC8]">
-                  Open Workspace
-                </span>
-              </Link>
 
               {/* User Account / Sign In */}
               <div className="pt-2 border-t border-paper-300 flex items-center justify-between px-1">
