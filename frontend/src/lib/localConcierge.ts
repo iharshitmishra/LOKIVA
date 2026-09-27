@@ -15,7 +15,9 @@ async function fetchAIReply(
   groupSize: number,
   budget: number | null,
   travelerType: string,
-  interests: string[]
+  interests: string[],
+  weatherContext?: string,
+  weatherAdvisory?: string
 ): Promise<string> {
   try {
     const token = typeof window !== 'undefined' ? localStorage.getItem('lokiva_token') : null;
@@ -32,6 +34,8 @@ async function fetchAIReply(
         budget: budget || undefined,
         traveler_type: travelerType,
         interests,
+        weather_context: weatherContext || undefined,
+        weather_advisory: weatherAdvisory || undefined,
       }),
     });
 
@@ -140,7 +144,7 @@ export async function generateLocalConciergeResponse(
   }
 
   // Fetch live weather for the destination to ground recommendations
-  await fetchWeatherContextForAI(detectedCity);
+  const weatherContext = await fetchWeatherContextForAI(detectedCity);
 
   // 2. Detect Group Size
   let groupSize = 1;
@@ -231,7 +235,9 @@ export async function generateLocalConciergeResponse(
     groupSize,
     budget,
     groupSize > 1 ? 'Group' : 'Solo',
-    ['culture', 'heritage', 'food']
+    ['culture', 'heritage', 'food'],
+    weatherContext?.aiPromptContext,
+    weatherContext?.weatherAdvisory
   );
 
   const extracted_intent: StructuredIntent = {

@@ -8,6 +8,51 @@ import {
   generateDayPlanWithGemini,
 } from '../services/geminiService.js';
 import { buildRouteOptions } from '../services/routeBuilder.js';
+import { fetchCurrentWeather } from '../services/weatherService.js';
+
+/**
+ * Normalize weather data from any source (frontend, backend fetch, simulated)
+ * into a consistent format for the AI prompt and scoring algorithm.
+ */
+function normalizeWeatherContext(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+
+  // Frontend format (WeatherContextForAI from openMeteoService)
+  if (raw.currentCondition !== undefined || raw.currentTempCelsius !== undefined) {
+    return {
+      currentCondition: raw.currentCondition || 'Clear Sky',
+      currentTempCelsius: Number(raw.currentTempCelsius) || 28,
+      todaySummary: raw.todaySummary || '',
+      rainExpected: Boolean(raw.rainExpected),
+      peakRainProbability: Number(raw.peakRainProbability) || 0,
+      hourlyHighlights: Array.isArray(raw.hourlyHighlights) ? raw.hourlyHighlights : [],
+      weatherAdvisory: raw.weatherAdvisory || '',
+      aiPromptContext: raw.aiPromptContext || '',
+      is_live: Boolean(raw.is_live),
+    };
+  }
+
+  // Backend weatherService format (fetchCurrentWeather)
+  if (raw.temp_c !== undefined || raw.condition !== undefined) {
+    const isRaining = Boolean(raw.will_rain_soon);
+    const temp = Number(raw.temp_c) || 28;
+    return {
+      currentCondition: raw.condition || 'Clear Sky',
+      currentTempCelsius: temp,
+      todaySummary: `Current: ${raw.condition || 'Clear Sky'} at ${temp}°C.`,
+      rainExpected: isRaining,
+      peakRainProbability: isRaining ? 80 : 10,
+      hourlyHighlights: [],
+      weatherAdvisory: isRaining
+        ? `Rain expected in ${raw.location_name || 'the area'}. Recommend indoor alternatives and rain gear.`
+        : `Pleasant weather in ${raw.location_name || 'the area'} (${raw.condition || 'Clear Sky'}, ${temp}°C). Good conditions for outdoor exploration.`,
+      aiPromptContext: `Current: ${raw.condition || 'Clear Sky'} at ${temp}°C.`,
+      is_live: Boolean(raw.is_live),
+    };
+  }
+
+  return null;
+}
 
 export const aiRouter = express.Router();
 
@@ -341,9 +386,25 @@ aiRouter.post('/concierge', async (req, res) => {
       [activeCity.toLowerCase()]
     );
 
-    // Score experiences based on extracted intent
+    // Fetch real-time weather for the active city if not provided by frontend.
+    // This ensures the AI always has weather context for recommendations.
+    let effectiveWeatherContext = normalizeWeatherContext(weather_context);
+    if (!effectiveWeatherContext) {
+      try {
+        // Use the first experience's coordinates as a proxy for the city center
+        const cityLat = cityExps[0]?.latitude || 28.6139;
+        const cityLng = cityExps[0]?.longitude || 77.209;
+        const rawWeather = await fetchCurrentWeather(cityLat, cityLng, activeCity);
+        effectiveWeatherContext = normalizeWeatherContext(rawWeather);
+      } catch (weatherErr) {
+        console.warn('[Concierge] Weather fetch failed, continuing without weather:', weatherErr.message);
+      }
+    }
+
+    // Score experiences based on extracted intent, using real weather data
+    const isRaining = effectiveWeatherContext?.rainExpected || false;
     const scoredExperiences = cityExps.map((exp) => {
-      const { score, match_reasons } = scoreExperience(exp, intent, null, { is_raining: false });
+      const { score, match_reasons } = scoreExperience(exp, intent, null, { is_raining: isRaining });
       return {
         experience: {
           ...exp,
@@ -396,7 +457,7 @@ aiRouter.post('/concierge', async (req, res) => {
         availableExperiences: topRecommendations.map((r) => r.experience),
         tripProfile: confirmedProfile,
         routeOptions,
-        weatherContext: weather_context || null,
+        weatherContext: effectiveWeatherContext,
       });
     } catch (aiErr) {
       console.warn('AI Concierge model unavailable, using contextual fallback:', aiErr.message);
