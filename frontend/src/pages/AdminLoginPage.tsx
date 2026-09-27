@@ -37,7 +37,7 @@ export function AdminLoginPage() {
             <span className="text-2xl font-bold font-display text-ink">Command Center</span>
           </Link>
           <h1 className="text-xl font-bold font-display text-ink">Platform Administrator</h1>
-          <p className="text-xs text-dusk-600 font-sans">KYC verification, experience moderation, and platform metrics</p>
+          <p className="text-xs text-dusk-600 font-sans">Live Twin Overall Dashboard, KYC verification, and platform moderation</p>
         </div>
 
         <GoogleSignInButton role="admin" />
@@ -82,7 +82,7 @@ export function AdminLoginPage() {
             disabled={loading}
             className="w-full py-3 bg-clay hover:bg-clay-600 text-white font-bold rounded-xl text-xs transition shadow-md disabled:opacity-50"
           >
-            {loading ? 'Authenticating...' : 'Enter Command Center'}
+            {loading ? 'Authenticating...' : 'Enter Command Center & Live Twin'}
           </button>
         </form>
       </div>

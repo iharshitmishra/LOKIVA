@@ -17,6 +17,7 @@ import { ItineraryPage } from './pages/ItineraryPage';
 import { SavedPage } from './pages/SavedPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { DiscoveryMapPage } from './pages/DiscoveryMapPage';
+import { DigitalTwinPage } from './pages/DigitalTwinPage';
 import { LocationDecisionModal, useOnboardingGate } from './components/onboarding/LocationDecisionModal';
 import { LoginPage } from './pages/LoginPage';
 import { TravelerLoginPage } from './pages/TravelerLoginPage';
@@ -27,6 +28,9 @@ import { ProviderAuthPage } from './pages/ProviderAuthPage';
 import { GroupTripHubPage } from './pages/GroupTripHubPage';
 import { RequireAuth } from './components/auth/RequireAuth';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { ProviderDashboardPage } from './pages/ProviderDashboardPage';
+import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { AdminLoginPage } from './pages/AdminLoginPage';
 
 function AppShell() {
   const location = useLocation();
@@ -35,6 +39,10 @@ function AppShell() {
     location.pathname === '/' ||
     location.pathname === '/destinations' ||
     location.pathname.startsWith('/destinations/');
+
+  const isProviderWorkspace =
+    location.pathname.startsWith('/provider') &&
+    !['/provider/auth', '/provider/login', '/provider/register'].includes(location.pathname);
 
   useEffect(() => {
     if ('scrollRestoration' in window.history) {
@@ -45,8 +53,8 @@ function AppShell() {
 
   return (
     <div className="flex flex-col min-h-screen bg-paper text-ink font-sans selection:bg-marigold selection:text-ink">
-      <Navbar />
-      <main className={`flex-1 ${isFullBleedPage ? 'pt-0' : 'pt-16 sm:pt-20'}`}>
+      {!isProviderWorkspace && <Navbar />}
+      <main className={`flex-1 ${isProviderWorkspace ? 'p-0' : isFullBleedPage ? 'pt-0' : 'pt-16 sm:pt-20'}`}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/explore" element={<ExplorePage />} />
@@ -60,6 +68,7 @@ function AppShell() {
           <Route path="/saved" element={<SavedPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/discovery-map" element={<DiscoveryMapPage />} />
+          <Route path="/digital-twin" element={<Navigate to="/admin" replace />} />
 
           {/* Lokiva Group Hub Routes - Protected by RequireAuth */}
           <Route
@@ -89,19 +98,25 @@ function AppShell() {
           <Route path="/provider/login" element={<ProviderLoginPage />} />
           <Route path="/provider/register" element={<ProviderRegisterPage />} />
 
-          {/* Provider routes redirect to explore */}
-          <Route path="/provider" element={<Navigate to="/explore" replace />} />
-          <Route path="/provider/dashboard" element={<Navigate to="/explore" replace />} />
-          <Route path="/provider/*" element={<Navigate to="/explore" replace />} />
+          {/* Provider workspace routes */}
+          <Route path="/provider" element={<ProviderDashboardPage />} />
+          <Route path="/provider/dashboard" element={<ProviderDashboardPage />} />
+          <Route path="/provider/*" element={<ProviderDashboardPage />} />
+
+          {/* Admin Command Center & Live Twin routes */}
+          <Route path="/admin" element={<AdminDashboardPage />} />
+          <Route path="/admin/*" element={<AdminDashboardPage />} />
+          <Route path="/login/admin" element={<AdminLoginPage />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
 
           {/* 404 Catch-all */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
-      <Footer />
+      {!isProviderWorkspace && <Footer />}
 
       {/* First-visit onboarding modal */}
-      <LocationDecisionModal isOpen={showModal} onClose={closeModal} />
+      {!isProviderWorkspace && <LocationDecisionModal isOpen={showModal} onClose={closeModal} />}
     </div>
   );
 }

@@ -108,28 +108,63 @@ export function LoginPage() {
         </form>
 
         {/* 1-Click Instant Demo Section */}
-        <div className="pt-4 border-t border-paper-300 space-y-2">
-          <span className="text-[10px] font-mono font-bold text-dusk uppercase tracking-wider block text-center">
-            Instant 1-Click Demo Persona
+        <div className="pt-4 border-t border-[#E2D5BE] space-y-2.5">
+          <span className="text-[10px] font-mono font-bold text-[#7A5C49] uppercase tracking-wider block text-center">
+            Instant 1-Click Demo Accounts
           </span>
-          <div className="font-mono">
+          <div className="space-y-2 font-mono">
+            {/* Demo Traveler */}
             <button
+              type="button"
               onClick={() => {
                 demoLogin('traveler', 'Piyush Kumar', 'piyush@lokiva.com');
                 navigate(redirectTo);
               }}
-              className="w-full p-2.5 bg-paper-100 hover:bg-paper-200 rounded-xl text-[11px] font-bold text-ink border border-paper-300 flex items-center justify-center gap-2 transition cursor-pointer"
+              className="w-full p-2.5 bg-[#FAF6F0] hover:bg-[#F2EAE0] rounded-xl text-[11px] font-bold text-[#3B2316] border border-[#DFCBB2] flex items-center justify-center gap-2 transition cursor-pointer"
             >
-              <User className="w-3.5 h-3.5 text-teal" />
+              <User className="w-3.5 h-3.5 text-[#059669]" />
               <span>Explore as Piyush Kumar (Demo Traveler)</span>
+            </button>
+
+            {/* Demo Provider / Host */}
+            <button
+              type="button"
+              onClick={async () => {
+                await demoLogin('provider', 'Heritage Horizons & Local Trails Collective', 'provider@lokiva.com');
+                navigate('/provider/dashboard');
+              }}
+              className="w-full p-2.5 bg-gradient-to-r from-[#FAF4ED] to-[#F5EADB] hover:from-[#F5EADB] hover:to-[#EEDBBE] rounded-xl text-[11px] font-bold text-[#C85A32] border border-[#C85A32]/40 flex items-center justify-center gap-2 transition shadow-xs cursor-pointer"
+            >
+              <Shield className="w-3.5 h-3.5 text-[#C85A32]" />
+              <span>Access Provider Portal (Demo Host: Heritage Horizons)</span>
+            </button>
+
+            {/* Demo Administrator (Live Twin Overall Dashboard) */}
+            <button
+              type="button"
+              onClick={async () => {
+                await demoLogin('admin', 'Platform Administrator', 'admin@lokiva.com');
+                navigate('/admin');
+              }}
+              className="w-full p-2.5 bg-gradient-to-r from-sky-50 to-blue-50 hover:from-sky-100 hover:to-blue-100 rounded-xl text-[11px] font-bold text-sky-900 border border-sky-300 flex items-center justify-center gap-2 transition shadow-xs cursor-pointer"
+            >
+              <Shield className="w-3.5 h-3.5 text-blue-600" />
+              <span>Sign in as Administrator (Live Twin Overall Dashboard)</span>
             </button>
           </div>
         </div>
 
-        <div className="text-center text-xs text-dusk-600 font-sans">
-          New explorer?{' '}
-          <Link to="/register/traveler" className="text-[#B84A27] font-bold hover:underline underline-offset-4">
-            Create Traveler Account
+        <div className="flex items-center justify-between text-xs text-[#7A5C49] font-sans pt-1">
+          <Link to="/register/traveler" className="text-[#B84A27] font-bold hover:underline">
+            New traveler? Register
+          </Link>
+          <span className="text-[#DFCBB2]">•</span>
+          <Link to="/login/admin" className="text-sky-700 font-bold hover:underline">
+            Admin Portal →
+          </Link>
+          <span className="text-[#DFCBB2]">•</span>
+          <Link to="/provider/login" className="text-[#12213B] font-bold hover:underline">
+            Host Sign In →
           </Link>
         </div>
       </div>

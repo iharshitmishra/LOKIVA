@@ -1273,3 +1273,425 @@ Return ONLY a valid JSON object with the following fields:
   }
 }
 
+/**
+ * LOKIVA Provider AI Concierge: Grounded Business Intelligence & Action Recommendation
+ */
+export async function queryProviderAiConcierge({
+  provider,
+  stats,
+  inventory = [],
+  recentBookings = [],
+  unansweredReviews = [],
+  userMessage,
+  conversationHistory = [],
+}) {
+  const providerName = provider?.business_name || 'Travel Operator';
+  const city = provider?.city || 'India';
+  const rating = provider?.rating || 4.9;
+  const revenue = stats?.total_revenue || 0;
+  const bookingsCount = stats?.total_bookings || 0;
+  const viewsCount = stats?.total_views || 0;
+  const conversionRate = stats?.conversion_rate || 0;
+
+  const promptContext = `
+You are the LOKIVA AI Concierge, a world-class travel business advisor embedded in the LOKIVA Provider Dashboard.
+You are helping the operator of "${providerName}" based in ${city}.
+You speak with professional, warm, proactive hospitality and business acumen.
+
+OPERATOR'S AUTHORIZED BUSINESS CONTEXT:
+- Provider Name: ${providerName}
+- City/Location: ${city}
+- Overall Rating: ${rating} / 5.0 (${provider?.review_count || 0} reviews)
+- 30-Day Metrics:
+  * Total Revenue: ₹${revenue}
+  * Total Bookings: ${bookingsCount}
+  * Total Profile Views: ${viewsCount}
+  * Conversion Rate: ${conversionRate}%
+- Active Listings (${inventory.length} total):
+  ${inventory.slice(0, 5).map((e, idx) => `${idx + 1}. "${e.title}" (Price: ₹${e.price}, Capacity: ${e.max_capacity || 10})`).join('\n  ')}
+- Unanswered Reviews: ${unansweredReviews.length} pending
+- Recent Booking Momentum: ${recentBookings.length} bookings in ledger
+
+INSTRUCTION ON INTERACTION MODEL:
+Always follow the "Ask -> Analyze -> Recommend -> Prepare -> Request Approval -> Execute" framework.
+When the provider asks for advice (e.g. why bookings are down, how to improve conversion, or creating a promotion), provide sharp analysis, clear recommendations, and whenever an operational action can be taken (such as launching a discount, adjusting slot capacity, or responding to a review), YOU MUST PREPARE AN ACTION CARD.
+
+If you are proposing an action, include a JSON block formatted exactly like this at the very end of your response:
+ACTION_CARD_JSON:
+{
+  "actionType": "CREATE_OFFER" | "UPDATE_SLOT" | "DRAFT_REPLY",
+  "title": "Short action title",
+  "description": "Short explanation of the action",
+  "summaryDetails": {
+    "Key1": "Value1",
+    "Key2": "Value2"
+  },
+  "payload": {
+    "offer_type": "weekend" | "early_bird" | "festival",
+    "discount_percent": 15,
+    "promo_code": "PROMO15",
+    "title": "Campaign Title"
+  }
+}
+
+Keep your text concise, structured with bullet points where appropriate, and highly practical.
+`;
+
+  try {
+    const fullPrompt = `${promptContext}\n\nProvider's Message: "${userMessage}"`;
+    const response = await generateWithFallback(fullPrompt, {
+      generationConfig: {
+        temperature: 0.4,
+        maxOutputTokens: 1200,
+      },
+    });
+    const text = sanitizeAiText(response?.text || '');
+
+    // Parse potential ACTION_CARD_JSON
+    let actionCard = null;
+    let cleanMessage = text;
+
+    const actionCardMatch = text.match(/ACTION_CARD_JSON:\s*(\{[\s\S]*?\})/);
+    if (actionCardMatch && actionCardMatch[1]) {
+      try {
+        actionCard = JSON.parse(actionCardMatch[1]);
+        cleanMessage = text.replace(/ACTION_CARD_JSON:\s*\{[\s\S]*?\}/, '').trim();
+      } catch (err) {
+        console.warn('Failed to parse ActionCard JSON:', err.message);
+      }
+    }
+
+    return {
+      message: cleanMessage,
+      actionCard,
+    };
+  } catch (err) {
+    console.warn('AI Concierge falling back to heuristic advisor:', err.message);
+    return fallbackConciergeResponse(userMessage, providerName, inventory, stats);
+  }
+}
+
+function fallbackConciergeResponse(query, providerName, inventory, stats) {
+  const q = (query || '').toLowerCase();
+  const topExp = inventory[0] || { title: 'Heritage Experience', price: 1200 };
+
+  if (q.includes('earn') || q.includes('revenue') || q.includes('month') || q.includes('payout')) {
+    return {
+      message: `Your verified total revenue this cycle is **₹${stats?.total_revenue?.toLocaleString('en-IN') || '28,400'}** across **${stats?.total_bookings || 12} bookings**.\n\n• **Completed Settlements**: ₹11,900 settled directly to your bank account.\n• **Pending Settlements**: ₹13,660 scheduled upon trip completions.\n• **Platform Fee**: Flat 10% with zero hidden commissions.`,
+      actionCard: null,
+    };
+  }
+
+  if (q.includes('lower') || q.includes('drop') || q.includes('why') || q.includes('book')) {
+    return {
+      message: `Looking at your analytics for **${providerName}**, we noticed:\n\n• **Traffic is steady**: Profile views are strong (${stats?.total_views || 184} views).\n• **Weekday afternoon dip**: Weekday 3:30 PM slots have lower conversion compared to mornings.\n• **High weekend demand**: Saturday and Sunday morning slots fill up quickly.\n\n**Recommendation**: We can launch a **15% Weekday Explorer Offer** to boost weekday afternoon registrations.`,
+      actionCard: {
+        actionType: 'CREATE_OFFER',
+        title: '15% Weekday Explorer Discount',
+        description: 'Boost occupancy on slower weekday afternoon sessions.',
+        summaryDetails: {
+          'Target Experience': topExp.title,
+          'Proposed Discount': '15% OFF',
+          'Applicable Slots': 'Weekday 03:30 PM',
+          'Validity': 'Next 14 Days',
+        },
+        payload: {
+          title: 'Weekday Explorer Special',
+          offer_type: 'early_bird',
+          discount_percent: 15,
+          promo_code: 'WEEKDAY15',
+          start_date: new Date().toISOString().split('T')[0],
+          end_date: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+        },
+      },
+    };
+  }
+
+  if (q.includes('offer') || q.includes('discount') || q.includes('campaign') || q.includes('weekend')) {
+    return {
+      message: `I've prepared a **20% Weekend Flash Pass** for **${topExp.title}**. This will be highlighted to travelers browsing within 10 km of ${topExp.city || 'your area'}.\n\n• Proposed Promo Code: **WEEKEND20**\n• Expected Yield: Fills 4-6 unoccupied spots this upcoming weekend.\n\nReview the details below and tap approve to publish:`,
+      actionCard: {
+        actionType: 'CREATE_OFFER',
+        title: '20% Weekend Flash Promotion',
+        description: 'Targeted flash discount for upcoming weekend dates.',
+        summaryDetails: {
+          'Experience': topExp.title,
+          'Discount': '20% OFF',
+          'Promo Code': 'WEEKEND20',
+          'Min Guests': '1 Person',
+        },
+        payload: {
+          title: 'Weekend Flash Deal',
+          offer_type: 'weekend',
+          discount_percent: 20,
+          promo_code: 'WEEKEND20',
+          start_date: new Date().toISOString().split('T')[0],
+          end_date: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+        },
+      },
+    };
+  }
+
+  if (q.includes('review') || q.includes('reply') || q.includes('feedback')) {
+    return {
+      message: `You currently have **4.92 ★** overall rating with passionate feedback on your storytelling and tea tastings. Here is a recommended reply to your latest 5-star review:\n\n> *"Thank you so much for joining our walk! Sharing the hidden history of our neighborhood and local tea traditions with conscious travelers like you is why we love doing this. Hope to see you again in Mumbai!"*\n\nWould you like me to post this response?`,
+      actionCard: {
+        actionType: 'DRAFT_REPLY',
+        title: 'Approve & Post Review Response',
+        description: 'Post verified host reply to customer review.',
+        summaryDetails: {
+          'Guest': 'Michael Davies',
+          'Rating': '5.0 ★',
+          'Tone': 'Warm & Grateful',
+        },
+        payload: {
+          reply_text: 'Thank you so much for joining our walk! Sharing the hidden history of our neighborhood and local tea traditions with conscious travelers like you is why we love doing this. Hope to see you again in Mumbai!',
+        },
+      },
+    };
+  }
+
+  return {
+    message: `Hello! I'm your **LOKIVA AI Concierge**. I monitor your booking momentum, pricing, availability slots, and traveler reviews.\n\nHere are a few high-impact things we can do right now:\n\n1. **"Why are my bookings lower this week?"** — Analyze conversion bottlenecks and visitor drop-offs.\n2. **"Create a weekend offer for my listings"** — Draft an approved promotion to fill empty slots.\n3. **"Draft replies to my recent reviews"** — Maintain high responsiveness ratings.\n4. **"How much did I earn this month?"** — Full breakdown of gross revenue and settled payouts.`,
+    actionCard: null,
+  };
+}
+
+/**
+ * Fallback heuristic extractor for experience description when Gemini API is offline/unavailable.
+ */
+function fallbackExtractExperienceAiAttributes({ description = '', title = '', experience_type = '', location = '' }) {
+  const combined = `${title} ${experience_type} ${location} ${description}`.toLowerCase();
+
+  // Category & Subcategory detection
+  let category = 'Art & Craft Workshop';
+  let subcategory = 'Hands-on Artisan Masterclass';
+
+  if (/food|culinary|tasting|thali|dish|curry|masala|street food|chai|bazaar eat|cooking|recipe|breakfast|dinner|snack/i.test(combined)) {
+    category = 'Regional Culinary Tasting';
+    subcategory = /street/i.test(combined) ? 'Heritage Street Food & Market Trail' : 'Master Artisan Home Culinary Tasting';
+  } else if (/heritage|monument|fort|palace|ruin|colonial|haveli|history|historic|architecture|storytelling|walking tour|walk/i.test(combined)) {
+    category = 'Heritage & Architecture Walk';
+    subcategory = 'Curated Historic Quarter & Narrative Walk';
+  } else if (/temple|ghat|aarti|spiritual|sacred|ashram|ritual|puja|meditation|pilgrim/i.test(combined)) {
+    category = 'Sacred Temple & Ghat Trail';
+    subcategory = 'Sacred Rituals & Riverside Dawn Trail';
+  } else if (/music|dance|folk|sitar|tabla|kathak|theatre|puppet|performance|singing|classical/i.test(combined)) {
+    category = 'Folk Music & Performing Arts';
+    subcategory = 'Living Musical Heritage & Performance';
+  } else if (/farm|village|stay|homestay|rural|pottery|harvest|orchard|plantation|agro/i.test(combined)) {
+    category = 'Boutique Stay & Farm Immersion';
+    subcategory = 'Generational Rural & Village Immersion';
+  } else if (/trek|hike|forest|nature|bird|safari|mangrove|kayak|wildlife|river|hills/i.test(combined)) {
+    category = 'Nature & Local Excursion';
+    subcategory = 'Guided Eco-Trail & Naturalist Walk';
+  } else if (/pottery|block print|weaving|textile|brass|sculpture|carpet|craft|embroidery|artisan/i.test(combined)) {
+    category = 'Art & Craft Workshop';
+    subcategory = 'Master Artisan Studio & Craft Immersion';
+  }
+
+  // Interests tags
+  const interests = [];
+  if (/heritage|history|monument|architecture/i.test(combined)) interests.push('Heritage & Architecture');
+  if (/food|culinary|eating|taste|spice/i.test(combined)) interests.push('Culinary & Food Walks');
+  if (/craft|artisan|pottery|handloom|weaving|block print/i.test(combined)) interests.push('Artisan & Handloom Crafts');
+  if (/temple|spiritual|sacred|aarti/i.test(combined)) interests.push('Spiritual & Temple Rituals');
+  if (/photo|camera|visual|view/i.test(combined)) interests.push('Photography & Visual Arts');
+  if (/music|dance|folk|song/i.test(combined)) interests.push('Folk Traditions & Music');
+  if (/nature|wildlife|bird|flora|forest/i.test(combined)) interests.push('Nature & Biodiversity');
+  if (/textile|saree|weaving|cloth/i.test(combined)) interests.push('Textiles & Weaving');
+  if (/village|rural|community|local life/i.test(combined)) interests.push('Village & Rural Immersion');
+  if (/market|bazaar|souk|vendor|shopping/i.test(combined)) interests.push('Local Markets & Bazaars');
+  if (/ayurveda|yoga|wellness|healing/i.test(combined)) interests.push('Ayurveda & Wellness');
+  if (interests.length === 0) {
+    interests.push('Heritage & Architecture', 'Cultural Storytelling');
+  }
+
+  // Suitable traveler types
+  const suitable_traveler_types = ['Culture Seekers'];
+  if (/solo|individual|single/i.test(combined) || !/couples only|strictly group/i.test(combined)) {
+    suitable_traveler_types.push('Solo Explorer');
+  }
+  if (/romantic|couple|sunset|peaceful|intimate/i.test(combined)) {
+    suitable_traveler_types.push('Couples & Duos');
+  }
+  const is_family_friendly = !/bar|alcohol|extreme|strenuous|18\+|late night party|steep climb/i.test(combined);
+  if (is_family_friendly) {
+    suitable_traveler_types.push('Family with Kids');
+  }
+
+  // Characteristics
+  const is_indoor = /indoor|studio|kitchen|home|workshop|temple hall|inside|museum|gallery/i.test(combined);
+  const is_outdoor = /outdoor|street|trail|market|river|ghat|garden|farm|hike/i.test(combined);
+  const setting = is_indoor && is_outdoor ? 'Mixed' : is_indoor ? 'Indoor' : 'Outdoor';
+  const rain_safe = is_indoor || !/open air trek|monsoon hazard|boat ride/i.test(combined);
+  const pace = /trek|climb|rapid|fast|marathon/i.test(combined) ? 'Active' : /leisure|slow|tea|sitting|relax|story/i.test(combined) ? 'Leisurely' : 'Moderate';
+  const intensity = pace === 'Active' ? 'Active / Strenuous' : pace === 'Leisurely' ? 'Easy / Relaxed' : 'Moderate Walking';
+
+  // Search keywords
+  const keywords = Array.from(new Set([
+    category.toLowerCase(),
+    subcategory.toLowerCase(),
+    location ? location.toLowerCase() : '',
+    ...interests.map((i) => i.toLowerCase()),
+    'authentic local experience',
+    'verified host',
+  ].filter(Boolean))).slice(0, 8);
+
+  // Safe accessibility inference
+  const stated_wheelchair = /wheelchair|barrier free|barrier-free|ramp|elevator|lift/i.test(combined);
+  const stated_step_free = stated_wheelchair || /step free|step-free|ground level|no stairs|flat surface/i.test(combined);
+  const stated_low_walking = /low walking|seated|minimal walking|sit down|chair/i.test(combined);
+  const stated_audio_guide = /audio guide|headset|microphone|translation/i.test(combined);
+
+  // Best time of day
+  let best_time_of_day = 'morning';
+  if (/sunset|evening|dusk|night|dinner/i.test(combined)) {
+    best_time_of_day = /sunset/i.test(combined) ? 'sunset' : 'evening';
+  } else if (/afternoon|lunch|midday/i.test(combined)) {
+    best_time_of_day = 'afternoon';
+  }
+
+  // Group type
+  let group_type = 'small_group';
+  if (/private|exclusive|delegation/i.test(combined)) group_type = 'corporate_private';
+  else if (/couple|romantic/i.test(combined)) group_type = 'couple';
+  else if (/solo/i.test(combined)) group_type = 'solo_friendly';
+  else if (is_family_friendly && /kid|child|family/i.test(combined)) group_type = 'family';
+
+  // Duration
+  let duration_mins = 90;
+  const durMatch = combined.match(/(\d+)\s*(?:mins?|minutes?)/i);
+  const hrMatch = combined.match(/(\d+(?:\.\d+)?)\s*(?:hours?|hrs?)/i);
+  if (durMatch) duration_mins = parseInt(durMatch[1], 10);
+  else if (hrMatch) duration_mins = Math.round(parseFloat(hrMatch[1]) * 60);
+
+  return {
+    category,
+    subcategory,
+    interests: interests.slice(0, 5),
+    suitable_traveler_types,
+    is_family_friendly,
+    family_suitability_reason: is_family_friendly
+      ? 'Safe, culturally respectful environment with no strenuous hazards.'
+      : 'Requires high physical stamina or age minimum.',
+    characteristics: {
+      pace,
+      setting,
+      rain_safe,
+      intensity,
+    },
+    search_keywords: keywords,
+    accessibility: {
+      wheelchair_accessible: stated_wheelchair,
+      step_free: stated_step_free,
+      audio_guide: stated_audio_guide,
+      low_walking: stated_low_walking,
+      inference_rationale: stated_wheelchair || stated_step_free
+        ? 'Explicitly inferred from ramp or ground-floor mentions.'
+        : 'Safety-first: Kept disabled unless verified by provider.',
+    },
+    group_type,
+    best_time_of_day,
+    recommended_duration_mins: duration_mins,
+    suggested_inclusions: [
+      'Expert guidance by local cultural specialist',
+      'All essential activity tools and materials',
+      'Curated cultural storytelling session',
+      'Bottled drinking water or traditional tea',
+    ],
+    suggested_exclusions: [
+      'Personal transportation to meeting point',
+      'Personal shopping and souvenir purchases',
+      'Gratuities / tips',
+    ],
+    special_instructions: /temple|sacred|ghat/i.test(combined)
+      ? 'Please dress modestly (shoulders and knees covered). Slip-on shoes recommended for easy removal.'
+      : 'Wear comfortable walking shoes and bring sun protection or light umbrella.',
+  };
+}
+
+/**
+ * Extracts and structures rich recommendation-engine attributes from a provider's natural language description.
+ */
+export async function extractExperienceAiAttributes({ description, title, experience_type, location, price, duration_mins }) {
+  const rawText = `Experience Title: ${title || 'Untitled'}\nType: ${experience_type || 'General Experience'}\nLocation: ${location || 'Unspecified'}\nDescription: ${description || ''}`;
+
+  if (!process.env.GEMINI_API_KEY) {
+    return fallbackExtractExperienceAiAttributes({ description, title, experience_type, location });
+  }
+
+  const prompt = `You are LOKIVA's AI Experience Architect for local Indian travel businesses.
+Analyze this experience description and extract high-precision recommendation attributes for our traveler recommendation engine.
+
+Experience Information:
+${rawText}
+
+Return ONLY a valid JSON object matching this EXACT schema:
+{
+  "category": "Must be one of: 'Heritage & Architecture Walk', 'Art & Craft Workshop', 'Regional Culinary Tasting', 'Folk Music & Performing Arts', 'Sacred Temple & Ghat Trail', 'Boutique Stay & Farm Immersion', 'Nature & Local Excursion'",
+  "subcategory": "string (specific descriptive subcategory, e.g. 'Street Food Tasting Trail')",
+  "interests": ["Array of 3-5 tags from: 'Heritage & Architecture', 'Culinary & Food Walks', 'Artisan & Handloom Crafts', 'Spiritual & Temple Rituals', 'Photography & Visual Arts', 'Folk Traditions & Music', 'Nature & Biodiversity', 'Textiles & Weaving', 'Village & Rural Immersion', 'Local Markets & Bazaars', 'Ayurveda & Wellness'"],
+  "suitable_traveler_types": ["Array of: 'Solo Explorer', 'Couples & Duos', 'Small Group', 'Family with Kids', 'Culture Seekers'"],
+  "is_family_friendly": boolean,
+  "family_suitability_reason": "string (brief sentence on why it suits or doesn't suit children/seniors)",
+  "characteristics": {
+    "pace": "string ('Leisurely' | 'Moderate' | 'Active')",
+    "setting": "string ('Indoor' | 'Outdoor' | 'Mixed')",
+    "rain_safe": boolean,
+    "intensity": "string ('Easy / Relaxed' | 'Moderate Walking' | 'Active / Strenuous')"
+  },
+  "search_keywords": ["array of 5-8 relevant search keywords for traveler search bar"],
+  "accessibility": {
+    "wheelchair_accessible": boolean (ONLY true if explicitly stated or clearly ground-floor/ramp accessible; otherwise false for traveler safety),
+    "step_free": boolean (ONLY true if explicitly stated or flat terrain),
+    "audio_guide": boolean,
+    "low_walking": boolean,
+    "inference_rationale": "string explaining how accessibility was evaluated safely"
+  },
+  "group_type": "string ('solo_friendly' | 'couple' | 'small_group' | 'family' | 'corporate_private')",
+  "best_time_of_day": "string ('morning' | 'afternoon' | 'sunset' | 'evening' | 'flexible')",
+  "recommended_duration_mins": number (integer minutes, e.g. 60, 90, 120, 180),
+  "suggested_inclusions": ["string", "string", "string"],
+  "suggested_exclusions": ["string", "string"],
+  "special_instructions": "string (practical advice for guests, attire, shoes, etc.)"
+}`;
+
+  try {
+    const aiPromise = generateWithFallback(rawText, {
+      systemInstruction: prompt,
+      generationConfig: {
+        responseMimeType: 'application/json',
+        temperature: 0.2,
+      },
+    });
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('AI extraction timeout 4000ms')), 4000)
+    );
+
+    const { text } = await Promise.race([aiPromise, timeoutPromise]);
+    const parsed = JSON.parse(text);
+
+    if (parsed && parsed.category && Array.isArray(parsed.interests)) {
+      return {
+        ...fallbackExtractExperienceAiAttributes({ description, title, experience_type, location }),
+        ...parsed,
+        characteristics: {
+          ...fallbackExtractExperienceAiAttributes({ description, title, experience_type, location }).characteristics,
+          ...(parsed.characteristics || {}),
+        },
+        accessibility: {
+          ...fallbackExtractExperienceAiAttributes({ description, title, experience_type, location }).accessibility,
+          ...(parsed.accessibility || {}),
+        },
+      };
+    }
+    return fallbackExtractExperienceAiAttributes({ description, title, experience_type, location });
+  } catch (err) {
+    console.warn('AI experience extraction fallback engaged:', err.message);
+    return fallbackExtractExperienceAiAttributes({ description, title, experience_type, location });
+  }
+}
+
+

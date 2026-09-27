@@ -117,7 +117,11 @@ export async function seedDatabase() {
     );
   }
 
-  console.log('Seeded database successfully with all 229 verified experiences!');
+  // 9. B2B Provider Workspace Data
+  const { seedProviderWorkspaceData } = await import('./seedProviderData.js');
+  await seedProviderWorkspaceData();
+
+  console.log('Seeded database successfully with all 229 verified experiences and B2B provider workspace!');
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
