@@ -383,7 +383,7 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
         timePeriod: '16th Century - 18th Century CE',
         headline: 'A golden era of Pichwai miniatures, astronomical observatories, and palace mirrorwork',
         narrative: 'The alliance and cultural exchange between Mughal emperors and Rajput kings catalyzed an explosion of fine arts. Maharaja Sawai Jai Singh II founded Jaipur on Vedic Vastu principles and built the monumental Jantar Mantar, while Shekhawati merchants painted open-air havelis with vibrant frescoes.',
-        image: 'https://images.unsplash.com/photo-1609946850989-138378732e79?auto=format&fit=crop&w=1200&q=80',
+        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTCfeS1SRMhuqFKGYwBn3eEkskhvDMRVDF65NnBMNFaXDT-binNob4OithE&s=10',
         imageCaption: 'Hawa Mahal & Courtly Sandstone Facades, Jaipur',
         monumentsBuilt: ['Amer Palace & Sheesh Mahal', 'Jantar Mantar Observatory', 'Hawa Mahal Palace of Winds', 'Shekhawati Painted Havelis'],
         impactOnToday: 'Forms Jaipur\'s UNESCO World Heritage core, the miniature painting tradition, and vibrant bazaar streetscapes.',
