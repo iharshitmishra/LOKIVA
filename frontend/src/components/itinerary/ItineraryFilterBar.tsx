@@ -139,41 +139,6 @@ export function ItineraryFilterBar({
           </button>
         </div>
       </form>
-
-      {/* 2. Quick Hubs Horizontal Rail with Edge Fade Masks */}
-      <div className="relative flex items-center px-1">
-        {/* Left Fade Gradient Mask */}
-        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#FAF6F0] to-transparent z-10" />
-
-        {/* Horizontal Chips Track */}
-        <div className="flex items-center gap-2 overflow-x-auto py-1 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden w-full">
-          <span className="text-[11px] font-meta uppercase font-bold text-[#B84A27] shrink-0 pl-1">
-            Quick Hubs:
-          </span>
-          {POPULAR_CITIES_LIST.map((cityName) => {
-            const isSelected = city.toLowerCase() === cityName.toLowerCase();
-            return (
-              <motion.button
-                key={cityName}
-                type="button"
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                onClick={() => onQuickCitySelect(cityName)}
-                className={`px-3 py-1 rounded-full text-xs font-meta whitespace-nowrap transition cursor-pointer shrink-0 ${
-                  isSelected
-                    ? 'bg-gradient-to-r from-[#B84A27] to-[#D47A39] text-[#FFFDF9] font-bold shadow-2xs shadow-[#B84A27]/20'
-                    : 'bg-[#FFFDF9]/85 hover:bg-[#FFFDF9] text-[#5C3D2E] border border-[#E6DAC6] hover:border-[#B84A27]/50 shadow-2xs'
-                }`}
-              >
-                {cityName}
-              </motion.button>
-            );
-          })}
-        </div>
-
-        {/* Right Fade Gradient Mask */}
-        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#FAF6F0] to-transparent z-10" />
-      </div>
     </div>
   );
 }

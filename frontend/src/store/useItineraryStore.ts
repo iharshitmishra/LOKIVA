@@ -14,6 +14,7 @@ import {
   replanDayForCondition,
   GenerateTripOptions,
 } from '../lib/itinerarySolver';
+import { solveEnRouteCorridor } from '../services/corridorGraphEngine';
 
 const STORAGE_KEY = 'lokiva_dynamic_itinerary_store_v3';
 
@@ -40,7 +41,8 @@ interface ItineraryState {
   updateActivity: (dayNumber: number, activityId: number, patch: Partial<ItineraryActivity>) => void;
   setDayStartTime: (dayNumber: number, startTime: string) => void;
   replanDay: (dayNumber: number, condition: ReplanCondition) => void;
-  generateTrip: (options: GenerateTripOptions) => Promise<void>;
+  generateTrip: (options: GenerateTripOptions) => void;
+  toggleCorridorMode: () => void;
   clearReplanMessage: () => void;
 }
 
@@ -425,7 +427,7 @@ export const useItineraryStore = create<ItineraryState>((set, get) => ({
         feasibilityMetrics: metricsMap,
         practicalInfo: plan.practicalInfo,
         isGenerating: false,
-        lastReplanMessage: `Generated conflict-free ${options.daysCount || 3}-Day itinerary for ${options.city}.`,
+        lastReplanMessage: null,
       });
 
       try {
@@ -444,6 +446,40 @@ export const useItineraryStore = create<ItineraryState>((set, get) => ({
     } finally {
       set({ isGenerating: false });
     }
+  },
+
+  toggleCorridorMode: () => {
+    const { tripDetails, days } = get();
+    const currentMode = tripDetails.corridorMode || 'direct';
+    const targetMode = currentMode === 'corridor' ? 'direct' : 'corridor';
+
+    const origin = tripDetails.originState || 'Maharashtra';
+    const destination = tripDetails.state || 'Rajasthan';
+    const city = tripDetails.destination || 'Jaipur';
+    const daysCount = days.length || 3;
+
+    let corridorEval = tripDetails.corridorEvaluation;
+    if (!corridorEval) {
+      corridorEval = solveEnRouteCorridor({
+        originQuery: origin,
+        destinationQuery: destination,
+        totalDays: daysCount,
+        userInterests: ['heritage', 'crafts', 'food'],
+      });
+    }
+
+    get().generateTrip({
+      city,
+      state: destination,
+      daysCount,
+      pace: tripDetails.pace || 'balanced',
+      budgetLimit: tripDetails.totalBudgetLimit || 25000,
+      travelers: tripDetails.travelers || 2,
+      corridorMode: targetMode,
+      corridorEvaluation: corridorEval,
+      originCity: tripDetails.originCity || corridorEval.originNode.primaryHubCity,
+      originState: origin,
+    });
   },
 
   clearReplanMessage: () => {

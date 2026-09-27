@@ -387,6 +387,123 @@ export async function initDb() {
   await dbRun('CREATE INDEX IF NOT EXISTS idx_chat_sessions_user ON chat_sessions (user_id, updated_at DESC)');
   await dbRun('CREATE INDEX IF NOT EXISTS idx_chat_messages_session ON chat_messages (session_id, created_at, id)');
 
+  // B2B Provider Workspace Tables
+  await dbRun(`
+    CREATE TABLE IF NOT EXISTS bookings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      booking_code TEXT UNIQUE NOT NULL,
+      provider_id INTEGER NOT NULL,
+      experience_id INTEGER NOT NULL,
+      user_id INTEGER,
+      guest_name TEXT NOT NULL,
+      guest_email TEXT NOT NULL,
+      guest_phone TEXT,
+      party_size INTEGER NOT NULL DEFAULT 1,
+      adults_count INTEGER DEFAULT 1,
+      children_count INTEGER DEFAULT 0,
+      booking_date TEXT NOT NULL,
+      time_slot TEXT NOT NULL,
+      total_price REAL NOT NULL,
+      commission_rate REAL DEFAULT 0.10,
+      commission_amount REAL DEFAULT 0.0,
+      net_payout REAL NOT NULL,
+      currency TEXT DEFAULT 'INR',
+      status TEXT DEFAULT 'pending',
+      payout_status TEXT DEFAULT 'pending',
+      special_requests TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (provider_id) REFERENCES providers (id),
+      FOREIGN KEY (experience_id) REFERENCES experiences (id)
+    )
+  `);
+  await dbRun('CREATE INDEX IF NOT EXISTS idx_bookings_provider ON bookings (provider_id, booking_date DESC)');
+  await dbRun('CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings (status)');
+
+  await dbRun(`
+    CREATE TABLE IF NOT EXISTS provider_availability (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      provider_id INTEGER NOT NULL,
+      experience_id INTEGER,
+      date TEXT NOT NULL,
+      time_slot TEXT NOT NULL,
+      capacity INTEGER NOT NULL DEFAULT 10,
+      booked_count INTEGER DEFAULT 0,
+      is_blocked BOOLEAN DEFAULT 0,
+      price_override REAL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (provider_id) REFERENCES providers (id)
+    )
+  `);
+  await dbRun('CREATE INDEX IF NOT EXISTS idx_availability_lookup ON provider_availability (provider_id, date)');
+  await dbRun('CREATE UNIQUE INDEX IF NOT EXISTS idx_provider_avail_unique ON provider_availability (provider_id, experience_id, date, time_slot)');
+
+  await dbRun(`
+    CREATE TABLE IF NOT EXISTS provider_offers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      provider_id INTEGER NOT NULL,
+      experience_id INTEGER,
+      title TEXT NOT NULL,
+      offer_type TEXT NOT NULL,
+      discount_percent REAL NOT NULL,
+      promo_code TEXT,
+      start_date TEXT NOT NULL,
+      end_date TEXT NOT NULL,
+      min_guests INTEGER DEFAULT 1,
+      usage_limit INTEGER DEFAULT 100,
+      used_count INTEGER DEFAULT 0,
+      is_active BOOLEAN DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (provider_id) REFERENCES providers (id)
+    )
+  `);
+
+  await dbRun(`
+    CREATE TABLE IF NOT EXISTS provider_customers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      provider_id INTEGER NOT NULL,
+      user_id INTEGER,
+      customer_name TEXT NOT NULL,
+      customer_email TEXT NOT NULL,
+      customer_phone TEXT,
+      total_bookings INTEGER DEFAULT 1,
+      total_spend REAL DEFAULT 0.0,
+      first_booking_date TEXT,
+      last_booking_date TEXT,
+      notes TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (provider_id) REFERENCES providers (id)
+    )
+  `);
+
+  await dbRun(`
+    CREATE TABLE IF NOT EXISTS provider_notifications (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      provider_id INTEGER NOT NULL,
+      category TEXT NOT NULL,
+      title TEXT NOT NULL,
+      message TEXT NOT NULL,
+      link_url TEXT,
+      is_read BOOLEAN DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (provider_id) REFERENCES providers (id)
+    )
+  `);
+
+  await dbRun(`
+    CREATE TABLE IF NOT EXISTS provider_verification (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      provider_id INTEGER NOT NULL,
+      document_type TEXT NOT NULL,
+      document_number TEXT,
+      document_file_url TEXT,
+      status TEXT DEFAULT 'pending',
+      reviewer_notes TEXT,
+      submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      reviewed_at DATETIME,
+      FOREIGN KEY (provider_id) REFERENCES providers (id)
+    )
+  `);
+
   // Safe migration check for new columns on existing database
   try {
     const userInfo = await dbAll("PRAGMA table_info(users)");
@@ -421,6 +538,40 @@ export async function initDb() {
     if (!cols.includes('notability_score')) await dbRun("ALTER TABLE experiences ADD COLUMN notability_score REAL");
     if (!cols.includes('source')) await dbRun("ALTER TABLE experiences ADD COLUMN source TEXT DEFAULT 'curated'");
     if (!cols.includes('raw_osm_tags')) await dbRun("ALTER TABLE experiences ADD COLUMN raw_osm_tags TEXT");
+    if (!cols.includes('inclusions')) await dbRun("ALTER TABLE experiences ADD COLUMN inclusions TEXT DEFAULT '[]'");
+    if (!cols.includes('exclusions')) await dbRun("ALTER TABLE experiences ADD COLUMN exclusions TEXT DEFAULT '[]'");
+    if (!cols.includes('requirements')) await dbRun("ALTER TABLE experiences ADD COLUMN requirements TEXT DEFAULT '[]'");
+    if (!cols.includes('things_to_carry')) await dbRun("ALTER TABLE experiences ADD COLUMN things_to_carry TEXT DEFAULT '[]'");
+    if (!cols.includes('status')) await dbRun("ALTER TABLE experiences ADD COLUMN status TEXT DEFAULT 'published'");
+    if (!cols.includes('meeting_point')) await dbRun("ALTER TABLE experiences ADD COLUMN meeting_point TEXT");
+    if (!cols.includes('view_count')) await dbRun("ALTER TABLE experiences ADD COLUMN view_count INTEGER DEFAULT 0");
+    if (!cols.includes('booking_count')) await dbRun("ALTER TABLE experiences ADD COLUMN booking_count INTEGER DEFAULT 0");
+    if (!cols.includes('interests')) await dbRun("ALTER TABLE experiences ADD COLUMN interests TEXT DEFAULT '[]'");
+    if (!cols.includes('min_group_size')) await dbRun("ALTER TABLE experiences ADD COLUMN min_group_size INTEGER DEFAULT 1");
+    if (!cols.includes('max_group_size')) await dbRun("ALTER TABLE experiences ADD COLUMN max_group_size INTEGER DEFAULT 10");
+    if (!cols.includes('opening_hours')) await dbRun("ALTER TABLE experiences ADD COLUMN opening_hours TEXT DEFAULT '09:00 AM - 06:00 PM'");
+    if (!cols.includes('operating_days')) await dbRun("ALTER TABLE experiences ADD COLUMN operating_days TEXT DEFAULT '[\"Mon\",\"Tue\",\"Wed\",\"Thu\",\"Fri\",\"Sat\",\"Sun\"]'");
+    if (!cols.includes('available_slots')) await dbRun("ALTER TABLE experiences ADD COLUMN available_slots TEXT DEFAULT '[\"09:00 AM\",\"03:00 PM\"]'");
+    if (!cols.includes('video_url')) await dbRun("ALTER TABLE experiences ADD COLUMN video_url TEXT");
+    if (!cols.includes('step_free')) await dbRun("ALTER TABLE experiences ADD COLUMN step_free BOOLEAN DEFAULT 0");
+    if (!cols.includes('audio_guide')) await dbRun("ALTER TABLE experiences ADD COLUMN audio_guide BOOLEAN DEFAULT 0");
+    if (!cols.includes('group_type')) await dbRun("ALTER TABLE experiences ADD COLUMN group_type TEXT DEFAULT 'small_group'");
+    if (!cols.includes('cancellation_policy')) await dbRun("ALTER TABLE experiences ADD COLUMN cancellation_policy TEXT DEFAULT 'Flexible: Free cancellation up to 24h before'");
+    if (!cols.includes('advance_booking')) await dbRun("ALTER TABLE experiences ADD COLUMN advance_booking TEXT DEFAULT 'Same day bookings allowed up to 2 hours before'");
+    if (!cols.includes('age_restriction')) await dbRun("ALTER TABLE experiences ADD COLUMN age_restriction TEXT DEFAULT 'All ages welcome'");
+    if (!cols.includes('special_instructions')) await dbRun("ALTER TABLE experiences ADD COLUMN special_instructions TEXT");
+
+    const providerInfo = await dbAll("PRAGMA table_info(providers)");
+    const providerCols = providerInfo.map((c) => c.name);
+    if (!providerCols.includes('provider_type')) await dbRun("ALTER TABLE providers ADD COLUMN provider_type TEXT DEFAULT 'Tour Operator'");
+    if (!providerCols.includes('tagline')) await dbRun("ALTER TABLE providers ADD COLUMN tagline TEXT");
+    if (!providerCols.includes('logo_url')) await dbRun("ALTER TABLE providers ADD COLUMN logo_url TEXT");
+    if (!providerCols.includes('cover_image_url')) await dbRun("ALTER TABLE providers ADD COLUMN cover_image_url TEXT");
+    if (!providerCols.includes('languages_spoken')) await dbRun("ALTER TABLE providers ADD COLUMN languages_spoken TEXT DEFAULT '[\"English\", \"Hindi\"]'");
+    if (!providerCols.includes('certifications')) await dbRun("ALTER TABLE providers ADD COLUMN certifications TEXT DEFAULT '[]'");
+    if (!providerCols.includes('social_links')) await dbRun("ALTER TABLE providers ADD COLUMN social_links TEXT DEFAULT '{}'");
+    if (!providerCols.includes('verification_status')) await dbRun("ALTER TABLE providers ADD COLUMN verification_status TEXT DEFAULT 'verified'");
+    if (!providerCols.includes('settlement_account')) await dbRun("ALTER TABLE providers ADD COLUMN settlement_account TEXT");
   } catch (err) {
     console.log('Migration note:', err.message);
   }

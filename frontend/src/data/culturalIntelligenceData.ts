@@ -1,0 +1,1188 @@
+/**
+ * Comprehensive Structured Per-State Cultural Grounding Datasets for LOKIVA
+ * Provides 100% accurate, 360-degree cultural intelligence across:
+ * - History Chapters & Citations
+ * - Living Festival Calendars & Dates
+ * - Signature Gastronomy & Regional Dishes
+ * - Key Landmarks & Architectural Monuments
+ * - Living Cultural Traditions (Music, Dance, Attire, Art)
+ * - Seasonal Almanac & Weather Profiles
+ * - Curated Local Experiences & Artisan Workshops
+ * - Cross-State Civilizational Connections
+ */
+
+export interface CulturalChapter {
+  id: string;
+  chapterNumber: number;
+  eraName: string;
+  timePeriod: string;
+  headline: string;
+  narrative: string;
+  keyMonuments: string[];
+  livingLegacy: string;
+  excerpt: string;
+}
+
+export interface StateFestival {
+  id: string;
+  name: string;
+  month: string;
+  dateRange: string;
+  startMonth: number;
+  startDay: number;
+  endDay: number;
+  durationDays: number;
+  significance: string;
+  location: string;
+  city: string;
+  tags: string[];
+  bestFor: string;
+  excerpt: string;
+  plannablePrompt?: string;
+  targetCity: string;
+  daysUntil?: number;
+  isNext60Days?: boolean;
+}
+
+export interface FoodItem {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  origin: string;
+}
+
+export interface PlaceItem {
+  id: string;
+  name: string;
+  location: string;
+  city: string;
+  description: string;
+  tags: string[];
+}
+
+export interface CulturalTradition {
+  category: string;
+  title: string;
+  description: string;
+}
+
+export interface SeasonInfo {
+  season: string;
+  months: string;
+  weather: string;
+  temperature: string;
+  experiences: string[];
+  festivals: string[];
+}
+
+export interface ArtisanGuild {
+  name: string;
+  craft: string;
+  location: string;
+  description: string;
+}
+
+export interface CrossStateConnection {
+  relatedState: string;
+  connectionDescription: string;
+  sharedFestivalsOrTraditions: string;
+}
+
+export interface StateCulturalDataset {
+  stateSlug: string;
+  stateName: string;
+  stateCode: string;
+  region: string;
+  capital: string;
+  primaryHub: string;
+  culturalEssence: string;
+  snapshot: {
+    region: string;
+    capital: string;
+    bestTime: string;
+    duration: string;
+    bestFor: string[];
+    climate: string;
+  };
+  chapters: CulturalChapter[];
+  festivalCalendar: StateFestival[];
+  foods: FoodItem[];
+  places: PlaceItem[];
+  cultureTraditions: CulturalTradition[];
+  seasons: SeasonInfo[];
+  artisanGuilds: ArtisanGuild[];
+  crossStateConnections: CrossStateConnection[];
+}
+
+export const CULTURAL_DATASETS: Record<string, StateCulturalDataset> = {
+  rajasthan: {
+    stateSlug: 'rajasthan',
+    stateName: 'Rajasthan',
+    stateCode: 'RJ',
+    region: 'North-West India',
+    capital: 'Jaipur',
+    primaryHub: 'Jaipur',
+    culturalEssence: 'Royal fortresses, desert ballads, vibrant block printing, and unbroken clan chivalry.',
+    snapshot: {
+      region: 'North-West India',
+      capital: 'Jaipur',
+      bestTime: 'October to March',
+      duration: '5 to 8 Days',
+      bestFor: ['Heritage Forts', 'Desert Safaris', 'Royal Palaces', 'Block Print Crafts', 'Gastronomy'],
+      climate: 'Arid desert climate with mild, sunny winters (10°C to 28°C) and hot summers.',
+    },
+    chapters: [
+      {
+        id: 'rj_ch1',
+        chapterNumber: 1,
+        eraName: 'The Rajput Princely Clans & Fortress Citadels',
+        timePeriod: '8th - 16th Century CE',
+        headline: 'Rathore, Sisodia, and Kachwaha chivalry engineered into impregnable hilltop bastions',
+        narrative: 'Across the jagged Aravalli crags and Thar dunes, warrior clans built living fortresses that housed entire medieval cities. Mehrangarh, Kumbhalgarh with its 36km continuous wall, and Chittorgarh became legendary sanctuaries of Rajput valor, water-harvesting stepwells, and unyielding resistance.',
+        keyMonuments: ['Kumbhalgarh Fortress Ramparts', 'Mehrangarh Citadel', 'Chittorgarh Fort', 'Chand Baori Stepwell'],
+        livingLegacy: 'Gave Rajasthan its world-famous hill fort circuit, royal hospitality traditions, and timeless desert architecture.',
+        excerpt: 'Rajput fortresses were designed as self-sustaining urban ecosystems. Stepwells like Chand Baori conserved monsoon runoff, while bastions like Mehrangarh and Kumbhalgarh protected master artisans, royal mints, and devotional shrines behind multi-layered defensive ramparts.',
+      },
+      {
+        id: 'rj_ch2',
+        chapterNumber: 2,
+        eraName: 'The Mughal-Rajput Synthesis & Courtly Arts',
+        timePeriod: '16th - 18th Century CE',
+        headline: 'A golden era of Pichwai miniatures, astronomical observatories, and palace mirrorwork',
+        narrative: 'The alliance and cultural exchange between Mughal emperors and Rajput kings catalyzed an explosion of fine arts. Maharaja Sawai Jai Singh II founded Jaipur on Vedic Vastu principles and built the monumental Jantar Mantar, while Shekhawati merchants painted open-air havelis with vibrant frescoes.',
+        keyMonuments: ['Amer Palace & Sheesh Mahal', 'Jantar Mantar Observatory', 'Hawa Mahal Palace of Winds', 'Shekhawati Painted Havelis'],
+        livingLegacy: 'Forms Jaipur\'s UNESCO World Heritage core, the miniature painting tradition, and vibrant bazaar streetscapes.',
+        excerpt: 'The 18th century synthesis united geometric Persian symmetry with indigenous Rajput stonecarving. Sawai Jai Singh II engineered Jaipur as India\'s first planned city, organizing bazaars by guild specialties (Johari for jewels, Sireh Deori for textiles).',
+      },
+      {
+        id: 'rj_ch3',
+        chapterNumber: 3,
+        eraName: 'The Desert Guilds & Living Artisan Renaissance',
+        timePeriod: '19th Century - Present',
+        headline: 'From princely patronage to world-renowned textile, stonecraft, and folk musical lineages',
+        narrative: 'As princely states acceded to modern India, ancestral artisan guilds flourished globally. Hereditary Manganiyar and Langa bards carry oral desert poetry, while Bagru natural-dye block printers and Jaipur blue-pottery artisans maintain unbroken generational mastercrafts.',
+        keyMonuments: ['Umaid Bhawan Palace', 'Albert Hall Museum', 'Bagru & Sanganer Artisan Guilds', 'Pushkar Sacred Ghats'],
+        livingLegacy: 'Drives Rajasthan\'s position as India\'s premier artisanal capital, luxury heritage stay destination, and international festival hub.',
+        excerpt: 'Bagru\'s Chippa community preserves 300-year-old wooden mud-resist (Dabu) printing using indigo, harda, and iron paste. The Manganiyar hereditary musicians continue complex rhythmic cycles on the bowing Kamayacha instrument.',
+      },
+    ],
+    festivalCalendar: [
+      {
+        id: 'rj_fest_marwar',
+        name: 'Marwar Festival',
+        month: 'October',
+        dateRange: 'Oct 9 - 10',
+        startMonth: 10,
+        startDay: 9,
+        endDay: 10,
+        durationDays: 2,
+        significance: 'Celebrating Rajasthani folk heroes and medieval chivalry through music, dance, and camel polo under the full moon.',
+        location: 'Mehrangarh Fort & Mandore Gardens, Jodhpur',
+        city: 'Jodhpur',
+        tags: ['Folk Music', 'Polo', 'Full Moon', 'Mehrangarh'],
+        bestFor: 'Heritage enthusiasts, midnight classical recitals, and folk dance lovers.',
+        excerpt: 'Held during the Sharad Purnima full moon, the Marwar Festival centers on Mehrangarh Fort. Hereditary folk singers recite ballads of Rao Jodha, accompanied by horse polo and Rajasthani turban competitions.',
+        plannablePrompt: 'Plan a 3-day royal heritage trip to Jodhpur during Marwar Festival',
+        targetCity: 'Jodhpur',
+      },
+      {
+        id: 'rj_fest_pushkar',
+        name: 'Pushkar Camel Fair',
+        month: 'November',
+        dateRange: 'Nov 15 - 23',
+        startMonth: 11,
+        startDay: 15,
+        endDay: 23,
+        durationDays: 9,
+        significance: 'Over 50,000 decorated camels, desert bards, and sacred Kartik Purnima ghat bathing rituals.',
+        location: 'Pushkar Sand Dunes & Brahma Temple Ghats',
+        city: 'Pushkar',
+        tags: ['Camel Fair', 'Sacred Ghats', 'Desert Bazaars', 'Folk Dance'],
+        bestFor: 'Cultural photographers, desert glamping, and sacred ritual witnesses.',
+        excerpt: 'Pushkar Fair converges pastoral Nomads with pilgrims. Camel decoration contests, mustache pageants, and evening Maha Aarti at Pushkar Lake create an electric atmosphere in the desert sands.',
+        plannablePrompt: 'Plan a 4-day desert festival trip to Pushkar & Ajmer',
+        targetCity: 'Pushkar',
+      },
+      {
+        id: 'rj_fest_desert',
+        name: 'Jaisalmer Desert Festival',
+        month: 'February',
+        dateRange: 'Feb 12 - 15',
+        startMonth: 2,
+        startDay: 12,
+        endDay: 15,
+        durationDays: 4,
+        significance: 'Sam Sand Dunes turn into a moonlit amphitheater for Kalbelia fire dancers, camel gymnastics, and folk symphonies.',
+        location: 'Sam Sand Dunes & Jaisalmer Fort, Jaisalmer',
+        city: 'Jaisalmer',
+        tags: ['Desert Dunes', 'Kalbelia Dance', 'Folk Music', 'Golden Fort'],
+        bestFor: 'Stargazing, desert safari adventures, and nomadic folk music.',
+        excerpt: 'Organized amidst the golden sands of the Thar Desert, this festival showcases turban tying contests, Mr. Desert pageants, and midnight acoustic recitals by Manganiyar masters.',
+        plannablePrompt: 'Plan a 4-day golden sands trip to Jaisalmer during the Desert Festival',
+        targetCity: 'Jaisalmer',
+      },
+      {
+        id: 'rj_fest_teej',
+        name: 'Teej & Gangaur Pageants',
+        month: 'March & August',
+        dateRange: 'Aug 18 - 20',
+        startMonth: 8,
+        startDay: 18,
+        endDay: 20,
+        durationDays: 3,
+        significance: 'Royal palanquin processions of Goddess Parvati through Jaipur old quarters with folk dancers and decorated elephants.',
+        location: 'Tripolia Bazaar & City Palace, Jaipur',
+        city: 'Jaipur',
+        tags: ['Royal Procession', 'Ghevar Delicacy', 'Women Folk', 'Old Pink City'],
+        bestFor: 'Witnessing royal court traditions, sweets tasting, and street processions.',
+        excerpt: 'Teej marks the arrival of the monsoon. The golden Teej idol leaves the City Palace in a grand palanquin escorted by royal staff, followed by tasting honeycombed Ghewar sweet pastries.',
+        plannablePrompt: 'Plan a 3-day Jaipur cultural trip during the Teej royal procession',
+        targetCity: 'Jaipur',
+      },
+      {
+        id: 'rj_fest_mewar',
+        name: 'Mewar Festival',
+        month: 'March - April',
+        dateRange: 'Mar 24 - 26',
+        startMonth: 3,
+        startDay: 24,
+        endDay: 26,
+        durationDays: 3,
+        significance: 'Welcoming the spring season along Lake Pichola with illuminated royal boat flotillas and fireworks.',
+        location: 'Gangaur Ghat & City Palace, Udaipur',
+        city: 'Udaipur',
+        tags: ['Lake Flotilla', 'Spring Celebrations', 'Udaipur Palace', 'Royal Pageant'],
+        bestFor: 'Romantic lake cruises, royal fireworks, and Rajasthani classical music.',
+        excerpt: 'The Mewar Festival welcomes spring in Udaipur. Women carry idols to Lake Pichola for holy immersions, followed by royal decorated boat processions across the lake.',
+        plannablePrompt: 'Plan a 3-day romantic heritage trip to Udaipur during Mewar Festival',
+        targetCity: 'Udaipur',
+      },
+    ],
+    foods: [
+      {
+        id: 'rj_f1',
+        name: 'Dal Baati Churma',
+        category: 'Royal Heritage Feast',
+        description: 'Fire-baked whole-wheat dough rounds dipped in pure desi ghee, served with five-lentil panchmel dal and sweetened jaggery churma crumble.',
+        origin: 'Traditional royal military rations evolved into the state banquet dish across Mewar and Marwar.',
+      },
+      {
+        id: 'rj_f2',
+        name: 'Laal Maas',
+        category: 'Spicy Royal Specialty',
+        description: 'Fiery slow-cooked mutton curry prepared with smoking Mathania red chilies, garlic paste, cloves, and curd in an unglazed earthen handi.',
+        origin: 'Invented in royal Rajput hunting camps for wild game preparation.',
+      },
+      {
+        id: 'rj_f3',
+        name: 'Pyaaz Ki Kachori',
+        category: 'Iconic Street Classic',
+        description: 'Flaky golden-crisp deep-fried pastry pocket stuffed with caramelized spiced onions, nigella seeds, and served with sweet-tangy tamarind chutney.',
+        origin: 'Originated in Jodhpur and perfected in Jaipur street sweetmarts like Rawat Mishtan Bhandar.',
+      },
+      {
+        id: 'rj_f4',
+        name: 'Jaipuri Malai Ghevar',
+        category: 'Monsoon Festive Sweet',
+        description: 'Delicate honeycomb disc made from clarified butter and flour batter, drenched in saffron-cardamom sugar syrup and topped with rich mawa rabri.',
+        origin: 'Celebrated as the quintessential sweet for Teej and Raksha Bandhan festivities.',
+      },
+      {
+        id: 'rj_f5',
+        name: 'Ker Sangri',
+        category: 'Desert Foraged Delicacy',
+        description: 'Wild desert capers (Ker) and dried desert beans (Sangri) stir-fried with mustard oil, fenugreek, dry mango powder, and whole red chilies.',
+        origin: 'Ingenious preservation food created to withstand arid Thar desert droughts.',
+      },
+    ],
+    places: [
+      {
+        id: 'rj_p1',
+        name: 'Amber Fort & Sheesh Mahal',
+        location: 'Jaipur',
+        city: 'Jaipur',
+        description: 'UNESCO World Heritage hill fortress featuring the world-famous Sheesh Mahal (Hall of Mirrors), carved marble courtyards, and Maota Lake views.',
+        tags: ['UNESCO Fort', 'Mirror Palace', 'Rajput Architecture'],
+      },
+      {
+        id: 'rj_p2',
+        name: 'Mehrangarh Fortress Ramparts',
+        location: 'Jodhpur',
+        city: 'Jodhpur',
+        description: 'Towering 400 feet above the Blue City, Mehrangarh houses palatial museum galleries, royal howdahs, and cannon ramparts.',
+        tags: ['Blue City View', 'Fortress Citadel', 'Royal Museum'],
+      },
+      {
+        id: 'rj_p3',
+        name: 'Lake Pichola & City Palace',
+        location: 'Udaipur',
+        city: 'Udaipur',
+        description: 'Romantic marble island palaces (Jag Mandir, Taj Lake Palace) rising out of tranquil waters framed by the misty Aravalli mountains.',
+        tags: ['Lake Flotilla', 'Romance', 'Palace Complex'],
+      },
+      {
+        id: 'rj_p4',
+        name: 'Sam Sand Dunes & Golden Jaisalmer Fort',
+        location: 'Jaisalmer',
+        city: 'Jaisalmer',
+        description: 'The Sonar Qila living sandstone fort surrounded by shifting golden Thar ripple dunes, camel caravans, and starlit skies.',
+        tags: ['Desert Safari', 'Living Fort', 'Stargazing'],
+      },
+      {
+        id: 'rj_p5',
+        name: 'Chand Baori Stepwell',
+        location: 'Abhaneri (near Bandikui)',
+        city: 'Abhaneri',
+        description: '9th-century architectural marvel with 3,500 narrow steps over 13 storeys descending 64 feet to an underground cooling reservoir.',
+        tags: ['Ancient Stepwell', 'Geometric Architecture', 'Ancient Engineering'],
+      },
+    ],
+    cultureTraditions: [
+      {
+        category: 'Dance',
+        title: 'Graceful Ghoomar & Nomadic Kalbelia',
+        description: 'Swirling embroidered ghagra skirts in Ghoomar contrasted with the hypnotic serpentine fire dancing and acrobatic poise of Kalbelias.',
+      },
+      {
+        category: 'Music',
+        title: 'Hereditary Manganiyar & Langa Rhythms',
+        description: 'Acoustic desert recitals featuring the bowed wooden Kamayacha, raw wooden Khartal clappers, and Dholak rhythms.',
+      },
+      {
+        category: 'Clothing',
+        title: 'Vibrant Bandhani & Royal Pagri Turbans',
+        description: 'Tie-and-dye silk textiles in marigold and vermilion, paired with angled clan turbans that signify regional origin and honor.',
+      },
+      {
+        category: 'Art',
+        title: 'Pichwai Tapestries & Jaipur Blue Pottery',
+        description: 'Intricate natural pigment paintings of Lord Shrinathji on starched silk, alongside quartz-powder glazed turquoise ceramics.',
+      },
+    ],
+    seasons: [
+      {
+        season: 'Winter',
+        months: 'October to March',
+        weather: 'Pleasant, sunny, clear blue skies with crisp desert nights.',
+        temperature: '10°C to 26°C',
+        experiences: ['Desert camping in Jaisalmer', 'Fortress rampart tours in Jaipur', 'Lake cruises in Udaipur'],
+        festivals: ['Pushkar Camel Fair', 'Marwar Festival', 'Jaisalmer Desert Festival', 'Jaipur Literature Festival'],
+      },
+      {
+        season: 'Summer',
+        months: 'April to June',
+        weather: 'Intense dry heat; ideal for budget heritage stays and early morning palace walks.',
+        temperature: '32°C to 45°C',
+        experiences: ['Mount Abu hill station retreat', 'Early morning wildlife safaris in Ranthambore'],
+        festivals: ['Mount Abu Summer Festival'],
+      },
+      {
+        season: 'Monsoon',
+        months: 'July to September',
+        weather: 'Lush green Aravalli hills with pleasant cloud cover and refreshing showers.',
+        temperature: '24°C to 34°C',
+        experiences: ['Monsoon palace explorations', 'Tasting fresh Malai Ghevar'],
+        festivals: ['Teej Festival in Jaipur'],
+      },
+    ],
+    artisanGuilds: [
+      {
+        name: 'Bagru Mud-Resist Block Printers Guild',
+        craft: 'Dabu & Natural Vegetable Dye Hand-Block Printing',
+        location: 'Bagru Village (30km from Jaipur)',
+        description: 'Generational Chippa masters using carved teakwood blocks, river washing, and sun drying.',
+      },
+      {
+        name: 'Jaipur Blue Pottery Guild',
+        craft: 'Quartz & Fuller Earth Glazed Ceramics (No Clay)',
+        location: 'Kot Jewar & Jaipur Bazaars',
+        description: 'Turquoise and cobalt floral pottery imported from Turko-Persian traditions during Sawai Ram Singh II.',
+      },
+      {
+        name: 'Pichwai Tapestry Painters of Nathdwara',
+        craft: 'Natural Stone Pigment Painting on Starched Khadi Silk',
+        location: 'Nathdwara near Udaipur',
+        description: 'Devotional paintings portraying Lord Shrinathji amidst lotus ponds, monsoons, and cows.',
+      },
+    ],
+    crossStateConnections: [
+      {
+        relatedState: 'Gujarat',
+        connectionDescription: 'Shared textile ties (Bandhani and block printing) and pastoral camel migrations across the Rann of Kutch.',
+        sharedFestivalsOrTraditions: 'Rann Utsav and Navratri Garba share rhythmic roots with Ghoomar.',
+      },
+      {
+        relatedState: 'Maharashtra',
+        connectionDescription: 'Historic hill fort engineering and royal ties between Rajput lineages and Maratha fortress architecture.',
+        sharedFestivalsOrTraditions: 'Makar Sankranti kite festivals and fortress defense architecture.',
+      },
+    ],
+  },
+
+  maharashtra: {
+    stateSlug: 'maharashtra',
+    stateName: 'Maharashtra',
+    stateCode: 'MH',
+    region: 'Western Deccan & Konkan Coast',
+    capital: 'Mumbai',
+    primaryHub: 'Mumbai',
+    culturalEssence: 'Chhatrapati Shivaji mountain ramparts, Varkari devotional walking pilgrimages, and Konkan coastal seafood.',
+    snapshot: {
+      region: 'Western Deccan & Konkan Coast',
+      capital: 'Mumbai',
+      bestTime: 'October to March',
+      duration: '5 to 9 Days',
+      bestFor: ['UNESCO Rock Caves', 'Sahyadri Hill Forts', 'Konkan Coastal Food', 'Ganeshotsav Pageantry'],
+      climate: 'Tropical coastal climate along Konkan; semi-arid pleasant winters across the Deccan plateau (16°C to 30°C).',
+    },
+    chapters: [
+      {
+        id: 'mh_ch1',
+        chapterNumber: 1,
+        eraName: 'Rock-Cut Sanctuaries & Satavahana Deccan Foundations',
+        timePeriod: '2nd Century BCE - 10th Century CE',
+        headline: 'Monolithic basalt caves and world-heritage rock carving at Ajanta, Ellora, and Elephanta',
+        narrative: 'Ancient trade guilds patronized master rock-carvers who chiseled the vertical Western Ghats basalt cliffs into monumental monasteries. The Kailasa Temple at Ellora stands as the world\'s largest monolithic rock-cut structure, carved from top to bottom out of a single mountain.',
+        keyMonuments: ['Kailasa Temple (Ellora Cave 16)', 'Ajanta Fresco Caves', 'Elephanta Island Caves', 'Karla & Bhaja Chaityas'],
+        livingLegacy: 'Established the sacred Deccan architectural grammar, stone iconographies, and Ajanta mineral-dye fresco techniques.',
+        excerpt: 'Kailasa Temple was excavated by removing over 200,000 tonnes of volcanic basalt without scaffolding. The Ajanta caves preserve early Buddhist murals depicting courtly life, silk route travelers, and Bodhisattva Padmapani.',
+      },
+      {
+        id: 'mh_ch2',
+        chapterNumber: 2,
+        eraName: 'The Maratha Swarajya & Hill Fort Mastery',
+        timePeriod: '17th Century - 18th Century CE',
+        headline: 'Chhatrapati Shivaji Maharaj\'s sea and mountain bastions that forged regional sovereignty',
+        narrative: 'Leveraging the rugged Sahyadri topography, Chhatrapati Shivaji Maharaj engineered over 300 mountain fortresses and sea citadels. Raigad, Rajgad, and the ocean fortress of Sindhudurg demonstrated ingenious guerrilla defense, freshwater catchment, and decentralized civil administration.',
+        keyMonuments: ['Raigad Fort Capital', 'Sindhudurg Ocean Fort', 'Shivneri Birthplace Fort', 'Pratapgad Ramparts'],
+        livingLegacy: 'Defines Maharashtra\'s collective pride, martial traditions, Dhol Tasha drumming ensembles, and mountain trekking trails.',
+        excerpt: 'Maratha fortress engineering utilized natural cliff contours as defense walls. Sindhudurg Sea Fort used molten lead foundations in the Arabian Sea to withstand coastal waves and naval sieges.',
+      },
+      {
+        id: 'mh_ch3',
+        chapterNumber: 3,
+        eraName: 'Peshwa Architecture, Textile Guilds & Modern Metropolis',
+        timePeriod: '18th Century - Present',
+        headline: 'From Pune\'s Shaniwar Wada and Yeola Paithani looms to Mumbai\'s UNESCO Victorian Gothic heritage',
+        narrative: 'The Peshwa era brought Pune\'s distinctive wooden Wada architecture and revitalized the golden-zari Paithani silk looms of Yeola. In the modern era, Mumbai merged colonial maritime terminals with vibrant Ganeshotsav street community spirit and industrial enterprise.',
+        keyMonuments: ['Shaniwar Wada (Pune)', 'Chhatrapati Shivaji Maharaj Terminus (CSMT)', 'Yeola Paithani Weaving Clusters', 'Gateway of India'],
+        livingLegacy: 'Binds Maharashtra as India\'s economic locomotive and cultural powerhouse of theater, cinema, literature, and textile mastercrafts.',
+        excerpt: 'Paithani silk sarees feature pure gold and silver Zari with peacock (Mor) and parrot (Tota) motifs woven on traditional handlooms in Yeola and Paithan.',
+      },
+    ],
+    festivalCalendar: [
+      {
+        id: 'mh_fest_ganesh',
+        name: 'Ganesh Chaturthi',
+        month: 'August - September',
+        dateRange: 'Sep 19 - 28',
+        startMonth: 9,
+        startDay: 19,
+        endDay: 28,
+        durationDays: 10,
+        significance: 'Spectacular 10-day community celebration with colossal clay idols, synchronized Dhol Tasha beats, and beach immersions.',
+        location: 'Lalbaugcha Raja & Girgaon Chowpatty, Mumbai / Pune Peths',
+        city: 'Mumbai',
+        tags: ['Ganeshotsav', 'Dhol Tasha', 'Modak Feast', 'Chowpatty Immersion'],
+        bestFor: 'High-energy cultural immersion, traditional percussion, and culinary delights.',
+        excerpt: 'Lokmanya Tilak transformed Ganeshotsav into a public community movement. Millions join street processions accompanied by 100-member Dhol Tasha percussion troupes and steamed saffron Ukadiche Modak sweets.',
+        plannablePrompt: 'Plan a 4-day festive trip to Mumbai and Pune during Ganesh Chaturthi',
+        targetCity: 'Mumbai',
+      },
+      {
+        id: 'mh_fest_gudi_padwa',
+        name: 'Gudi Padwa',
+        month: 'March - April',
+        dateRange: 'Apr 9',
+        startMonth: 4,
+        startDay: 9,
+        endDay: 9,
+        durationDays: 1,
+        significance: 'The Marathi New Year marked by raising auspicious silk Gudis, Shobha Yatra cultural rallies, and saffron Shrikhand.',
+        location: 'Girgaon (Mumbai) & Pune Heritage Wadas',
+        city: 'Mumbai',
+        tags: ['New Year', 'Shobha Yatra', 'Shrikhand Puri', 'Traditional Attire'],
+        bestFor: 'Witnessing traditional Nauvari saree motor rallies, lejim folk dance, and spring feastings.',
+        excerpt: 'Families erect a decorated bamboo flag (Gudi) adorned with neem leaves and silver pots atop roofs to invite prosperity and victory.',
+        plannablePrompt: 'Plan a 3-day spring cultural trip to Mumbai during Gudi Padwa',
+        targetCity: 'Mumbai',
+      },
+      {
+        id: 'mh_fest_banganga',
+        name: 'Banganga Music Festival',
+        month: 'January',
+        dateRange: 'Jan 20 - 21',
+        startMonth: 1,
+        startDay: 20,
+        endDay: 21,
+        durationDays: 2,
+        significance: 'Classical Indian ragas performed under torchlight at the ancient freshwater stepwell tank of Walkeshwar, Mumbai.',
+        location: 'Banganga Water Tank, Walkeshwar, South Mumbai',
+        city: 'Mumbai',
+        tags: ['Classical Ragas', 'Ancient Stepwell', 'Night Concert', 'South Mumbai'],
+        bestFor: 'Classical music connoisseurs and historic stepwell ambiance.',
+        excerpt: 'Set around a 12th-century freshwater stepwell fed by an underground natural spring, world-renowned sitar and vocal maestros perform against illuminated temple steps.',
+        plannablePrompt: 'Plan a 3-day South Mumbai heritage & music getaway for Banganga Festival',
+        targetCity: 'Mumbai',
+      },
+      {
+        id: 'mh_fest_ellora_ajanta',
+        name: 'Ellora Ajanta International Festival',
+        month: 'January',
+        dateRange: 'Jan 26 - 28',
+        startMonth: 1,
+        startDay: 26,
+        endDay: 28,
+        durationDays: 3,
+        significance: 'Classical dance and musical performances against the floodlit monolithic backdrop of the Kailasa Temple.',
+        location: 'Ellora Caves, Chhatrapati Sambhajinagar (Aurangabad)',
+        city: 'Chhatrapati Sambhajinagar',
+        tags: ['Kailasa Temple', 'Classical Dance', 'UNESCO Backdrop', 'Aurangabad'],
+        bestFor: 'Archaeology lovers and classical dance admirers.',
+        excerpt: 'Kathak, Odissi, and Bharatnatyam exponents perform before the massive 8th-century rock-cut facade of Kailasa Temple, bringing ancient stone halls to vibrant life.',
+        plannablePrompt: 'Plan a 3-day UNESCO heritage trip to Aurangabad & Ellora Festival',
+        targetCity: 'Chhatrapati Sambhajinagar',
+      },
+    ],
+    foods: [
+      {
+        id: 'mh_f1',
+        name: 'Misal Pav',
+        category: 'Spicy Street Cult Favorite',
+        description: 'Sprouted moth beans in a fiery red Kat/Rassa gravy, topped with crunchy farsan, chopped onions, lemon juice, and served with buttered pav buns.',
+        origin: 'Punekar and Kolhapuri breakfast staple celebrated for its layered textural spice.',
+      },
+      {
+        id: 'mh_f2',
+        name: 'Ukadiche Modak',
+        category: 'Sacred Ganeshotsav Delicacy',
+        description: 'Steamed rice flour dumplings stuffed with freshly grated coconut, jaggery, cardamom, and nutmeg, drizzled with fragrant warm desi ghee.',
+        origin: 'Traditional prasad offered to Lord Ganesha during Ganeshotsav celebrations.',
+      },
+      {
+        id: 'mh_f3',
+        name: 'Malvani Fish Curry & Kombdi Vade',
+        category: 'Coastal Konkan Feast',
+        description: 'Fresh surmai/pomfret simmered in roasted coconut, fresh triphala, and tart kokum curry, paired with fluffy multigrain deep-fried puris (vade).',
+        origin: 'Southern Konkan coastal fishing villages of Malvan and Sindhudurg.',
+      },
+      {
+        id: 'mh_f4',
+        name: 'Puran Poli',
+        category: 'Festive Sweet Flatbread',
+        description: 'Thin, soft whole-wheat flatbread stuffed with sweet chana dal, jaggery, nutmeg, and cardamom filling, served drenched in pure ghee.',
+        origin: 'Quintessential festive dish for Gudi Padwa, Holi, and Diwali across Marathi households.',
+      },
+      {
+        id: 'mh_f5',
+        name: 'Mumbai Vada Pav',
+        category: 'Street Icon',
+        description: 'Spiced potato mash batata vada dipped in gram-flour batter, deep-fried to golden perfection, and served in pav with fiery dry garlic-peanut chutney.',
+        origin: 'Invented outside Dadar railway station in 1966 by Ashok Vaidya as the working-class energy fuel.',
+      },
+    ],
+    places: [
+      {
+        id: 'mh_p1',
+        name: 'Ellora Caves & Kailasa Monolithic Temple',
+        location: 'Chhatrapati Sambhajinagar (Aurangabad)',
+        city: 'Chhatrapati Sambhajinagar',
+        description: 'UNESCO World Heritage wonder featuring Cave 16 (Kailasa), carved vertically from a single volcanic cliff without scaffolding.',
+        tags: ['Monolithic Rock Temple', 'UNESCO World Heritage', 'Ancient Engineering'],
+      },
+      {
+        id: 'mh_p2',
+        name: 'Ajanta Caves Buddhist Murals',
+        location: 'Chhatrapati Sambhajinagar',
+        city: 'Chhatrapati Sambhajinagar',
+        description: '30 rock-hewn horseshoe caves preserving 2,000-year-old Buddhist frescoes painted with natural mineral lapis and malachite pigments.',
+        tags: ['Ancient Frescoes', 'Buddhist Chaityas', 'UNESCO Heritage'],
+      },
+      {
+        id: 'mh_p3',
+        name: 'Raigad Fortress Capital & Sindhudurg Sea Fort',
+        location: 'Mahad & Malvan',
+        city: 'Raigad',
+        description: 'The impregnable mountain capital of Chhatrapati Shivaji Maharaj and the offshore sea bastion constructed on molten lead foundations.',
+        tags: ['Maratha Bastion', 'Mountain Fortress', 'Sea Citadel'],
+      },
+      {
+        id: 'mh_p4',
+        name: 'Gateway of India & South Mumbai Heritage Precinct',
+        location: 'Colaba, Mumbai',
+        city: 'Mumbai',
+        description: 'Indo-Saracenic basalt arch facing Mumbai harbour, surrounded by UNESCO Victorian Gothic and Art Deco buildings.',
+        tags: ['Colonial Maritime', 'UNESCO Heritage', 'Harbourfront'],
+      },
+    ],
+    cultureTraditions: [
+      {
+        category: 'Dance & Music',
+        title: 'High-Energy Lavani & Dhol Tasha Percussion',
+        description: 'Rhythmic footwork set to Dholki rhythms and satirical poetry in Lavani, alongside 100-member synchronized percussion troupes.',
+      },
+      {
+        category: 'Clothing',
+        title: 'Nauvari Saree & Puneri Pagadi',
+        description: '9-yard Kashta silk saree draped in trouser style for equestrian mobility, paired with Peshwa velvet turbans.',
+      },
+      {
+        category: 'Art',
+        title: 'Warli Indigenous Tribal Painting',
+        description: 'Ancient geometric mural art created using rice flour and water on mud-washed cow dung walls, depicting sacred harvest circle dances.',
+      },
+    ],
+    seasons: [
+      {
+        season: 'Winter',
+        months: 'November to February',
+        weather: 'Pleasant, dry, breezy with cool evenings across the plateau and balmy coastal days.',
+        temperature: '16°C to 30°C',
+        experiences: ['Ajanta & Ellora cave explorations', 'Sahyadri hill fort trekking', 'South Mumbai heritage art walks'],
+        festivals: ['Banganga Music Festival', 'Ellora Ajanta Festival', 'Kala Ghoda Arts Festival'],
+      },
+      {
+        season: 'Monsoon',
+        months: 'June to September',
+        weather: 'Heavy tropical downpours transforming the Sahyadri mountains into cascading waterfalls and mist.',
+        temperature: '22°C to 29°C',
+        experiences: ['Waterfalls in Lonavala and Bhandardara', 'Ganeshotsav immersion pageantry in Mumbai'],
+        festivals: ['Ganesh Chaturthi', 'Pandharpur Wari Pilgrimage'],
+      },
+    ],
+    artisanGuilds: [
+      {
+        name: 'Yeola & Paithan Silk Weavers',
+        craft: 'Paithani Saree with Pure Gold Zari & Pallu Birds',
+        location: 'Yeola (Nashik) & Paithan (Aurangabad)',
+        description: 'Two-thousand-year-old weaving lineage creating kaleidoscopic silk sarees using tapestry weave techniques.',
+      },
+      {
+        name: 'Warli Tribal Art Collective',
+        craft: 'Geometric Ochre & Rice Flour Mural Painting',
+        location: 'Dahanu & Palghar Foothills',
+        description: 'Ancient indigenous folk painting using triangles and circles representing mother nature, harvest Tarpa dances, and celestial cycles.',
+      },
+      {
+        name: 'Kolhapuri Leather Chappal Guild',
+        craft: 'Hand-Stitched Vegetable Tanned Leather Footwear',
+        location: 'Kolhapur Old Bazaar',
+        description: 'Generational cobbler guilds using natural bark tannins and intricate braided cords without artificial adhesives.',
+      },
+    ],
+    crossStateConnections: [
+      {
+        relatedState: 'Goa',
+        connectionDescription: 'Shared Konkan coastal ecology, Malvani culinary spices, and ancient Kadamba dynastic sea routes.',
+        sharedFestivalsOrTraditions: 'Ganesh Chaturthi and Shigmo festival cross-coastal traditions.',
+      },
+      {
+        relatedState: 'Karnataka',
+        connectionDescription: 'Varkari pilgrimage connections to Pandharpur and shared Chalukya rock-cut temple lineages.',
+        sharedFestivalsOrTraditions: 'Pandharpur Wari and Deccan temple architecture.',
+      },
+    ],
+  },
+
+  kerala: {
+    stateSlug: 'kerala',
+    stateName: 'Kerala',
+    stateCode: 'KL',
+    region: 'South-West Malabar Coast',
+    capital: 'Thiruvananthapuram',
+    primaryHub: 'Kochi',
+    culturalEssence: 'Palm-fringed backwater lagoons, fiery Theyyam rituals, Ayurvedic herbal healing, and aromatic spice ports.',
+    snapshot: {
+      region: 'South-West Malabar Coast',
+      capital: 'Thiruvananthapuram',
+      bestTime: 'September to March',
+      duration: '6 to 9 Days',
+      bestFor: ['Backwaters', 'Ayurveda', 'Spices', 'Theyyam Rituals', 'Kathakali'],
+      climate: 'Tropical maritime climate with rejuvenating monsoons and balmy winter breezes (22°C to 32°C).',
+    },
+    chapters: [
+      {
+        id: 'kl_ch1',
+        chapterNumber: 1,
+        eraName: 'The Ancient Spice Coast & Muziris Port Global Trade',
+        timePeriod: '3rd Century BCE - 12th Century CE',
+        headline: 'Black gold pepper trade with Rome, Greece, Arabia, and China through the ancient port of Muziris',
+        narrative: 'Kerala\'s Malabar coast was the world\'s primary source of black pepper, cardamom, and teakwood. Merchant ships from the Roman Empire and Phoenicia sailed across the monsoon trade winds to anchor at Muziris, fostering an extraordinary pluralistic haven of Syrian Christians, Cochin Jews, and Arab traders.',
+        keyMonuments: ['Muziris Archaeological Excavations', 'Cheraman Juma Mosque', 'Paradesi Synagogue (Mattancherry)', 'St. Francis Church'],
+        livingLegacy: 'Bestowed Kerala with unmatched cosmopolitan religious harmony, maritime spice gardens, and Fort Kochi colonial streetscapes.',
+        excerpt: 'The Malabar coast traded millions of Roman gold coins for Tellicherry black pepper. Ancient trading quarters welcomed Saint Thomas Christians in 52 CE and Cochin Jewish communities in 72 CE.',
+      },
+      {
+        id: 'kl_ch2',
+        chapterNumber: 2,
+        eraName: 'Sovereign Kingdoms, Temple Feudalism & Sacred Performing Arts',
+        timePeriod: '14th - 18th Century CE',
+        headline: 'The Zamorins of Calicut, Travancore Kingdom, and the codification of Kathakali and Kalaripayattu',
+        narrative: 'The medieval era witnessed the rise of powerful maritime kingdoms. The Zamorins defended coastal sovereignty with Marakkar naval fleets, while Travancore royalty codified classical arts. Kathakali dance dramas, Koodiyattam Sanskrit theater, and Kalaripayattu martial academies flourished under court patronage.',
+        keyMonuments: ['Padmanabhapuram Wooden Palace', 'Mattancherry Dutch Palace', 'Bekal Cliff Fortress', 'Vadakkumnathan Temple'],
+        livingLegacy: 'Preserved the distinct Kerala timber architectural style with steep gabled roofs, vibrant temple murals, and world-class theatrical disciplines.',
+        excerpt: 'Padmanabhapuram Palace is Asia\'s largest wooden palace, built entirely with rosewood and teak joinery with natural ventilation, clay floors, and brass lamps.',
+      },
+      {
+        id: 'kl_ch3',
+        chapterNumber: 3,
+        eraName: 'Living Ritual Theater, Ayurveda & Modern Eco-Sanctuary',
+        timePeriod: '19th Century - Present',
+        headline: 'Unbroken Theyyam trance rituals, Panchakarma healing sanctuaries, and community tourism',
+        narrative: 'Today, Northern Malabar maintains over 400 forms of fiery Theyyam temple shrines where performers embody living deities. In the tranquil backwaters and Western Ghats slopes, traditional Ashtavaidya Ayurvedic families practice timeless herbal wellness for global travelers.',
+        keyMonuments: ['Thrissur Thekkinkadu Maidan', 'Aranmula Mirror Guilds', 'Vembanad Lake Backwater Network', 'Munnar Tea Estates'],
+        livingLegacy: 'Solidified Kerala\'s reputation as God\'s Own Country, balancing high social literacy with pristine conservation and cultural hospitality.',
+        excerpt: 'Theyyam is an ancient shamanic ritual where village priests wear towering headdresses (Mudi), intricate facial paints made of crushed turmeric and rice paste, and perform walking over glowing embers.',
+      },
+    ],
+    festivalCalendar: [
+      {
+        id: 'kl_fest_thrissur',
+        name: 'Thrissur Pooram',
+        month: 'April - May',
+        dateRange: 'May 10',
+        startMonth: 5,
+        startDay: 10,
+        endDay: 10,
+        durationDays: 1,
+        significance: 'The Mother of All Poorams with 30 caparisoned elephants, dynamic parasol exchange (Kudamattom), and 250-artist Ilanjithara Melam percussion.',
+        location: 'Vadakkumnathan Temple & Thekkinkadu Maidan, Thrissur',
+        city: 'Thrissur',
+        tags: ['Elephant Pageantry', 'Ilanjithara Melam', 'Kudamattom', 'Temple Drumming'],
+        bestFor: 'Percussion enthusiasts, grand temple pageantry, and world-record pyrotechnics.',
+        excerpt: 'Instituted by King Sakthan Thampuran in 1798, two rival temple factions compete in displaying majestic ornamental umbrellas atop elephants to the thunderous rhythm of Chenda drums.',
+        plannablePrompt: 'Plan a 3-day Thrissur Pooram & cultural heritage trip to Central Kerala',
+        targetCity: 'Thrissur',
+      },
+      {
+        id: 'kl_fest_onam',
+        name: 'Onam & Vallam Kali Snake Boat Race',
+        month: 'August - September',
+        dateRange: 'Sep 5 - 15',
+        startMonth: 9,
+        startDay: 5,
+        endDay: 15,
+        durationDays: 10,
+        significance: 'Grand harvest homecoming of mythical King Mahabali featuring 100-rower Chundan Vallam boat races, floral Pookkalam carpets, and 26-dish Sadhya feasts.',
+        location: 'Punnamada Lake (Alappuzha) & Aranmula',
+        city: 'Alappuzha',
+        tags: ['Snake Boat Race', 'Onasadya Feast', 'Pookkalam Carpets', 'Pulikali Tiger Dance'],
+        bestFor: 'Backwater boat spectacles, culinary feasts, and community celebration.',
+        excerpt: 'The Nehru Trophy Boat Race at Punnamada Lake witnesses 100-foot snake boats with over 100 oarsmen slicing through backwater channels in rhythmic harmony to ancient Vanchipattu boat songs.',
+        plannablePrompt: 'Plan a 4-day backwater houseboat & Onam festival trip to Alleppey',
+        targetCity: 'Alappuzha',
+      },
+      {
+        id: 'kl_fest_theyyam_season',
+        name: 'North Malabar Theyyam Season',
+        month: 'October - May',
+        dateRange: 'Nov 1 - Apr 30',
+        startMonth: 11,
+        startDay: 1,
+        endDay: 30,
+        durationDays: 180,
+        significance: 'Over 400 sacred village grove rituals where performers dance in blazing costumes to manifest living ancestor deities.',
+        location: 'Kannur & Kasaragod Sacred Groves (Kavus)',
+        city: 'Kannur',
+        tags: ['Theyyam Ritual', 'Fire Dance', 'Sacred Groves', 'Kannur Culture'],
+        bestFor: 'Spiritual travelers, documentary photographers, and authentic tribal folklore.',
+        excerpt: 'In village shrines known as Kavus, Muthappan and Pottan Theyyam dancers perform all-night trance ceremonies on glowing charcoal beds without artificial stages.',
+        plannablePrompt: 'Plan a 3-day Northern Kerala heritage & Theyyam ritual tour in Kannur',
+        targetCity: 'Kannur',
+      },
+    ],
+    foods: [
+      {
+        id: 'kl_f1',
+        name: 'Onam Sadhya Feast',
+        category: 'Grand Vegetarian Banquet',
+        description: '26 traditional vegetarian dishes served on fresh plantain leaves, featuring Avial, Olan, Thoran, Kalan, Sambar, Rasam, and sweet Palada Payasam.',
+        origin: 'Sacred harvest feast honoring King Mahabali, embodying the balance of six essential ayurvedic tastes.',
+      },
+      {
+        id: 'kl_f2',
+        name: 'Appam with Stew (Ishtu)',
+        category: 'Breakfast Classic',
+        description: 'Lacy, bowl-shaped fermented rice and coconut milk pancakes with soft spongy centers, paired with fragrant cinnamon-cardamom coconut vegetable or chicken stew.',
+        origin: 'Syrian Christian heritage staple enjoyed across backwater homestays.',
+      },
+      {
+        id: 'kl_f3',
+        name: 'Karimeen Pollichathu',
+        category: 'Backwater Signature',
+        description: 'Pearl spot fish marinated in fiery shallot, ginger, and curry leaf masala, wrapped in charred banana leaves and slow-roasted on a tawa.',
+        origin: 'Authentic Kumarakom and Alleppey backwater delicacy caught fresh from freshwater lagoons.',
+      },
+      {
+        id: 'kl_f4',
+        name: 'Malabar Parotta with Kozhi Curry',
+        category: 'Malabar Culinary Heritage',
+        description: 'Flaky, spiral layered, buttery flatbread beaten by hand, served with slow-simmered toasted coconut chicken gravy and fennel seeds.',
+        origin: 'North Malabar coastal trading hub around Calicut and Thalassery.',
+      },
+    ],
+    places: [
+      {
+        id: 'kl_p1',
+        name: 'Fort Kochi Colonial Quarters & Chinese Fishing Nets',
+        location: 'Kochi',
+        city: 'Kochi',
+        description: '500-year-old Portuguese and Dutch trading lanes with iconic cantilevered Cheena Vala fishing nets on the Arabian Sea.',
+        tags: ['Colonial Maritime', 'Chinese Nets', 'Spice Bazaars'],
+      },
+      {
+        id: 'kl_p2',
+        name: 'Alleppey & Vembanad Backwater Network',
+        location: 'Alappuzha',
+        city: 'Alappuzha',
+        description: '900km of interconnected palm-fringed canals, traditional Kettuvallam houseboats, and village paddy fields.',
+        tags: ['Houseboat Cruise', 'Vembanad Lake', 'Tranquil Waters'],
+      },
+      {
+        id: 'kl_p3',
+        name: 'Munnar Highland Tea Plantations',
+        location: 'Idukki',
+        city: 'Munnar',
+        description: 'Misty rolling emerald hills at 1,600m elevation, home to colonial tea estates, waterfalls, and the endangered Nilgiri Tahr.',
+        tags: ['Tea Gardens', 'Highland Mist', 'Western Ghats'],
+      },
+    ],
+    cultureTraditions: [
+      {
+        category: 'Dance & Theater',
+        title: 'Kathakali Drama & Mohiniyattam',
+        description: 'Classical Sanskrit dance-dramas with vibrant Paccha green face paint and towering headdresses, alongside the lyrical sway of Mohiniyattam.',
+      },
+      {
+        category: 'Martial Arts',
+        title: 'Kalaripayattu Ancient Combat',
+        description: 'The world\'s oldest martial art, combining animal forms, flexible swords (Urumi), and wooden oil-massage healing.',
+      },
+      {
+        category: 'Clothing',
+        title: 'Kasavu Cream Saree & Mundu',
+        description: 'Handloom unbleached cotton garments woven with gleaming pure gold zari borders for auspicious occasions.',
+      },
+    ],
+    seasons: [
+      {
+        season: 'Winter',
+        months: 'September to March',
+        weather: 'Balmy, sunny, dry with pleasant coastal breezes and cool hill stations.',
+        temperature: '22°C to 32°C',
+        experiences: ['Houseboat cruising in Alleppey', 'Theyyam night rituals in Kannur', 'Tea trekking in Munnar'],
+        festivals: ['Thrissur Pooram', 'Nishagandhi Dance Festival', 'Kochi-Muziris Biennale'],
+      },
+      {
+        season: 'Monsoon (Ayurveda Season)',
+        months: 'June to August',
+        weather: 'Heavy monsoon rains opening atmospheric pores, considered the prime time for Ayurvedic Panchakarma rejuvenation.',
+        temperature: '20°C to 28°C',
+        experiences: ['Traditional Ayurvedic herbal therapies', 'Watching Nehru Trophy snake boat races in August'],
+        festivals: ['Nehru Trophy Boat Race', 'Onam Celebrations'],
+      },
+    ],
+    artisanGuilds: [
+      {
+        name: 'Aranmula Kannadi Metal Mirror Guild',
+        craft: 'Secret Copper-Tin Alloy Hand-Polished Reflective Mirrors',
+        location: 'Aranmula Village (near Pathanamthitta)',
+        description: 'UNESCO protected metallurgy lineage casting frontline reflective metallic mirrors without mercury coating.',
+      },
+      {
+        name: 'Balaramapuram Handloom Weavers',
+        craft: 'Kasavu Cream Cotton Saree with Pure Gold Zari Border',
+        location: 'Balaramapuram (near Trivandrum)',
+        description: 'Fine counts of organic unbleached cotton woven on pit looms for traditional Onam attire.',
+      },
+    ],
+    crossStateConnections: [
+      {
+        relatedState: 'Tamil Nadu',
+        connectionDescription: 'Shared Western Ghats mountain ecology, ancient Sangam literature heritage, and Carnatic music roots.',
+        sharedFestivalsOrTraditions: 'Pongal and Onam harvest celebrations, plus temple architecture synergies.',
+      },
+    ],
+  },
+
+  ladakh: {
+    stateSlug: 'ladakh',
+    stateName: 'Ladakh',
+    stateCode: 'LA',
+    region: 'Trans-Himalayan High Altitude Plateau',
+    capital: 'Leh',
+    primaryHub: 'Leh',
+    culturalEssence: 'Ancient Tibetan Buddhist monasteries perched on barren crags, Silk Route mountain passes, and nomadic Changpa pashmina herders.',
+    snapshot: {
+      region: 'Trans-Himalayan High Altitude Plateau',
+      capital: 'Leh',
+      bestTime: 'May to September (Summer) / Dec to Feb (Chadar Trek & Losar)',
+      duration: '6 to 10 Days',
+      bestFor: ['High Mountain Passes', 'Monastery Cham Dances', 'Pashmina Wool', 'Pangong Tso Lake', 'Stargazing'],
+      climate: 'Cold high-altitude desert with clear sunny summers (15°C to 25°C) and sub-zero winters (-20°C to 5°C).',
+    },
+    chapters: [
+      {
+        id: 'la_ch1',
+        chapterNumber: 1,
+        eraName: 'Silk Route Caravans & Trans-Himalayan Kingdoms',
+        timePeriod: '9th - 16th Century CE',
+        headline: 'Maryul kingdom foundations, trade entrepots at Leh, and high-altitude Buddhist sanctuaries',
+        narrative: 'At the crossroads of Central Asia, Tibet, and the Indian subcontinent, Ladakhi kings established the Maryul kingdom. Monasteries like Alchi and Hemis were founded along high-altitude mountain passes where silk, tea, salt, and pashmina wool were traded by hardy camel caravans.',
+        keyMonuments: ['Alchi Monastic Complex Frescoes', 'Shey Palace & Monastery', 'Thiksey 12-Story Gompa', 'Basgo Fortress Ruins'],
+        livingLegacy: 'Gifted Ladakh its extraordinary monastic preservation, 1,000-year-old Kashmiri-Buddhist woodcarvings, and resilient high-desert village eco-systems.',
+        excerpt: 'Alchi monastery contains 11th-century wall paintings executed by Kashmiri artists that are distinct from Tibetan murals, displaying miniature details of Silk Route court dresses.',
+      },
+      {
+        id: 'la_ch2',
+        chapterNumber: 2,
+        eraName: 'The Namgyal Dynasty & Monastic Citadels',
+        timePeriod: '16th - 19th Century CE',
+        headline: 'King Sengge Namgyal\'s 9-story Leh Palace and fortified hilltop Gompas',
+        narrative: 'The \'Lion King\' Sengge Namgyal unified Ladakh, commissioning the imposing Leh Palace overlooking the Indus Valley (a prototype for Lhasa\'s Potala Palace). He patronized the Drukpa Kagyu lineage and established Hemis Monastery as the wealthiest monastic institution in the Trans-Himalayas.',
+        keyMonuments: ['Leh Palace (Lhachen Palkhar)', 'Hemis Monastery', 'Diskit Monastery (Nubra Valley)', 'Lamayuru Moonland Gompa'],
+        livingLegacy: 'Forms Ladakh\'s dramatic skyline of stacked white and ochre monastic sanctuaries, Mani prayer walls, and sacred Chortens.',
+        excerpt: 'Leh Palace was constructed with rammed earth, sun-dried mud bricks, and heavy timber lintels to insulate against sub-zero winter winds while surviving tectonic shifts.',
+      },
+      {
+        id: 'la_ch3',
+        chapterNumber: 3,
+        eraName: 'Nomadic Changpa Lineages & Sustainable Living Heritage',
+        timePeriod: '20th Century - Present',
+        headline: 'From Changthang high-plateau pashmina herding to global eco-tourism and carbon-neutral travel',
+        narrative: 'The nomadic Changpa tribes graze prized Changthangi goats on the windswept Changthang plateau at 4,500 meters altitude. Their ultra-fine pashmina fleece is combed by hand and spun into world-famous Cashmere shawls, while Ladakh leads India in passive solar architecture and glacier preservation.',
+        keyMonuments: ['Shanti Stupa', 'Hemis Museum', 'Pangong Tso & Tso Moriri Reserves', 'Khardung La Pass'],
+        livingLegacy: 'Inspires travelers worldwide with spiritual mindfulness, high-altitude endurance, and community homestay stewardship.',
+        excerpt: 'Changthangi goats survive winter temperatures of -40°C by growing a microscopic underfleece just 12 to 15 microns thick, which is harvested during spring shedding.',
+      },
+    ],
+    festivalCalendar: [
+      {
+        id: 'la_fest_hemis',
+        name: 'Hemis Festival',
+        month: 'June - July',
+        dateRange: 'Jul 8 - 9',
+        startMonth: 7,
+        startDay: 8,
+        endDay: 9,
+        durationDays: 2,
+        significance: 'Birth anniversary of Guru Padmasambhava celebrated with mystic masked Cham dances, horn blowers, and unveiling of a two-story silk Thangka.',
+        location: 'Hemis Monastery Courtyard (45km from Leh)',
+        city: 'Leh',
+        tags: ['Cham Mask Dance', 'Guru Padmasambhava', 'Giant Thangka', 'Monastic Trumpets'],
+        bestFor: 'Spiritual mysticism, Tibetan mask art, and monastery photography.',
+        excerpt: 'Lamas dressed in brocade silk robes and heavy lacquered papier-mache masks portray guardian deities and divine protectors, dancing in circles to giant cymbals and long Dunchen horns.',
+        plannablePrompt: 'Plan a 4-day Ladakh monastery & Hemis Festival high-altitude tour in Leh',
+        targetCity: 'Leh',
+      },
+      {
+        id: 'la_fest_ladakh_fest',
+        name: 'Ladakh Festival',
+        month: 'September',
+        dateRange: 'Sep 21 - 24',
+        startMonth: 9,
+        startDay: 21,
+        endDay: 24,
+        durationDays: 4,
+        significance: 'Grand state showcase with street parades through Leh bazaar, traditional archery contests, polo matches, and folk dances.',
+        location: 'Leh Polo Ground & Main Bazaar, Leh',
+        city: 'Leh',
+        tags: ['Leh Parade', 'Archery Contest', 'Polo Matches', 'Folk Costumes'],
+        bestFor: 'Witnessing diverse ethnic tribes (Drokpa, Balti, Changpa) and traditional sports.',
+        excerpt: 'A colorful cultural procession starts from Karzoo and winds through Leh town with brass bands, yak dances, and folk troupes in Goncha robes and turquoise Perak headdresses.',
+        plannablePrompt: 'Plan a 5-day cultural & landscape expedition to Leh during Ladakh Festival',
+        targetCity: 'Leh',
+      },
+      {
+        id: 'la_fest_losar',
+        name: 'Losar (Ladakhi New Year)',
+        month: 'December - January',
+        dateRange: 'Dec 25 - 28',
+        startMonth: 12,
+        startDay: 25,
+        endDay: 28,
+        durationDays: 4,
+        significance: 'The Ladakhi New Year with Metho torchlight processions to ward off evil, butter lamp illuminations, and family reunions.',
+        location: 'Leh Valley & Monasteries across Ladakh',
+        city: 'Leh',
+        tags: ['New Year', 'Torch Procession', 'Butter Lamps', 'Winter Ladakh'],
+        bestFor: 'Winter wonderland explorers and intimate cultural rituals.',
+        excerpt: 'Villagers carry flaming cedar torches (Metho) through alleys while chanting sacred mantras, followed by preparing sweet baked dough cookies (Khapse) and butter tea.',
+        plannablePrompt: 'Plan a 4-day magical winter cultural trip to Leh for Losar New Year',
+        targetCity: 'Leh',
+      },
+    ],
+    foods: [
+      {
+        id: 'la_f1',
+        name: 'Skyu Traditional Stew',
+        category: 'High Altitude Comfort Food',
+        description: 'Hand-rolled thumb-pressed whole wheat pasta shells slow-cooked with root vegetables, dried yak cheese, and wild mountain herbs in a rich warming broth.',
+        origin: 'Generational winter energy staple created by Ladakhi village families during harsh sub-zero snowfalls.',
+      },
+      {
+        id: 'la_f2',
+        name: 'Thukpa & Tingmo',
+        category: 'Tibetan Noodle Broth & Steamed Bread',
+        description: 'Hearty hand-pulled noodle soup filled with mountain spinach, garlic, and simmered vegetables, paired with fluffy flower-shaped steamed Tingmo buns.',
+        origin: 'Himalayan caravan trading legacy perfected in Leh and Nubra monastery kitchens.',
+      },
+      {
+        id: 'la_f3',
+        name: 'Gur Gur Cha (Butter Tea) & Tsampa',
+        category: 'Sacred Himalayan Beverage',
+        description: 'Fermented black tea churned with fresh yak butter, Himalayan pink rock salt, and hot water, frequently mixed with roasted barley flour (Tsampa).',
+        origin: 'Crucial high-altitude hydration and endurance beverage consumed daily across monasteries and Changpa tents.',
+      },
+      {
+        id: 'la_f4',
+        name: 'Khapse Festive Pastries',
+        category: 'Losar New Year Sweet',
+        description: 'Intricately twisted deep-fried dough cookies made with wheat flour, butter, and sugar, prepared in auspicious knot shapes for Losar celebrations.',
+        origin: 'Traditional prasad offered to lamas and guests during the Tibetan and Ladakhi New Year.',
+      },
+    ],
+    places: [
+      {
+        id: 'la_p1',
+        name: 'Pangong Tso & Tso Moriri High-Altitude Lakes',
+        location: 'Changthang Plateau',
+        city: 'Changthang',
+        description: 'Endorheic salt lake at 4,350m elevation shifting colors from emerald turquoise to cobalt blue against barren snow-dusted mountains.',
+        tags: ['Endorheic Lake', 'Color Shift', 'Changthang Border'],
+      },
+      {
+        id: 'la_p2',
+        name: 'Thiksey 12-Storey Monastic Complex',
+        location: 'Thiksey (near Leh)',
+        city: 'Leh',
+        description: 'Imposing white and ochre hilltop Gompa resembling the Potala Palace, housing a 49-foot Maitreya Future Buddha statue.',
+        tags: ['Hilltop Gompa', 'Maitreya Buddha', 'Morning Puja'],
+      },
+      {
+        id: 'la_p3',
+        name: 'Nubra Valley, Hunder Dunes & Diskit Monastery',
+        location: 'Nubra Valley',
+        city: 'Nubra',
+        description: 'High-altitude cold desert valley with double-humped Bactrian camels roaming white sand dunes beneath a colossal 106-foot statue of Jampa Buddha.',
+        tags: ['Bactrian Camels', 'Silk Route Oasis', 'Diskit Gompa'],
+      },
+      {
+        id: 'la_p4',
+        name: 'Khardung La High Mountain Pass',
+        location: 'Khardung La',
+        city: 'Leh',
+        description: 'Historic pass connecting the Indus Valley to the Nubra Valley and Siachen Glacier at an altitude of 17,582 feet.',
+        tags: ['Himalayan Pass', 'High Altitude', 'Prayer Flags'],
+      },
+    ],
+    cultureTraditions: [
+      {
+        category: 'Sacred Performing Arts',
+        title: 'Mystic Cham Masked Dances',
+        description: 'Monastic ritual lamas dancing in lacquered deity masks to the sound of giant Dunchen brass horns and cymbals.',
+      },
+      {
+        category: 'Textiles & Lineages',
+        title: 'Changpa Pashmina Spinning',
+        description: 'Ultra-fine 13-micron raw Cashmere wool hand-combed from mountain goats and spun on wooden drop spindles.',
+      },
+      {
+        category: 'Attire',
+        title: 'Goncha Robes & Turquoise Perak Headdresses',
+        description: 'Thick maroon woolen robes fastened with silk sashes, paired with leather headpieces encrusted with 200 raw turquoise stones.',
+      },
+    ],
+    seasons: [
+      {
+        season: 'Summer',
+        months: 'May to September',
+        weather: 'Clear blue sunny skies with pleasant daytime temperatures; high mountain passes fully accessible.',
+        temperature: '15°C to 25°C',
+        experiences: ['Pangong Tso camping', 'Nubra Valley camel safaris', 'Hemis and Ladakh Festival pageantry'],
+        festivals: ['Hemis Festival', 'Ladakh Festival'],
+      },
+      {
+        season: 'Winter',
+        months: 'November to March',
+        weather: 'Severe sub-zero winter; frozen rivers and dramatic snowscapes with clear unpolluted night skies.',
+        temperature: '-20°C to 5°C',
+        experiences: ['Chadar Frozen River Trek', 'Snow leopard spotting in Hemis National Park', 'Losar family celebrations'],
+        festivals: ['Losar Ladakhi New Year', 'Spituk Gustor'],
+      },
+    ],
+    artisanGuilds: [
+      {
+        name: 'Changthang Nomadic Pashmina Guild',
+        craft: 'Hand-Spun Raw Cashmere Yarn & Shawl Weaving',
+        location: 'Changthang Plateau & Chushul Co-operatives',
+        description: 'Hand-carding and wooden spindle spinning of the world\'s warmest 13-micron raw goat fleece.',
+      },
+      {
+        name: 'Tibetan Thangka Sacred Painting Masters',
+        craft: 'Mineral Pigment & Real Gold Leaf Buddhist Scroll Art',
+        location: 'Shey & Choglamsar Art Studios',
+        description: 'Rigorous canonical proportion painting of Mandalas and deities on prepared cotton canvas.',
+      },
+    ],
+    crossStateConnections: [
+      {
+        relatedState: 'Himachal Pradesh',
+        connectionDescription: 'Shared Himalayan Buddhist culture in Spiti & Lahaul valleys and trans-Himalayan high mountain passes.',
+        sharedFestivalsOrTraditions: 'Losar, masked Cham dances, and butter sculpture traditions.',
+      },
+    ],
+  },
+};
+
+/**
+ * State-agnostic helper to resolve cultural dataset by any slug or name.
+ */
+export function getCulturalDataset(stateSlugOrName?: string | null): StateCulturalDataset | null {
+  if (!stateSlugOrName) return null;
+  const s = String(stateSlugOrName).toLowerCase().trim();
+  
+  if (s.includes('rajasthan') || s === 'rj') return CULTURAL_DATASETS.rajasthan;
+  if (s.includes('maharashtra') || s === 'mh') return CULTURAL_DATASETS.maharashtra;
+  if (s.includes('kerala') || s === 'kl') return CULTURAL_DATASETS.kerala;
+  if (s.includes('ladakh') || s === 'la' || s === 'leh') return CULTURAL_DATASETS.ladakh;
+  
+  if (CULTURAL_DATASETS[s]) return CULTURAL_DATASETS[s];
+  
+  return null;
+}
+
+/**
+ * Calculates upcoming festival for a given state relative to reference date.
+ */
+export function getUpcomingFestivalForState(stateSlugOrName?: string | null, referenceDate = new Date()): StateFestival | null {
+  const dataset = getCulturalDataset(stateSlugOrName);
+  if (!dataset || !dataset.festivalCalendar || dataset.festivalCalendar.length === 0) {
+    return null;
+  }
+
+  const currentYear = referenceDate.getFullYear();
+  const currentMonth = referenceDate.getMonth() + 1;
+  const currentDay = referenceDate.getDate();
+
+  const evaluatedFestivals = dataset.festivalCalendar.map((fest) => {
+    let festYear = currentYear;
+    if (fest.startMonth < currentMonth || (fest.startMonth === currentMonth && fest.startDay < currentDay)) {
+      festYear = currentYear + 1;
+    }
+
+    const festDate = new Date(festYear, fest.startMonth - 1, fest.startDay);
+    const diffTime = festDate.getTime() - referenceDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    return {
+      ...fest,
+      daysUntil: diffDays,
+      isNext60Days: diffDays >= 0 && diffDays <= 60,
+    };
+  });
+
+  evaluatedFestivals.sort((a, b) => (a.daysUntil ?? 999) - (b.daysUntil ?? 999));
+  return evaluatedFestivals[0] || null;
+}

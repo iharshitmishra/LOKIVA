@@ -38,6 +38,7 @@ __pycache__/
 scratch/
 .claude/
 *.log
+*.bak
 
 # debug
 npm-debug.log*

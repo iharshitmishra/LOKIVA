@@ -1382,8 +1382,8 @@ export function AiGuidePage() {
 
   return (
     <div
-      className="min-h-screen bg-[#FAF7F2] text-ink pt-6 sm:pt-8 relative overflow-hidden"
-      style={{ paddingBottom: Math.max(composerHeight, 200) + 24 }}
+      className="min-h-screen bg-transparent text-ink pt-6 sm:pt-8 relative overflow-hidden"
+      style={{ paddingBottom: Math.max(composerHeight, 240) + 24 }}
     >
       {/* Subtle radial warmth behind the concierge header */}
       <div

@@ -163,22 +163,12 @@ export function ProviderAuthPage({ initialMode = 'login' }: ProviderAuthPageProp
     try {
       await demoLogin(
         'provider',
-        'Kutch Rogan Art Collective',
-        'kutch.rogan@lokiva.in'
+        'Heritage Horizons & Local Trails Collective',
+        'provider@lokiva.com'
       );
-      initializeProviderSession({
-        guildName: 'Kutch Rogan Art & Handloom Collective',
-        craftSpecialty: 'Generational Rogan Fabric Painting & Natural Dyeing',
-        city: 'Mumbai',
-        precinct: 'Bandra West / Kala Ghoda',
-        heritage: '300+ Year Family Atelier (8th Generation)',
-        isAccessible: true,
-        email: 'kutch.rogan@lokiva.in',
-        phone: '+91 98201 44521',
-      });
-      navigate(redirectUrl);
+      navigate('/provider/dashboard');
     } catch (err: any) {
-      setAuthError('Failed to initialize demo artisan session.');
+      setAuthError('Failed to initialize demo host session.');
     } finally {
       setIsLoading(false);
     }
@@ -347,6 +337,34 @@ export function ProviderAuthPage({ initialMode = 'login' }: ProviderAuthPageProp
             {/* TAB CONTENT: LOGIN FORM */}
             {mode === 'login' && (
               <div className="space-y-4">
+                {/* 1-Click Instant Demo Provider Card */}
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-[#FAF4ED] to-[#F5EADB] border-2 border-[#C85A32] shadow-xs space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#C85A32]" />
+                      <span className="text-xs font-heading font-extrabold text-[#12213B]">
+                        Instant 1-Click Demo Provider Access
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-mono font-bold uppercase bg-[#C85A32] text-white px-2 py-0.5 rounded-full">
+                      Pre-loaded Data
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[#556275] leading-normal">
+                    Experience the complete B2B Provider Workspace OS for <strong>Heritage Horizons & Local Trails</strong> with 12 bookings, 28 availability slots, AI Concierge co-pilot, and live earnings ledger.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleOneTapDemoLogin}
+                    disabled={isLoading}
+                    className="w-full py-2.5 px-4 bg-[#12213B] hover:bg-[#1A2F50] text-white rounded-xl text-xs font-heading font-extrabold transition flex items-center justify-center gap-2 shadow-xs cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-[#C85A32]" />
+                    <span>Launch Demo Provider Workspace</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
                 <GoogleSignInButton role="provider" text="Continue as Host with Google" redirectTo="/provider" />
 
                 <div className="flex items-center gap-3">

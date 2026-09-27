@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import {
   MapPin,
   Clock,
@@ -24,6 +24,7 @@ import {
   Zap,
   Star,
   Building2,
+  Train,
 } from 'lucide-react';
 import {
   QuickEscapeQuery,
@@ -42,39 +43,79 @@ import {
 } from '../../data/quickEscapeData';
 import { getUserLiveLocation } from '../../lib/gpsLocation';
 import { resolveImageUrl } from '../../lib/api';
-import { SquiggleUnderline, StampBadge } from '../ui/HandDrawnAnnotations';
+import { SquiggleUnderline } from '../ui/HandDrawnAnnotations';
 
 const AVAILABLE_TIMES: AvailableHours[] = [1, 2, 3, 5];
 
 const INTEREST_OPTIONS: { id: QuickEscapeInterest; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 'Culture', label: 'Culture', icon: Landmark },
-  { id: 'Food', label: 'Food', icon: UtensilsCrossed },
-  { id: 'Heritage', label: 'Heritage', icon: Compass },
-  { id: 'Shopping', label: 'Shopping', icon: ShoppingBag },
-  { id: 'Nature', label: 'Nature', icon: Trees },
+  { id: 'Food', label: 'Food & Chai', icon: UtensilsCrossed },
+  { id: 'Heritage', label: 'Living Heritage', icon: Compass },
+  { id: 'Shopping', label: 'Artisan Shopping', icon: ShoppingBag },
+  { id: 'Nature', label: 'Nature & Baoris', icon: Trees },
   { id: 'Entertainment', label: 'Entertainment', icon: Ticket },
 ];
 
+const HOUR_LABELS: Record<number, string> = { 1: '1 Hour', 2: '2 Hours', 3: '3 Hours', 5: '5 Hours' };
+
+// Warm Earthen Luxury palette constants
+const PALETTE = {
+  espresso: '#3B2316',
+  terracotta: '#B84A27',
+  saffron: '#D47A39',
+  sandstone: '#A67B5B',
+  travertine: '#F3ECE1',
+  linen: '#FAF6F0',
+  ivory: '#FFFDF9',
+  warmBorder: '#DFCBB2',
+  warmBorderLight: '#E6DAC6',
+  warmBorderDark: '#E2D2BC',
+  midBrown: '#5C3D2E',
+  fieldBrown: '#7A523B',
+  labelBrown: '#8C6751',
+  saffronDeep: '#9E5414',
+};
+
+// Transit mode icons
+const TransitIcon = ({ mode }: { mode: string }) => {
+  if (mode === 'walk') return <Footprints className="w-3.5 h-3.5 text-[#B84A27] shrink-0" />;
+  if (mode === 'metro') return <Train className="w-3.5 h-3.5 text-[#B84A27] shrink-0" />;
+  return <Car className="w-3.5 h-3.5 text-[#B84A27] shrink-0" />;
+};
+
+// Card animation variants for staggered cascade
+const cardVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.08, duration: 0.5, ease: 'easeOut' as const },
+  }),
+  exit: { opacity: 0, y: -16, transition: { duration: 0.25 } },
+};
+
 export function QuickEscapeSection() {
-  // Form State
-  const [location, setLocation] = useState<string>('Delhi, India');
+  // Form State - Defaulting to Jaipur
+  const [location, setLocation] = useState<string>('Jaipur, Rajasthan');
   const [availableHours, setAvailableHours] = useState<AvailableHours>(3);
   const [interests, setInterests] = useState<QuickEscapeInterest[]>(['Heritage', 'Food', 'Shopping']);
   const [startPointType, setStartPointType] = useState<StartPointType>('current');
-  const [customStartPoint, setCustomStartPoint] = useState<string>('Indira Gandhi Int. Airport (DEL)');
-  
+  const [customStartPoint, setCustomStartPoint] = useState<string>('Jaipur International Airport (JAI)');
+
   // GPS Detection State
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [isLiveGpsActive, setIsLiveGpsActive] = useState<boolean>(false);
   const [liveCoords, setLiveCoords] = useState<{ latitude: number; longitude: number } | undefined>(undefined);
   const [gpsErrorMsg, setGpsErrorMsg] = useState<string | null>(null);
 
-  // Result state - initialize with default plan for instant zero-jump rendering
+  // Result state
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [generatedPlan, setGeneratedPlan] = useState<QuickEscapePlan | null>(DEFAULT_QUICK_ESCAPE_PLAN);
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
+  const [planKey, setPlanKey] = useState(0); // For re-triggering animations
 
   const itineraryRef = useRef<HTMLDivElement>(null);
+  const timeBarRef = useRef<HTMLDivElement>(null);
 
   // Dynamic start point config for currently selected city
   const currentStartConfig = getStartPointConfig(location);
@@ -84,10 +125,24 @@ export function QuickEscapeSection() {
     ScrollTrigger.refresh();
   }, [generatedPlan]);
 
+  // Animate time allocation bar segments
+  useEffect(() => {
+    if (!timeBarRef.current || !generatedPlan) return;
+    const segments = timeBarRef.current.querySelectorAll<HTMLElement>('[data-time-segment]');
+    segments.forEach((seg) => {
+      const targetWidth = seg.getAttribute('data-target-width') || '0%';
+      gsap.fromTo(
+        seg,
+        { width: '0%' },
+        { width: targetWidth, duration: 0.8, ease: 'power2.out', delay: 0.2 }
+      );
+    });
+  }, [generatedPlan, planKey]);
+
   const handleToggleInterest = (interest: QuickEscapeInterest) => {
     setInterests((prev) => {
       if (prev.includes(interest)) {
-        if (prev.length === 1) return prev; // Keep at least one
+        if (prev.length === 1) return prev;
         return prev.filter((i) => i !== interest);
       } else {
         return [...prev, interest];
@@ -95,7 +150,6 @@ export function QuickEscapeSection() {
     });
   };
 
-  // Helper to re-generate with custom parameters
   const runPlanGeneration = async (
     targetLocation: string,
     targetStartType: StartPointType,
@@ -108,7 +162,7 @@ export function QuickEscapeSection() {
     setIsLoading(true);
     try {
       const plan = await generateQuickEscapePlan({
-        location: targetLocation.trim() || 'Delhi, India',
+        location: targetLocation.trim() || 'Jaipur, Rajasthan',
         availableHours: targetHours,
         interests: targetInterests,
         startPointType: targetStartType,
@@ -117,6 +171,7 @@ export function QuickEscapeSection() {
         isLiveGps: targetIsLiveGps,
       });
       setGeneratedPlan(plan);
+      setPlanKey((k) => k + 1);
     } catch (err) {
       console.error('Quick escape generation error:', err);
     } finally {
@@ -199,7 +254,6 @@ export function QuickEscapeSection() {
         true
       );
 
-      // Smooth scroll into itinerary on mobile/tablet
       setTimeout(() => {
         if (window.innerWidth < 1024 && itineraryRef.current) {
           itineraryRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -293,7 +347,6 @@ export function QuickEscapeSection() {
       liveCoords,
       isLiveGpsActive
     );
-    // Smooth scroll into itinerary on mobile/tablet
     setTimeout(() => {
       if (window.innerWidth < 1024 && itineraryRef.current) {
         itineraryRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -308,628 +361,662 @@ export function QuickEscapeSection() {
     setTimeout(() => setCopiedLink(false), 2200);
   };
 
+  // Compute time allocation segments
+  const totalMinutes = generatedPlan ? generatedPlan.totalDurationMins : 180;
+  const transitMinutes = generatedPlan ? generatedPlan.estimatedTravelTimeMins : 30;
+  const bufferMinutes = Math.round(totalMinutes * 0.08);
+  const immersionMinutes = totalMinutes - transitMinutes - bufferMinutes;
+  const immersionPct = Math.round((immersionMinutes / totalMinutes) * 100);
+  const transitPct = Math.round((transitMinutes / totalMinutes) * 100);
+  const bufferPct = 100 - immersionPct - transitPct;
+
+  const cityNameOnly = location.split(',')[0].trim();
+
   return (
     <section
       id="quick-escape"
-      className="relative z-20 w-full bg-[#FAF7F2] py-16 sm:py-24 border-t border-[#E5DFD5] overflow-hidden"
+      className="relative z-20 w-full bg-[#FAF6F0] py-16 sm:py-24 border-t border-[#E2D2BC] overflow-hidden"
     >
-      {/* Decorative ambient background blurs matching LOKIVA aesthetic */}
-      <div className="absolute top-10 left-1/4 w-96 h-96 rounded-full bg-[#FFC067]/15 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-96 h-96 rounded-full bg-[#C1443B]/10 blur-3xl pointer-events-none" />
+      {/* Decorative ambient background blurs */}
+      <div className="absolute top-10 left-1/4 w-96 h-96 rounded-full bg-[#D47A39]/10 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-10 right-1/4 w-96 h-96 rounded-full bg-[#B84A27]/8 blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* ─── SECTION HEADER ───────────────────────────────────────────── */}
         <div className="text-center max-w-3xl mx-auto space-y-4 mb-12 sm:mb-16">
-          {/* Eyebrow badge */}
           <div className="flex items-center justify-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#FFF3DF] border border-[#FFC067]/70 text-[#C1443B] font-mono text-xs sm:text-sm font-extrabold tracking-wide shadow-2xs">
-              <Zap className="w-3.5 h-3.5 text-[#F0A63B] fill-[#F0A63B]" />
+            <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-[#FAF2E6] border border-[#D47A39]/40 text-[#B84A27] font-mono text-xs sm:text-sm font-extrabold tracking-wide shadow-2xs">
+              <Zap className="w-3.5 h-3.5 text-[#D47A39] fill-[#D47A39]" />
               <span>Quick Escape</span>
             </span>
           </div>
 
-          {/* Main headline */}
-          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-display font-extrabold text-[#12213B] tracking-tight leading-[1.12]">
+          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-display font-extrabold text-[#3B2316] tracking-tight leading-[1.12]">
             <span>Got a few hours </span>
             <span className="relative inline-block">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C1443B] via-[#E25C34] to-[#F59E0B]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#B84A27] via-[#C85A32] to-[#D47A39]">
                 to spare?
               </span>
-              <SquiggleUnderline className="absolute -bottom-2 left-0 w-full h-3 sm:h-4 text-[#FFC067]" />
+              <SquiggleUnderline className="absolute -bottom-2 left-0 w-full h-3 sm:h-4 text-[#D47A39]" />
             </span>
           </h2>
 
-          {/* Subtitle */}
-          <p className="text-base sm:text-lg text-[#5B6B8C] font-sans font-medium leading-relaxed max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg text-[#5C3D2E] font-sans font-medium leading-relaxed max-w-2xl mx-auto">
             Make the most of your time with personalized experiences near you, planned around your exact time constraint.
           </p>
 
-          {/* Key Value Highlight Callout Box */}
-          <div className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-2.5 rounded-2xl bg-white/90 border border-[#E5DFD5] shadow-xs max-w-xl mx-auto text-left sm:text-center mt-2">
-            <Sparkles className="w-4 h-4 text-[#F0A63B] shrink-0" />
-            <p className="text-xs sm:text-[13px] text-[#12213B] font-sans font-semibold leading-normal">
-              <strong className="text-[#C1443B] font-extrabold">LOKIVA key value:</strong> We don&apos;t just find nearby places — we plan what you can <span className="underline decoration-[#FFC067] decoration-2">realistically experience</span> within the time you have.
+          <div className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-2.5 rounded-2xl bg-[#FFFDF9]/90 border border-[#E2D2BC] shadow-xs max-w-xl mx-auto text-left sm:text-center mt-2">
+            <Sparkles className="w-4 h-4 text-[#D47A39] shrink-0" />
+            <p className="text-xs sm:text-[13px] text-[#3B2316] font-sans font-semibold leading-normal">
+              <strong className="text-[#B84A27] font-extrabold">LOKIVA key value:</strong> We don&apos;t just find nearby places, we plan what you can <span className="underline decoration-[#D47A39] decoration-2">realistically experience</span> within the time you have.
             </p>
           </div>
         </div>
 
         {/* ─── INTERACTIVE WORKSPACE GRID ───────────────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* LEFT: THE INTERACTIVE INPUT CARD (5 COLS) */}
-          <div className="lg:col-span-5 bg-white rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 border border-[#E5DFD5] shadow-xl shadow-[#12213B]/5 space-y-6">
-            <div className="flex items-center justify-between border-b border-[#F0ECE1] pb-4">
-              <div className="space-y-0.5">
-                <span className="text-[11px] font-mono font-extrabold uppercase tracking-widest text-[#C1443B]">
-                  Constraint Planner
-                </span>
-                <h3 className="text-xl font-display font-bold text-[#12213B]">
-                  Customize Your Window
-                </h3>
-              </div>
-              <StampBadge text="REAL TIME" className="scale-90 origin-right" />
-            </div>
-
-            <form onSubmit={handleGenerate} className="space-y-5">
-              {/* 1. LOCATION */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="quick-escape-location" className="text-xs font-mono font-bold uppercase tracking-wider text-[#12213B] flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-[#C1443B]" />
-                    <span>1. Location</span>
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleDetectLocation}
-                    disabled={isLocating}
-                    className={`text-[11px] font-mono font-bold flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition cursor-pointer ${
-                      isLiveGpsActive
-                        ? 'bg-[#EBF6F0] text-[#1F7A6C] border-[#B6DDD4] shadow-xs'
-                        : 'bg-[#FAF8F5] text-[#5B6B8C] border-[#DDD7CC] hover:border-[#FFC067] hover:text-[#12213B]'
-                    }`}
-                    title="Detect your exact live GPS location"
-                  >
-                    {isLocating ? (
-                      <>
-                        <Navigation className="w-3 h-3 animate-spin text-[#C1443B]" />
-                        <span>Acquiring GPS...</span>
-                      </>
-                    ) : isLiveGpsActive ? (
-                      <>
-                        <span className="w-2 h-2 rounded-full bg-[#1F7A6C] animate-pulse" />
-                        <span>Live GPS Active</span>
-                      </>
-                    ) : (
-                      <>
-                        <Navigation className="w-3 h-3 text-[#C1443B]" />
-                        <span>Use Live GPS</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                <div className="relative">
-                  <input
-                    id="quick-escape-location"
-                    type="text"
-                    value={location}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setLocation(val);
-                      setIsLiveGpsActive(false);
-                      setGpsErrorMsg(null);
-                      const cfg = getStartPointConfig(val);
-                      if (cfg && cfg.customPresets[0]) {
-                        setCustomStartPoint(cfg.customPresets[0]);
-                      }
-                    }}
-                    placeholder="e.g. Jaipur, Rajasthan or Mumbai"
-                    className={`w-full px-4 py-3 pl-10 rounded-2xl bg-[#FAF8F5] border text-sm font-sans font-medium text-[#12213B] placeholder-[#8FA1BC] transition outline-none shadow-2xs ${
-                      isLiveGpsActive
-                        ? 'border-[#1F7A6C] bg-[#F4F9F6] pr-24'
-                        : 'border-[#DDD7CC] hover:border-[#FFC067] focus:border-[#C1443B] focus:bg-white'
-                    }`}
-                  />
-                  <MapPin className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none ${isLiveGpsActive ? 'text-[#1F7A6C]' : 'text-[#C1443B]'}`} />
-                  {isLiveGpsActive && (
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-0.5 rounded-md bg-[#EBF6F0] text-[#1F7A6C] text-[10px] font-mono font-extrabold flex items-center gap-1 border border-[#B6DDD4]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#1F7A6C] animate-pulse" />
-                      GPS Fixed
-                    </span>
-                  )}
-                </div>
-
-                {gpsErrorMsg && (
-                  <p className="text-[11px] text-[#C1443B] font-mono font-semibold flex items-center gap-1 pt-0.5">
-                    <span>⚠️</span> {gpsErrorMsg}
-                  </p>
-                )}
-
-                {/* Popular Quick Suggestions - All 14 major cities */}
-                <div className="space-y-1 pt-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8FA1BC]">
-                      Popular Cities
-                    </span>
-                    <span className="text-[10px] font-mono text-[#5B6B8C]">
-                      One-tap to switch
+        <LayoutGroup>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* ═══════════ LEFT: SCULPTED CONSTRAINT CONSOLE (5 COLS) ═══════════ */}
+            <div className="lg:col-span-5 xl:col-span-4">
+              <div className="sticky top-24 rounded-[36px] bg-gradient-to-b from-[#FFFDF9] via-[#FAF4E8] to-[#F3E8D8] border border-[#DFCBB2] p-7 sm:p-8 shadow-[0_24px_60px_-18px_rgba(59,35,22,0.14)] space-y-8">
+                {/* Editorial Header */}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#B84A27] animate-pulse" />
+                    <span className="text-xs font-mono font-extrabold tracking-[0.2em] text-[#B84A27] uppercase">
+                      Real-Time Micro-Circuit Solver
                     </span>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1 py-0.5">
-                    {POPULAR_CITIES_QUICK.map((city) => {
-                      const cityNameOnly = city.split(',')[0].trim();
-                      const isSelected =
-                        !isLiveGpsActive &&
-                        (location === city || location.toLowerCase().startsWith(cityNameOnly.toLowerCase()));
-
-                      return (
-                        <button
-                          key={city}
-                          type="button"
-                          onClick={() => handleCitySelect(city)}
-                          className={`text-[11px] font-mono px-2.5 py-1 rounded-lg border transition cursor-pointer whitespace-nowrap ${
-                            isSelected
-                              ? 'bg-[#12213B] text-white border-[#12213B] shadow-2xs font-extrabold'
-                              : 'bg-[#FAF8F5] text-[#5B6B8C] border-[#E5DFD5] hover:border-[#FFC067] hover:text-[#12213B]'
-                          }`}
-                        >
-                          {cityNameOnly}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-
-              {/* 2. AVAILABLE TIME */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#12213B] flex items-center gap-1.5">
-                    <Clock className="w-3.5 h-3.5 text-[#F0A63B]" />
-                    <span>2. Available Time</span>
-                  </label>
-                  <span className="text-[11px] font-mono text-[#5B6B8C]">
-                    Strict Hard Limit
-                  </span>
+                  <h3 className="text-3xl font-display font-black text-[#3B2316] tracking-tight mt-1">
+                    Customize Your Window
+                  </h3>
                 </div>
 
-                <div className="grid grid-cols-4 gap-2">
-                  {AVAILABLE_TIMES.map((hours) => {
-                    const isSelected = availableHours === hours;
-                    return (
-                      <button
-                        key={hours}
-                        type="button"
-                        onClick={() => handleTimeChange(hours)}
-                        className={`py-3 px-2 rounded-2xl text-xs font-mono font-bold transition-all text-center flex flex-col items-center justify-center gap-1 cursor-pointer border ${
-                          isSelected
-                            ? 'bg-[#FFC067] text-[#12213B] font-extrabold shadow-md shadow-[#FFC067]/35 border-[#E5A84B] scale-[1.02]'
-                            : 'bg-[#FAF8F5] text-[#12213B] border-[#DDD7CC] hover:border-[#FFC067] hover:bg-white'
-                        }`}
-                      >
-                        <span className="text-base font-display font-extrabold leading-none">{hours}h</span>
-                        <span className="text-[10px] tracking-wide opacity-80">
-                          {hours === 1 ? '1 Hour' : `${hours} Hours`}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 3. INTERESTS (MULTI-SELECT) */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#12213B] flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#C1443B]" />
-                    <span>3. Interests (Select Multiple)</span>
-                  </label>
-                  <span className="text-[11px] font-mono text-[#5B6B8C]">
-                    {interests.length} selected
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {INTEREST_OPTIONS.map(({ id, label, icon: Icon }) => {
-                    const isChecked = interests.includes(id);
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => handleToggleInterest(id)}
-                        className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-sans font-bold transition text-left cursor-pointer border ${
-                          isChecked
-                            ? 'bg-[#FFF6E9] text-[#12213B] border-[#F0A63B] shadow-2xs font-extrabold'
-                            : 'bg-[#FAF8F5] text-[#5B6B8C] border-[#E5DFD5] hover:border-[#DDD7CC] hover:text-[#12213B]'
-                        }`}
-                      >
-                        <div
-                          className={`w-4 h-4 rounded-md flex items-center justify-center transition-colors shrink-0 ${
-                            isChecked ? 'bg-[#F0A63B] text-[#12213B]' : 'bg-[#E5DFD5] text-transparent'
-                          }`}
-                        >
-                          <Check className="w-3 h-3 stroke-[3]" />
-                        </div>
-                        <Icon className={`w-3.5 h-3.5 shrink-0 ${isChecked ? 'text-[#C1443B]' : 'text-[#8FA1BC]'}`} />
-                        <span className="truncate">{label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* 4. START POINT */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#12213B] flex items-center gap-1.5">
-                    <Navigation className="w-3.5 h-3.5 text-[#5B6B8C]" />
-                    <span>4. Start Point</span>
-                  </label>
-                  <span className="text-[11px] font-mono text-[#5B6B8C]">
-                    Circuit loops here
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleSelectStartType('current')}
-                    className={`px-3 py-2.5 rounded-xl text-xs font-mono font-bold transition text-center cursor-pointer border ${
-                      startPointType === 'current'
-                        ? 'bg-[#12213B] text-white border-[#12213B] shadow-xs'
-                        : 'bg-[#FAF8F5] text-[#5B6B8C] border-[#E5DFD5] hover:border-[#FFC067]'
-                    }`}
-                  >
-                    Current Location
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSelectStartType('custom')}
-                    className={`px-3 py-2.5 rounded-xl text-xs font-mono font-bold transition text-center cursor-pointer border ${
-                      startPointType === 'custom'
-                        ? 'bg-[#12213B] text-white border-[#12213B] shadow-xs'
-                        : 'bg-[#FAF8F5] text-[#5B6B8C] border-[#E5DFD5] hover:border-[#FFC067]'
-                    }`}
-                  >
-                    Custom Location
-                  </button>
-                </div>
-
-                {/* Content according to selected Start Point mode */}
-                {startPointType === 'current' ? (
-                  <div className="rounded-xl bg-[#FAF8F5] border border-[#DDD7CC] p-3 text-xs flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5 text-[#1F7A6C] shrink-0" />
-                      <span className="font-mono text-[11px] text-[#12213B]">
-                        <strong>Active Origin:</strong>{' '}
-                        {isLiveGpsActive ? `Live GPS (${location})` : currentStartConfig.current}
+                <form onSubmit={handleGenerate} className="space-y-7">
+                  {/* ─── SECTION 1: LOCATION & CITY RIBBON ─── */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-mono font-extrabold tracking-widest text-[#8C6751] uppercase">
+                        01 · Departure Hub
                       </span>
+                      <button
+                        type="button"
+                        onClick={handleDetectLocation}
+                        disabled={isLocating}
+                        className={`text-xs font-heading font-bold flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border transition-all cursor-pointer ${
+                          isLiveGpsActive
+                            ? 'bg-[#F7EFE4] text-[#B84A27] border-[#D47A39] shadow-xs'
+                            : 'bg-[#F5EBE0] text-[#B84A27] border-[#DFCBB2] hover:bg-[#B84A27] hover:text-[#FFFDF9] hover:border-[#B84A27]'
+                        }`}
+                        title="Detect your exact live GPS location"
+                      >
+                        {isLocating ? (
+                          <>
+                            <Navigation className="w-3 h-3 animate-spin" />
+                            <span>Acquiring GPS...</span>
+                          </>
+                        ) : isLiveGpsActive ? (
+                          <>
+                            <span className="w-2 h-2 rounded-full bg-[#B84A27] animate-pulse" />
+                            <span>📍 Live GPS Active</span>
+                          </>
+                        ) : (
+                          <>
+                            <Navigation className="w-3 h-3" />
+                            <span>📍 Use Live GPS</span>
+                          </>
+                        )}
+                      </button>
                     </div>
-                    <span className="text-[10px] font-mono text-[#1F7A6C] bg-[#EBF6F0] px-2 py-0.5 rounded-md font-bold shrink-0">
-                      Safe Return Loop
-                    </span>
-                  </div>
-                ) : (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="space-y-2 pt-1"
-                  >
+
+                    {/* Sculpted Warm Ivory Search Input */}
                     <div className="relative">
-                      <input
-                        type="text"
-                        value={customStartPoint}
-                        onChange={(e) => setCustomStartPoint(e.target.value)}
-                        placeholder="e.g. Airport, Railway Station, Hotel, Landmark"
-                        className="w-full px-3.5 py-2.5 pl-8 rounded-xl bg-[#FAF8F5] border border-[#DDD7CC] focus:border-[#C1443B] text-xs font-sans text-[#12213B] placeholder-[#8FA1BC] outline-none"
-                      />
-                      <Navigation className="w-3.5 h-3.5 text-[#5B6B8C] absolute left-2.5 top-1/2 -translate-y-1/2" />
+                      <div className={`flex items-center gap-3 bg-[#FFFDF9] border-2 rounded-2xl px-4 py-3.5 shadow-2xs transition-all ${
+                        isLiveGpsActive
+                          ? 'border-[#B84A27] bg-[#FAF2E6]'
+                          : 'border-[#E2D2BC] focus-within:border-[#B84A27]'
+                      }`}>
+                        <MapPin className={`w-4.5 h-4.5 shrink-0 ${isLiveGpsActive ? 'text-[#B84A27]' : 'text-[#A67B5B]'}`} />
+                        <input
+                          id="quick-escape-location"
+                          type="text"
+                          value={location}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setLocation(val);
+                            setIsLiveGpsActive(false);
+                            setGpsErrorMsg(null);
+                            const cfg = getStartPointConfig(val);
+                            if (cfg && cfg.customPresets[0]) {
+                              setCustomStartPoint(cfg.customPresets[0]);
+                            }
+                          }}
+                          placeholder="e.g. Jaipur, Rajasthan or Mumbai"
+                          className="flex-1 bg-transparent text-lg font-heading font-bold text-[#3B2316] placeholder-[#A67B5B] outline-none"
+                        />
+                        {isLiveGpsActive && (
+                          <span className="px-2.5 py-1 rounded-full bg-[#F7EFE4] text-[#B84A27] text-[10px] font-mono font-extrabold flex items-center gap-1 border border-[#D47A39]/40 shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#B84A27] animate-pulse" />
+                            GPS Fixed
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Quick Hub Presets for Current City */}
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-mono font-bold text-[#8FA1BC] uppercase tracking-wider">
-                        Quick Hub Presets:
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {currentStartConfig.customPresets.map((preset) => (
-                          <button
-                            key={preset}
+                    {gpsErrorMsg && (
+                      <p className="text-xs text-[#B84A27] font-heading font-semibold flex items-center gap-1 pt-0.5">
+                        <span>⚠️</span> {gpsErrorMsg}
+                      </p>
+                    )}
+
+                    {/* Flowing City Selector Pills */}
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {POPULAR_CITIES_QUICK.map((city) => {
+                        const cName = city.split(',')[0].trim();
+                        const isSelected =
+                          !isLiveGpsActive &&
+                          (location === city || location.toLowerCase().startsWith(cName.toLowerCase()));
+
+                        return (
+                          <motion.button
+                            key={city}
                             type="button"
-                            onClick={() => handleSelectPreset(preset)}
-                            className={`text-[10px] font-mono px-2 py-1 rounded-lg border transition cursor-pointer ${
-                              customStartPoint === preset
-                                ? 'bg-[#FFC067] text-[#12213B] font-extrabold border-[#E5A84B] shadow-2xs'
-                                : 'bg-[#FAF8F5] text-[#5B6B8C] border-[#E5DFD5] hover:border-[#FFC067] hover:text-[#12213B]'
+                            onClick={() => handleCitySelect(city)}
+                            className={`relative px-3.5 py-1.5 rounded-full font-heading text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                              isSelected
+                                ? 'text-[#FFFDF9] shadow-sm'
+                                : 'bg-[#FFFDF9] text-[#5C3D2E] border border-[#E2D2BC] hover:border-[#B84A27] hover:text-[#3B2316]'
                             }`}
                           >
-                            {preset}
+                            {isSelected && (
+                              <motion.div
+                                layoutId="activeQuickCity"
+                                className="absolute inset-0 rounded-full bg-gradient-to-r from-[#B84A27] to-[#D47A39]"
+                                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                              />
+                            )}
+                            <span className="relative z-10">{cName}</span>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* ─── SECTION 2: AVAILABLE TIME KINETIC DIAL ─── */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-mono font-extrabold tracking-widest text-[#8C6751] uppercase">
+                        02 · Available Time Ceiling
+                      </span>
+                      <span className="text-xs font-semibold text-[#B84A27]">
+                        Strict Hard Limit
+                      </span>
+                    </div>
+
+                    <div className="p-1 rounded-2xl bg-[#EFE4D4] border border-[#DFCBB2] grid grid-cols-4 gap-1 relative">
+                      {AVAILABLE_TIMES.map((hours) => {
+                        const isSelected = availableHours === hours;
+                        return (
+                          <motion.button
+                            key={hours}
+                            type="button"
+                            onClick={() => handleTimeChange(hours)}
+                            className={`relative py-2 sm:py-2.5 px-1.5 rounded-xl text-center flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-colors ${
+                              isSelected ? 'text-[#FFFDF9]' : 'text-[#3B2316] hover:bg-[#F5EBE0]'
+                            }`}
+                          >
+                            {isSelected && (
+                              <motion.div
+                                layoutId="activeEscapeHourPill"
+                                className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#B84A27] via-[#C85A32] to-[#D47A39] shadow-[0_8px_20px_-5px_rgba(184,74,39,0.4)]"
+                                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                              />
+                            )}
+                            <span className="relative z-10 text-lg sm:text-xl font-display font-black leading-none">
+                              {hours}h
+                            </span>
+                            <span className="relative z-10 text-[10px] sm:text-[11px] font-mono font-bold opacity-85">
+                              {HOUR_LABELS[hours]}
+                            </span>
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* ─── SECTION 3: INTERESTS TACTILE TOKENS ─── */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-mono font-extrabold tracking-widest text-[#8C6751] uppercase">
+                        03 · Curation Lenses
+                      </span>
+                      <span className="text-xs font-heading font-bold text-[#B84A27]">
+                        {interests.length} active
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2.5">
+                      {INTEREST_OPTIONS.map(({ id, label, icon: Icon }) => {
+                        const isChecked = interests.includes(id);
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => handleToggleInterest(id)}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-full font-heading text-sm transition-all cursor-pointer ${
+                              isChecked
+                                ? 'bg-[#3B2316] text-[#FFFDF9] border border-[#3B2316] font-bold shadow-sm'
+                                : 'bg-[#FFFDF9] text-[#5C3D2E] border border-[#E2D2BC] font-semibold hover:bg-[#F5EBE0]'
+                            }`}
+                          >
+                            {isChecked ? (
+                              <Check className="w-3.5 h-3.5 text-[#D47A39] stroke-[2.5]" />
+                            ) : (
+                              <Icon className="w-3.5 h-3.5 text-[#A67B5B]" />
+                            )}
+                            <span>{label}</span>
                           </button>
-                        ))}
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* ─── SECTION 4: START POINT & LOOP ASSURANCE ─── */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-mono font-extrabold tracking-widest text-[#8C6751] uppercase">
+                        04 · Circuit Origin
+                      </span>
+                      <span className="text-xs font-heading font-semibold text-[#7A523B]">
+                        Circuit loops here
+                      </span>
+                    </div>
+
+                    {/* Segmented Toggle */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSelectStartType('current')}
+                        className={`px-4 py-2.5 rounded-full font-heading text-sm font-bold transition-all text-center cursor-pointer border ${
+                          startPointType === 'current'
+                            ? 'bg-[#3B2316] text-[#FFFDF9] border-[#3B2316] shadow-sm'
+                            : 'bg-[#FFFDF9] text-[#5C3D2E] border-[#E2D2BC] hover:border-[#B84A27]'
+                        }`}
+                      >
+                        Current Location
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectStartType('custom')}
+                        className={`px-4 py-2.5 rounded-full font-heading text-sm font-bold transition-all text-center cursor-pointer border ${
+                          startPointType === 'custom'
+                            ? 'bg-[#3B2316] text-[#FFFDF9] border-[#3B2316] shadow-sm'
+                            : 'bg-[#FFFDF9] text-[#5C3D2E] border-[#E2D2BC] hover:border-[#B84A27]'
+                        }`}
+                      >
+                        Custom Pin
+                      </button>
+                    </div>
+
+                    {/* Origin Callout */}
+                    {startPointType === 'current' ? (
+                      <div className="border-l-4 border-l-[#D47A39] pl-4 py-1">
+                        <p className="font-heading text-sm font-bold text-[#3B2316]">
+                          Active Origin: {isLiveGpsActive ? `Live GPS (${location})` : currentStartConfig.current}
+                        </p>
+                        <p className="text-xs font-mono font-extrabold text-[#B84A27] uppercase tracking-wider mt-0.5">
+                          ✦ Guaranteed Return Loop Within {availableHours}h Ceiling
+                        </p>
+                      </div>
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        className="space-y-2.5 pt-1"
+                      >
+                        <div className="flex items-center gap-3 bg-[#FFFDF9] border-2 border-[#E2D2BC] focus-within:border-[#B84A27] rounded-2xl px-4 py-3 shadow-2xs">
+                          <Navigation className="w-4 h-4 text-[#A67B5B] shrink-0" />
+                          <input
+                            type="text"
+                            value={customStartPoint}
+                            onChange={(e) => setCustomStartPoint(e.target.value)}
+                            placeholder="e.g. Airport, Railway Station, Hotel, Landmark"
+                            className="flex-1 bg-transparent text-sm font-heading font-bold text-[#3B2316] placeholder-[#A67B5B] outline-none"
+                          />
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          {currentStartConfig.customPresets.map((preset) => (
+                            <button
+                              key={preset}
+                              type="button"
+                              onClick={() => handleSelectPreset(preset)}
+                              className={`text-xs font-heading font-bold px-3 py-1.5 rounded-full border transition-all cursor-pointer ${
+                                customStartPoint === preset
+                                  ? 'bg-gradient-to-r from-[#B84A27] to-[#D47A39] text-[#FFFDF9] border-[#B84A27] shadow-sm'
+                                  : 'bg-[#FFFDF9] text-[#5C3D2E] border-[#E2D2BC] hover:border-[#B84A27] hover:text-[#3B2316]'
+                              }`}
+                            >
+                              {preset}
+                            </button>
+                          ))}
+                        </div>
+
+                        <div className="border-l-4 border-l-[#D47A39] pl-4 py-1">
+                          <p className="text-xs font-mono font-extrabold text-[#B84A27] uppercase tracking-wider">
+                            ✦ Guaranteed Return Loop Within {availableHours}h Ceiling
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+
+                  {/* CTA BUTTON */}
+                  <div className="pt-1">
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#B84A27] to-[#D47A39] hover:from-[#A03D20] hover:to-[#C06A2F] text-[#FFFDF9] font-heading font-extrabold text-sm sm:text-base tracking-wide transition-all shadow-lg shadow-[#B84A27]/30 hover:shadow-xl border border-[#B84A27]/40 flex items-center justify-center gap-3 active:scale-[0.98] cursor-pointer group disabled:opacity-70"
+                    >
+                      {isLoading ? (
+                        <>
+                          <RotateCcw className="w-4 h-4 animate-spin" />
+                          <span>Synthesizing Realistic Micro-Circuit...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Generate My Quick Escape</span>
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            {/* ═══════════ RIGHT: EDITORIAL ESCAPE DOSSIER (7-8 COLS) ═══════════ */}
+            <div ref={itineraryRef} className="lg:col-span-7 xl:col-span-8 space-y-7">
+              {generatedPlan ? (
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`plan-${planKey}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-7"
+                  >
+                    {/* ─── OPEN MAGAZINE MASTHEAD HEADER ─── */}
+                    <div className="space-y-4">
+                      {/* Status Overline */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-mono font-extrabold tracking-[0.18em] text-[#B84A27] uppercase">
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          ✦ {generatedPlan.feasibilityBadge}
+                        </span>
+                        <span className="text-xs sm:text-sm font-mono font-bold text-[#7A523B]">
+                          · {generatedPlan.startTime} AM to {generatedPlan.endTime} PM Window
+                        </span>
+                      </div>
+
+                      {/* Title & Actions Row */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <h3 className="text-2xl sm:text-3xl lg:text-[34px] font-display font-extrabold text-[#3B2316] tracking-tight leading-snug">
+                          {generatedPlan.title}
+                        </h3>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <a
+                            href={generatedPlan.mapDirectionsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-6 py-3 rounded-full bg-gradient-to-r from-[#B84A27] to-[#D47A39] text-[#FFFDF9] font-heading font-extrabold text-sm shadow-md hover:scale-[1.02] transition-all flex items-center gap-2 cursor-pointer"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            <span>Open Live Route in Maps ↗</span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ─── SCULPTED TIME-BUDGET INSTRUMENT ─── */}
+                    <div className="my-7 p-6 rounded-[28px] bg-[#FFFDF9] border border-[#E6DAC6] shadow-sm">
+                      {/* Top Visual Time Bar */}
+                      <div ref={timeBarRef} className="h-3.5 w-full rounded-full bg-[#F3ECE1] p-0.5 flex gap-1 overflow-hidden mb-5">
+                        <div
+                          data-time-segment="immersion"
+                          data-target-width={`${immersionPct}%`}
+                          className="h-full rounded-full bg-[#B84A27]"
+                          style={{ width: `${immersionPct}%` }}
+                        />
+                        <div
+                          data-time-segment="transit"
+                          data-target-width={`${transitPct}%`}
+                          className="h-full rounded-full bg-[#D47A39]"
+                          style={{ width: `${transitPct}%` }}
+                        />
+                        <div
+                          data-time-segment="buffer"
+                          data-target-width={`${bufferPct}%`}
+                          className="h-full rounded-full bg-[#A67B5B]"
+                          style={{ width: `${bufferPct}%` }}
+                        />
+                      </div>
+
+                      {/* Bottom 4 Sculpted Readouts */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-mono font-extrabold uppercase tracking-wider text-[#8C6751]">
+                            Hard Window Cap
+                          </span>
+                          <p className="text-lg sm:text-xl font-display font-extrabold text-[#3B2316]">
+                            {generatedPlan.totalHours} Hours Total
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-mono font-extrabold uppercase tracking-wider text-[#8C6751]">
+                            Transit Overhead
+                          </span>
+                          <p className="text-lg sm:text-xl font-display font-extrabold text-[#B84A27]">
+                            {generatedPlan.estimatedTravelTimeMins} mins total
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-mono font-extrabold uppercase tracking-wider text-[#8C6751]">
+                            Circuit Footprint
+                          </span>
+                          <p className="text-lg sm:text-xl font-display font-extrabold text-[#3B2316]">
+                            ~{generatedPlan.approxDistanceKm} km Loop
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-mono font-extrabold uppercase tracking-wider text-[#8C6751]">
+                            Return Assurance
+                          </span>
+                          <p className="text-lg sm:text-xl font-display font-extrabold text-[#9E5414] flex items-center gap-1.5">
+                            <ShieldCheck className="w-5 h-5 text-[#D47A39]" />
+                            100% Buffer Padded
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ─── HOROLOGICAL ROUTE SEQUENCE ─── */}
+                    <div className="space-y-4">
+                      {/* Origin Departure Medallion */}
+                      <div className="rounded-2xl bg-[#F5EBE0] border border-[#DFCBB2] px-5 py-3.5 flex items-center justify-between">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <Compass className="w-5 h-5 text-[#3B2316] shrink-0" />
+                          <span className="font-heading text-base font-extrabold text-[#3B2316]">
+                            {generatedPlan.startTime} AM · Depart {generatedPlan.startPoint}
+                          </span>
+                        </div>
+                        <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#D47A39] to-[#B84A27] text-[#FFFDF9] text-xs font-heading font-extrabold shrink-0">
+                          Starting Point
+                        </span>
+                      </div>
+
+                      {/* Chrono-Spine + Stop Cards */}
+                      <div className="relative">
+                        {/* Continuous vertical rail */}
+                        <div className="absolute left-[22px] sm:left-[26px] top-0 bottom-0 w-[2px] bg-[#D8C5AE]">
+                          <motion.div
+                            className="w-full bg-gradient-to-b from-[#B84A27] to-[#D47A39]"
+                            initial={{ height: '0%' }}
+                            animate={{ height: '100%' }}
+                            transition={{ duration: 1.2, ease: 'easeOut', delay: 0.3 }}
+                          />
+                        </div>
+
+                        <div className="space-y-0">
+                          {generatedPlan.stops.map((stop, idx) => {
+                            const isReturn = stop.category === 'Return';
+                            const stopNumber = String(idx + 1).padStart(2, '0');
+
+                            return (
+                              <React.Fragment key={stop.id}>
+                                <motion.div
+                                  custom={idx}
+                                  variants={cardVariants}
+                                  initial="hidden"
+                                  animate="visible"
+                                  exit="exit"
+                                  className="relative grid grid-cols-[110px_1fr] sm:grid-cols-[130px_1fr] gap-4 items-start py-3"
+                                >
+                                  {/* Left Spine Column */}
+                                  <div className="flex flex-col items-center pt-1 relative z-10">
+                                    {/* Stop number badge */}
+                                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-display font-black text-sm shadow-sm ${
+                                      isReturn
+                                        ? 'bg-gradient-to-br from-[#B84A27] to-[#D47A39] text-[#FFFDF9]'
+                                        : 'bg-[#3B2316] text-[#FFFDF9]'
+                                    }`}>
+                                      {isReturn ? '✓' : stopNumber}
+                                    </div>
+
+                                    {/* Start time */}
+                                    <span className="font-display text-lg font-black text-[#3B2316] mt-2 leading-tight text-center">
+                                      {stop.startTime}
+                                    </span>
+                                    <span className="text-[10px] font-mono text-[#7A523B]">AM</span>
+
+                                    {/* Duration pill */}
+                                    {!isReturn && (
+                                      <span className="mt-1.5 px-2.5 py-1 rounded-full bg-[#B84A27] text-[#FFFDF9] text-xs font-mono font-extrabold">
+                                        {stop.durationMins} MIN
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  {/* Right Editorial Card */}
+                                  {isReturn ? (
+                                    <div className="rounded-[28px] bg-[#F7EFE4] border border-[#DFCBB2] p-5 sm:p-6 shadow-sm">
+                                      <div className="space-y-2">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                          <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#B84A27] to-[#D47A39] text-[#FFFDF9] text-xs font-heading font-extrabold uppercase">
+                                            Return Complete
+                                          </span>
+                                          <span className="text-sm font-mono font-bold text-[#7A523B]">
+                                            {stop.startTime} to {stop.endTime}
+                                          </span>
+                                        </div>
+                                        <h5 className="text-xl sm:text-2xl font-display font-black text-[#3B2316] leading-snug">
+                                          {stop.title}
+                                        </h5>
+                                        <p className="text-sm sm:text-base text-[#5C3D2E] font-sans leading-relaxed">
+                                          ✓ Safely back within hard time cap (100% time-padded buffer assurance)
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="rounded-[28px] bg-[#FFFDF9] border border-[#E2D5BE] hover:border-[#B84A27] p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all group grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+                                      {/* Left 4 Columns: Atmospheric Heritage Photo */}
+                                      {stop.imageUrl && (
+                                        <div className="md:col-span-4 relative rounded-2xl overflow-hidden">
+                                          <img
+                                            src={resolveImageUrl(stop.imageUrl)}
+                                            alt={stop.title}
+                                            className="h-44 md:h-full min-h-[160px] w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            loading="lazy"
+                                          />
+                                          <div className="absolute top-3 left-3">
+                                            <span className="px-2.5 py-1 rounded-full bg-[#3B2316]/80 backdrop-blur-sm text-[#FFFDF9] text-[10px] font-heading font-extrabold uppercase tracking-wider">
+                                              {stop.categoryLabel}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      )}
+
+                                      {/* Right 8 Columns: Rich Typography */}
+                                      <div className={`${stop.imageUrl ? 'md:col-span-8' : 'md:col-span-12'} space-y-2`}>
+                                        {/* Top metadata row */}
+                                        <div className="flex flex-wrap items-center gap-2">
+                                          {stop.rating && (
+                                            <span className="inline-flex items-center gap-1 text-sm font-heading font-bold text-[#3B2316]">
+                                              <Star className="w-4 h-4 text-[#D47A39] fill-[#D47A39]" />
+                                              {stop.rating}
+                                              {stop.reviewCount && (
+                                                <span className="text-[#A67B5B] font-normal text-xs">
+                                                  ({stop.reviewCount > 1000 ? `${(stop.reviewCount / 1000).toFixed(1)}k` : stop.reviewCount})
+                                                </span>
+                                              )}
+                                            </span>
+                                          )}
+                                          {stop.priceNote && (
+                                            <span className="text-xs sm:text-sm font-mono font-bold text-[#B84A27] bg-[#FAF2E6] px-3 py-1 rounded-full border border-[#E6DAC6]">
+                                              {stop.priceNote}
+                                            </span>
+                                          )}
+                                        </div>
+
+                                        {/* Stop Title */}
+                                        <h5 className="text-xl sm:text-2xl font-display font-black text-[#3B2316] leading-snug">
+                                          {stop.title}
+                                        </h5>
+
+                                        {/* Full Description (NO truncation) */}
+                                        <p className="text-sm sm:text-base text-[#5C3D2E] font-sans leading-relaxed">
+                                          {stop.description}
+                                        </p>
+
+                                        {/* Tactile Time-Saving Field Note */}
+                                        <div className="mt-3 px-3.5 py-2 rounded-xl bg-[#F7EFE4] border border-[#E6DAC6] text-xs sm:text-sm font-heading font-semibold text-[#7A523B] flex items-center gap-2">
+                                          <Zap className="w-4 h-4 text-[#D47A39] shrink-0" />
+                                          <span>{stop.whyItFits}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </motion.div>
+
+                                {/* External Transit Connector Capsule */}
+                                {stop.transitToNext && !isReturn && stop.transitToNext.durationMins > 0 && (
+                                  <div className="my-3 ml-[130px] sm:ml-[150px] inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#F5EBE0] border border-[#DFCBB2] text-xs sm:text-sm font-heading font-bold text-[#5C3D2E]">
+                                    <TransitIcon mode={stop.transitToNext.mode} />
+                                    <span className="font-extrabold text-[#3B2316]">{stop.endTime}</span>
+                                    <span className="text-[#A67B5B]">·</span>
+                                    <span>{stop.transitToNext.description}</span>
+                                  </div>
+                                )}
+                              </React.Fragment>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   </motion.div>
-                )}
-              </div>
-
-              {/* 5. CTA BUTTON */}
-              <div className="pt-2">
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full py-4 px-6 rounded-2xl bg-[#FFC067] hover:bg-[#F5B24E] text-[#12213B] font-heading font-extrabold text-sm sm:text-base tracking-wide transition-all shadow-lg shadow-[#FFC067]/35 hover:shadow-xl border border-[#E5A84B]/60 flex items-center justify-center gap-3 active:scale-[0.98] cursor-pointer group disabled:opacity-70"
-                >
-                  {isLoading ? (
-                    <>
-                      <RotateCcw className="w-4 h-4 animate-spin text-[#12213B]" />
-                      <span>Synthesizing Realistic Micro-Circuit...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Generate My Quick Escape</span>
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
+                </AnimatePresence>
+              ) : (
+                <div className="rounded-[28px] bg-[#FFFDF9] border border-[#E2D2BC] p-8 text-center space-y-4">
+                  <RotateCcw className="w-6 h-6 animate-spin mx-auto text-[#D47A39]" />
+                  <p className="text-sm font-sans text-[#5C3D2E]">
+                    Preparing sample Quick Escape itineraries...
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-
-          {/* RIGHT: GENERATED MINI-ITINERARY DISPLAY (7 COLS) */}
-          <div ref={itineraryRef} className="lg:col-span-7 space-y-6">
-            {generatedPlan ? (
-              <div className="bg-white rounded-[28px] sm:rounded-[32px] p-6 sm:p-8 border border-[#E5DFD5] shadow-xl shadow-[#12213B]/5 space-y-6">
-                {/* Result Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#F0ECE1] pb-5">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EBF6F0] text-[#1F7A6C] font-mono text-[10px] font-extrabold uppercase tracking-wide">
-                        <CheckCircle2 className="w-3 h-3" />
-                        {generatedPlan.feasibilityBadge}
-                      </span>
-                      <span className="text-xs font-mono text-[#5B6B8C]">
-                        {generatedPlan.startTime} — {generatedPlan.endTime}
-                      </span>
-                    </div>
-                    <h3 className="text-2xl sm:text-3xl font-display font-black text-[#12213B] tracking-tight">
-                      {generatedPlan.title}
-                    </h3>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      type="button"
-                      onClick={handleCopyShare}
-                      className="px-3 py-2 rounded-xl bg-[#FAF8F5] hover:bg-[#FFF6E9] border border-[#DDD7CC] hover:border-[#FFC067] text-[#12213B] text-xs font-mono font-bold flex items-center gap-1.5 transition cursor-pointer"
-                      title="Share Micro-Circuit"
-                    >
-                      <Share2 className="w-3.5 h-3.5 text-[#C1443B]" />
-                      <span>{copiedLink ? 'Copied!' : 'Share'}</span>
-                    </button>
-                    <a
-                      href={generatedPlan.mapDirectionsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3.5 py-2 rounded-xl bg-[#12213B] hover:bg-[#1D2E49] text-white text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-xs cursor-pointer"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5 text-[#FFC067]" />
-                      <span>Open Maps</span>
-                    </a>
-                  </div>
-                </div>
-
-                {/* KPI Metrics Bar */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-[#FAF8F5] rounded-2xl p-4 border border-[#E5DFD5]">
-                  <div className="space-y-0.5">
-                    <span className="text-[10px] font-mono font-extrabold uppercase tracking-wider text-[#5B6B8C]">
-                      Total Duration
-                    </span>
-                    <p className="text-sm sm:text-base font-display font-extrabold text-[#12213B]">
-                      {generatedPlan.totalHours} Hours Hard Cap
-                    </p>
-                  </div>
-                  <div className="space-y-0.5">
-                    <span className="text-[10px] font-mono font-extrabold uppercase tracking-wider text-[#5B6B8C]">
-                      Estimated Travel Time
-                    </span>
-                    <p className="text-sm sm:text-base font-display font-extrabold text-[#C1443B]">
-                      {generatedPlan.estimatedTravelTimeMins} mins
-                    </p>
-                  </div>
-                  <div className="space-y-0.5">
-                    <span className="text-[10px] font-mono font-extrabold uppercase tracking-wider text-[#5B6B8C]">
-                      Approx Distance
-                    </span>
-                    <p className="text-sm sm:text-base font-display font-extrabold text-[#12213B]">
-                      ~{generatedPlan.approxDistanceKm} km Circuit
-                    </p>
-                  </div>
-                  <div className="space-y-0.5">
-                    <span className="text-[10px] font-mono font-extrabold uppercase tracking-wider text-[#5B6B8C]">
-                      Return Assurance
-                    </span>
-                    <p className="text-sm sm:text-base font-display font-extrabold text-[#1F7A6C]">
-                      100% Padded
-                    </p>
-                  </div>
-                </div>
-
-                {/* ─── TIMELINE SEQUENCE ROUTE VIEW ───────────────────────── */}
-                <div className="space-y-4 pt-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-mono font-bold uppercase tracking-wider text-[#12213B] flex items-center gap-1.5">
-                      <Compass className="w-3.5 h-3.5 text-[#C1443B]" />
-                      <span>Optimized Route Sequence</span>
-                    </h4>
-                    <span className="text-[11px] font-mono text-[#5B6B8C] flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-[#C1443B]" />
-                      <span>Start Point: <strong>{generatedPlan.startPoint}</strong></span>
-                    </span>
-                  </div>
-
-                  <div className="relative pl-6 sm:pl-8 space-y-3">
-                    {/* Continuous vertical route line */}
-                    <div className="absolute left-[11px] sm:left-[15px] top-3 bottom-3 w-0.5 bg-gradient-to-b from-[#12213B] via-[#FFC067] via-[#C1443B] to-[#1F7A6C]" />
-
-                    {/* Compact Circuit Departure Strip */}
-                    <div className="relative group">
-                      <div className="absolute -left-6 sm:-left-8 top-1 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[#12213B] text-white border-2 border-white ring-2 ring-[#12213B]/20 flex items-center justify-center text-[10px] font-mono font-bold">
-                        ▶
-                      </div>
-                      <div className="rounded-xl px-3.5 py-2 bg-[#FAF8F5] border border-[#DDD7CC] flex items-center justify-between shadow-2xs">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="px-1.5 py-0.5 rounded bg-white border border-[#DDD7CC] text-[10px] font-mono font-extrabold text-[#12213B] shrink-0">
-                            {generatedPlan.startTime}
-                          </span>
-                          <span className="text-xs sm:text-[13px] font-sans font-semibold text-[#12213B] truncate">
-                            Depart: <strong>{generatedPlan.startPoint}</strong>
-                          </span>
-                        </div>
-                        <span className="text-[10px] font-mono text-[#1F7A6C] bg-[#EBF6F0] px-2 py-0.5 rounded font-bold shrink-0 ml-2">
-                          Origin
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Curated Stops List */}
-                    {generatedPlan.stops.map((stop, idx) => {
-                      const isReturn = stop.category === 'Return';
-
-                      return (
-                        <div key={stop.id} className="relative group">
-                          {/* Timeline node icon */}
-                          <div
-                            className={`absolute -left-6 sm:-left-8 top-1 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-[10px] font-mono font-black border-2 transition-transform group-hover:scale-110 ${
-                              isReturn
-                                ? 'bg-[#1F7A6C] text-white border-white ring-2 ring-[#1F7A6C]/30'
-                                : idx === 0
-                                ? 'bg-[#FFC067] text-[#12213B] border-white ring-2 ring-[#FFC067]/40'
-                                : 'bg-[#FAF8F5] text-[#12213B] border-[#C1443B] ring-2 ring-[#C1443B]/20'
-                            }`}
-                          >
-                            {isReturn ? '✓' : idx + 1}
-                          </div>
-
-                          {/* Stop Card */}
-                          <div
-                            className={`rounded-2xl p-3 sm:p-4 border transition-all ${
-                              isReturn
-                                ? 'bg-[#F2F8F5] border-[#B6DDD4]'
-                                : 'bg-[#FAF8F5] border-[#E5DFD5] hover:border-[#FFC067] hover:bg-white shadow-2xs hover:shadow-xs'
-                            }`}
-                          >
-                            {isReturn ? (
-                              <div className="flex items-center justify-between">
-                                <div className="space-y-0.5 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <span className="px-1.5 py-0.5 rounded bg-white border border-[#B6DDD4] text-[10px] font-mono font-extrabold text-[#1F7A6C]">
-                                      {stop.startTime} - {stop.endTime}
-                                    </span>
-                                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider bg-[#1F7A6C] text-white px-2 py-0.5 rounded">
-                                      Return Complete
-                                    </span>
-                                  </div>
-                                  <h5 className="text-sm sm:text-base font-display font-bold text-[#12213B] truncate pt-0.5">
-                                    {stop.title}
-                                  </h5>
-                                  <p className="text-[11px] text-[#1F7A6C] font-mono font-semibold">
-                                    ✓ Safely back within hard time cap (100% time-padded buffer)
-                                  </p>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="flex items-center sm:items-start justify-between gap-3">
-                                <div className="space-y-1 flex-1 min-w-0">
-                                  {/* Badges in a single clean row */}
-                                  <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-mono">
-                                    <span className="px-1.5 py-0.5 rounded bg-white border border-[#DDD7CC] font-extrabold text-[#12213B]">
-                                      {stop.startTime}
-                                    </span>
-                                    <span className="px-1.5 py-0.5 rounded bg-[#FFF3DF] text-[#C1443B] font-bold uppercase">
-                                      {stop.categoryLabel}
-                                    </span>
-                                    <span className="text-[#5B6B8C] font-medium">
-                                      {stop.durationMins}m
-                                    </span>
-                                    {stop.rating && (
-                                      <span className="inline-flex items-center gap-0.5 font-bold text-[#12213B] bg-white px-1.5 py-0.5 rounded border border-[#E5DFD5]">
-                                        <Star className="w-2.5 h-2.5 text-[#F59E0B] fill-[#F59E0B]" />
-                                        {stop.rating}
-                                        {stop.reviewCount && (
-                                          <span className="text-[#8FA1BC] font-normal">
-                                            ({stop.reviewCount > 1000 ? `${(stop.reviewCount / 1000).toFixed(1)}k` : stop.reviewCount})
-                                          </span>
-                                        )}
-                                      </span>
-                                    )}
-                                    {stop.priceNote && (
-                                      <span className="text-[#5B6B8C] bg-white/80 px-1.5 py-0.5 rounded border border-[#E5DFD5] truncate max-w-[130px]">
-                                        {stop.priceNote}
-                                      </span>
-                                    )}
-                                  </div>
-
-                                  {/* Title */}
-                                  <h5 className="text-sm sm:text-base font-display font-bold text-[#12213B] leading-tight truncate">
-                                    {stop.title}
-                                  </h5>
-
-                                  {/* Description - concise 1 line */}
-                                  <p className="text-xs text-[#5B6B8C] font-sans line-clamp-1 leading-snug">
-                                    {stop.description}
-                                  </p>
-
-                                  {/* Feasibility tag - compact */}
-                                  <div className="flex items-center gap-1 text-[10.5px] font-sans text-[#1F7A6C] font-semibold truncate">
-                                    <ShieldCheck className="w-3 h-3 shrink-0" />
-                                    <span className="truncate">{stop.whyItFits}</span>
-                                  </div>
-                                </div>
-
-                                {/* Compact Thumbnail */}
-                                {stop.imageUrl && (
-                                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden shrink-0 border border-[#DDD7CC] shadow-2xs">
-                                    <img
-                                      src={resolveImageUrl(stop.imageUrl)}
-                                      alt={stop.title}
-                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                      loading="lazy"
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Transit segment indicator connecting to next stop - slim */}
-                          {stop.transitToNext && !isReturn && (
-                            <div className="py-1 pl-2 flex items-center gap-1.5 text-[11px] font-mono text-[#5B6B8C]">
-                              {stop.transitToNext.mode === 'walk' ? (
-                                <Footprints className="w-3 h-3 text-[#C1443B] shrink-0" />
-                              ) : (
-                                <Car className="w-3 h-3 text-[#C1443B] shrink-0" />
-                              )}
-                              <span className="font-bold text-[#12213B]">{stop.endTime}</span>
-                              <span className="text-[#8FA1BC]">·</span>
-                              <span className="truncate">{stop.transitToNext.description}</span>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white rounded-[28px] p-8 border border-[#E5DFD5] text-center space-y-4">
-                <RotateCcw className="w-6 h-6 animate-spin mx-auto text-[#FFC067]" />
-                <p className="text-sm font-sans text-[#5B6B8C]">
-                  Preparing sample Quick Escape itineraries...
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+        </LayoutGroup>
       </div>
     </section>
   );

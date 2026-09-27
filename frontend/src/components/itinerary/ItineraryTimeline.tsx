@@ -12,6 +12,7 @@ import {
   Coffee,
   Sliders,
   RotateCcw,
+  Train,
 } from 'lucide-react';
 import { ItineraryDay, BookingStatus, ItineraryActivity } from '../../types/itinerary';
 import { SignatureAnchorHero } from './SignatureAnchorHero';
@@ -175,6 +176,32 @@ export function ItineraryTimeline({
           {day.activities.length} Stops Mapped · ~{durationHours} Hours Total Exploration
         </span>
       </div>
+
+      {/* 2.5. Sculpted Inter-State Border Crossing Capsule */}
+      {day.isInterStateCrossing && day.corridorTransitSummary && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98, y: -8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-[#FAF0DF] via-[#FFFDF9] to-[#F3ECE1] border-2 border-[#D47A39] shadow-md flex items-center justify-between gap-4 text-xs sm:text-sm font-heading text-[#3B2316]"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-[#B84A27] text-[#FFFDF9] flex items-center justify-center shadow-xs shrink-0">
+              <Train className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-[10px] font-mono font-extrabold uppercase tracking-widest text-[#B84A27] block">
+                ✦ Inter-State Territorial Corridor Transition
+              </span>
+              <p className="font-heading font-black text-sm sm:text-base text-[#3B2316] mt-0.5">
+                {day.corridorTransitSummary}
+              </p>
+            </div>
+          </div>
+          <span className="px-3 py-1 rounded-full bg-[#FAF4E8] border border-[#DFCBB2] text-[11px] font-mono font-extrabold text-[#7A523B] shrink-0 hidden sm:inline-block">
+            Minimum Detour Optimized
+          </span>
+        </motion.div>
+      )}
 
       {/* 3. Continuous Engraved Horological Ruler Rail & Asymmetric Stop Rows */}
       <div className="relative space-y-6 sm:space-y-8 pt-2 pb-4">

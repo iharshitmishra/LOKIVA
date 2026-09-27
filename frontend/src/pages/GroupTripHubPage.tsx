@@ -780,8 +780,8 @@ export function GroupTripHubPage({ mode }: GroupTripHubPageProps) {
             />
 
             {/* Quick Share to WhatsApp Bar */}
-            <div className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E2D5BE] flex items-center justify-between gap-2 text-sm">
-              <span className="font-heading font-bold text-[#3B2316] truncate">
+            <div className="p-3.5 rounded-2xl bg-[#FFFFFF] border border-[#E5DFD5] flex items-center justify-between gap-2 text-sm shadow-xs">
+              <span className="font-heading font-bold text-[#12213B] truncate">
                 Invite friends to calibrate
               </span>
               <a
@@ -790,7 +790,7 @@ export function GroupTripHubPage({ mode }: GroupTripHubPageProps) {
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-xl bg-[#B84A27] hover:bg-[#9E3C1D] text-[#FFFDF9] font-heading font-bold shrink-0 transition flex items-center gap-1.5 shadow-2xs"
+                className="px-4 py-2 rounded-xl bg-[#C1443B] hover:bg-[#A83830] text-white font-heading font-bold text-xs sm:text-sm shrink-0 transition flex items-center gap-1.5 shadow-2xs cursor-pointer"
               >
                 <span>WhatsApp Invite</span>
               </a>

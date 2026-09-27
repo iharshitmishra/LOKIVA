@@ -112,13 +112,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (fbUser && fbUser.email) {
           try {
             const idToken = await fbUser.getIdToken();
+            const storedUserRaw = localStorage.getItem('lokiva_user');
+            let detectedRole: Role = 'traveler';
+            if (storedUserRaw) {
+              try {
+                const parsed = JSON.parse(storedUserRaw);
+                if (parsed.role) detectedRole = parsed.role;
+              } catch {}
+            }
+
             const realUser: User = {
               id: fbUser.uid,
               email: fbUser.email || '',
-              full_name: fbUser.displayName || fbUser.email.split('@')[0] || 'Traveler',
+              full_name: fbUser.displayName || fbUser.email.split('@')[0] || (detectedRole === 'provider' ? 'Cultural Host' : 'Traveler'),
               avatar: fbUser.photoURL || undefined,
               avatar_url: fbUser.photoURL || undefined,
-              role: 'traveler',
+              role: detectedRole,
               is_active: true,
               created_at: new Date().toISOString(),
               profile: {
@@ -136,7 +145,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             // Attempt backend synchronization
             try {
-              await exchangeFirebaseToken(idToken, 'traveler', fbUser.displayName || undefined);
+              await exchangeFirebaseToken(idToken, detectedRole, fbUser.displayName || undefined);
             } catch {
               // Direct Firebase session
               if (!cancelled) {

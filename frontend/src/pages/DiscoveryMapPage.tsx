@@ -22,6 +22,9 @@ import {
 } from '../components/onboarding/DiscoveryOnboardingFlow';
 import { getStateDossier } from '../data/stateDossiersData';
 import { getStateForCity } from '../data/places';
+import { DigitalTwinMapLayer } from '../components/map/DigitalTwinMapLayer';
+import { fetchDigitalTwinSimulation, fetchDigitalTwinCities } from '../lib/digitalTwinApi';
+import { DigitalTwinSimulationData, WeatherConditionType } from '../types/digitalTwin';
 
 // Map destination city or slug to Indian state name for the map
 const CITY_TO_STATE: Record<string, string> = {
@@ -101,6 +104,33 @@ export function DiscoveryMapPage() {
     return searchParams.get('onboard') === 'true';
   });
 
+  // Digital Twin in-place overlay state
+  const [isWeatherTwinOverlayActive, setIsWeatherTwinOverlayActive] = useState<boolean>(false);
+  const [twinCity, setTwinCity] = useState<string>('Jaipur');
+  const [twinCondition, setTwinCondition] = useState<WeatherConditionType>('rain');
+  const [twinSimulation, setTwinSimulation] = useState<DigitalTwinSimulationData | null>(null);
+  const [availableTwinCities, setAvailableTwinCities] = useState<{ id: string; name: string; state: string }[]>([
+    { id: 'jaipur', name: 'Jaipur', state: 'Rajasthan' },
+    { id: 'mumbai', name: 'Mumbai', state: 'Maharashtra' },
+  ]);
+
+  useEffect(() => {
+    fetchDigitalTwinCities()
+      .then((cities) => {
+        if (Array.isArray(cities) && cities.length > 0) {
+          setAvailableTwinCities(cities);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!isWeatherTwinOverlayActive) return;
+    fetchDigitalTwinSimulation(twinCity, twinCondition)
+      .then((data) => setTwinSimulation(data))
+      .catch((err) => console.error('Error loading discovery twin:', err));
+  }, [isWeatherTwinOverlayActive, twinCity, twinCondition]);
+
   // Sync selected state to URL query parameter cleanly without reload
   useEffect(() => {
     const currentParam = searchParams.get('state');
@@ -164,7 +194,7 @@ export function DiscoveryMapPage() {
   const currentDossier = selectedState ? getStateDossier(selectedState) : null;
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF7F2] text-[#12213B] selection:bg-[#C85A32] selection:text-white">
+    <div className="w-full min-h-screen bg-transparent text-[#12213B] selection:bg-[#C85A32] selection:text-white">
       {/* Top Dedicated Sub-Header Ribbon (Outside the map viewport) */}
       <header className="sticky top-0 z-30 w-full bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E5DFD5] px-4 sm:px-8 py-2.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
@@ -199,16 +229,32 @@ export function DiscoveryMapPage() {
             })}
           </div>
 
-          {/* Right: Guided Match Flow Button */}
-          <button
-            type="button"
-            onClick={() => setIsGuidedFlowOpen(true)}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white hover:bg-white text-[#C85A32] border border-[#E5DFD5] hover:border-[#C85A32] text-xs font-heading font-extrabold shadow-2xs transition-colors shrink-0 cursor-pointer"
-          >
-            <Sparkles className="w-4 h-4 text-[#D99B43]" />
-            <span className="hidden sm:inline">Guided Match Quiz</span>
-            <span className="sm:hidden">Quiz</span>
-          </button>
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsWeatherTwinOverlayActive(!isWeatherTwinOverlayActive)}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-heading font-extrabold shadow-2xs transition-colors shrink-0 cursor-pointer ${
+                isWeatherTwinOverlayActive
+                  ? 'bg-sky-600 text-white shadow-sm ring-2 ring-sky-300'
+                  : 'bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-300'
+              }`}
+              title="Toggle Live Weather Radar & Impact Simulation Layer"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping" />
+              <span>{isWeatherTwinOverlayActive ? '🗺️ Heritage Map' : '🌧️ Weather Radar Twin'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsGuidedFlowOpen(true)}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white hover:bg-white text-[#C85A32] border border-[#E5DFD5] hover:border-[#C85A32] text-xs font-heading font-extrabold shadow-2xs transition-colors shrink-0 cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4 text-[#D99B43]" />
+              <span className="hidden sm:inline">Guided Match Quiz</span>
+              <span className="sm:hidden">Quiz</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -218,16 +264,34 @@ export function DiscoveryMapPage() {
         className="w-full h-[78vh] sm:h-[82vh] relative overflow-hidden bg-[#FAF7F2] border-b border-[#E5DFD5]"
         aria-label="Interactive Pan-India Discovery Map"
       >
-        {/* Full-Width Interactive Map Stage */}
-        <IndiaVectorMap
-          selectedState={selectedState}
-          onSelectState={handleStateSelect}
-          activeRegion={activeRegion}
-          className="w-full h-full"
-        />
+        {isWeatherTwinOverlayActive && twinSimulation ? (
+          <div className="w-full h-full p-2 sm:p-4">
+            <DigitalTwinMapLayer
+              simulation={twinSimulation}
+              activeCondition={twinCondition}
+              onConditionChange={setTwinCondition}
+              onCityChange={setTwinCity}
+              availableCities={availableTwinCities}
+              selectedCity={twinCity}
+              focusCoordinate={null}
+              onSelectSanctuary={() => {}}
+              onSelectMonument={() => {}}
+            />
+          </div>
+        ) : (
+          <>
+            {/* Full-Width Interactive Map Stage */}
+            <IndiaVectorMap
+              selectedState={selectedState}
+              onSelectState={handleStateSelect}
+              activeRegion={activeRegion}
+              className="w-full h-full"
+            />
 
-        {/* Diagonal Heritage Flank Clusters with Corner-Reveal Entrances & Scroll Retraction */}
-        <HeritageFlankClusters heroRef={heroContainerRef} />
+            {/* Diagonal Heritage Flank Clusters with Corner-Reveal Entrances & Scroll Retraction */}
+            <HeritageFlankClusters heroRef={heroContainerRef} />
+          </>
+        )}
 
         {/* Bottom Teaser Cue */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none">

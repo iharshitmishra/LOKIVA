@@ -244,6 +244,149 @@ experiencesRouter.get('/:id', async (req, res) => {
   }
 });
 
+// GET /experiences/:id/availability
+// Traveler-side & AI Itinerary Solver slot inspector: Experience -> Date -> Time Slot -> Capacity -> Booked -> Remaining
+experiencesRouter.get('/:id/availability', async (req, res) => {
+  try {
+    const expId = req.params.id;
+    const exp = await dbGet('SELECT * FROM experiences WHERE id = ?', [expId]);
+    if (!exp) return res.status(404).json({ detail: 'Experience not found' });
+
+    const now = new Date();
+    const defaultStart = now.toISOString().split('T')[0];
+    const defaultEndObj = new Date(now);
+    defaultEndObj.setDate(defaultEndObj.getDate() + 30);
+    const defaultEnd = defaultEndObj.toISOString().split('T')[0];
+
+    const startDate = req.query.startDate || defaultStart;
+    const endDate = req.query.endDate || defaultEnd;
+
+    // 1. Fetch custom availability rows
+    const customSlots = await dbAll(
+      `SELECT * FROM provider_availability 
+       WHERE experience_id = ? AND date BETWEEN ? AND ? 
+       ORDER BY date ASC, time_slot ASC`,
+      [expId, startDate, endDate]
+    );
+
+    // 2. Fetch live bookings
+    const bookings = await dbAll(
+      `SELECT booking_date, time_slot, SUM(party_size) as booked_seats 
+       FROM bookings 
+       WHERE experience_id = ? AND booking_date BETWEEN ? AND ? AND status != 'cancelled'
+       GROUP BY booking_date, time_slot`,
+      [expId, startDate, endDate]
+    );
+
+    const bookingMap = new Map();
+    bookings.forEach((b) => {
+      bookingMap.set(`${b.booking_date}___${b.time_slot}`, Number(b.booked_seats || 0));
+    });
+
+    // 3. Fallback operating days & slots from Experience definition
+    const operatingDays = typeof exp.operating_days === 'string'
+      ? JSON.parse(exp.operating_days || '["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]')
+      : (exp.operating_days || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']);
+
+    const defaultSlots = typeof exp.available_slots === 'string'
+      ? JSON.parse(exp.available_slots || '["09:00 AM", "03:30 PM"]')
+      : (exp.available_slots || ['09:00 AM', '03:30 PM']);
+
+    const baseCapacity = Number(exp.max_group_size || exp.max_capacity || 10);
+    const basePrice = Number(exp.price || 1200);
+
+    // Build day-by-day availability map
+    const customSlotMap = new Map();
+    customSlots.forEach((cs) => {
+      if (!customSlotMap.has(cs.date)) customSlotMap.set(cs.date, []);
+      customSlotMap.get(cs.date).push(cs);
+    });
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const daysDiff = Math.min(60, Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 3600 * 24))));
+
+    const schedule = [];
+
+    for (let i = 0; i <= daysDiff; i++) {
+      const curDate = new Date(start);
+      curDate.setDate(curDate.getDate() + i);
+      const dateStr = curDate.toISOString().split('T')[0];
+      const dayName = curDate.toLocaleDateString('en-US', { weekday: 'short' });
+
+      let daySlots = [];
+
+      if (customSlotMap.has(dateStr)) {
+        // Use explicitly configured custom slots
+        daySlots = customSlotMap.get(dateStr).map((cs) => {
+          const booked = Math.max(
+            Number(cs.booked_count || 0),
+            bookingMap.get(`${dateStr}___${cs.time_slot}`) || 0
+          );
+          const capacity = Number(cs.capacity || baseCapacity);
+          const remaining = Math.max(0, capacity - booked);
+          const isAvailable = !cs.is_blocked && remaining > 0;
+
+          return {
+            slot_id: cs.id,
+            time_slot: cs.time_slot,
+            capacity,
+            booked,
+            remaining,
+            is_available: isAvailable,
+            is_blocked: Boolean(cs.is_blocked),
+            is_sold_out: remaining === 0,
+            price: cs.price_override ? Number(cs.price_override) : basePrice,
+          };
+        });
+      } else if (operatingDays.includes(dayName)) {
+        // Synthesize slots from Experience weekly schedule
+        daySlots = defaultSlots.map((slotTime) => {
+          const booked = bookingMap.get(`${dateStr}___${slotTime}`) || 0;
+          const remaining = Math.max(0, baseCapacity - booked);
+          const isAvailable = remaining > 0;
+
+          return {
+            slot_id: null,
+            time_slot: slotTime,
+            capacity: baseCapacity,
+            booked,
+            remaining,
+            is_available: isAvailable,
+            is_blocked: false,
+            is_sold_out: remaining === 0,
+            price: basePrice,
+          };
+        });
+      }
+
+      schedule.push({
+        date: dateStr,
+        day_of_week: dayName,
+        is_operating_day: operatingDays.includes(dayName) || daySlots.length > 0,
+        has_availability: daySlots.some((s) => s.is_available),
+        slots: daySlots,
+      });
+    }
+
+    res.json({
+      experience_id: exp.id,
+      title: exp.title,
+      category: exp.category,
+      opening_hours: exp.opening_hours || '09:00 AM - 06:00 PM',
+      approx_duration_mins: exp.approx_duration_mins || 90,
+      base_price: basePrice,
+      max_capacity: baseCapacity,
+      operating_days: operatingDays,
+      start_date: startDate,
+      end_date: endDate,
+      schedule,
+    });
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
 // POST /experiences (Create new experience)
 experiencesRouter.post('/', async (req, res) => {
   try {

@@ -14,6 +14,7 @@ import {
   Car,
 } from 'lucide-react';
 import { ItineraryTripDetails } from '../../types/itinerary';
+import { useItineraryStore } from '../../store/useItineraryStore';
 
 interface TripHeaderOverviewProps {
   tripDetails: ItineraryTripDetails;
@@ -65,9 +66,45 @@ export function TripHeaderOverview({
         <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
           {/* Left Column: Title & Magazine Masthead Sentence */}
           <div className="space-y-3 max-w-2xl">
-            {/* Minimal Typographic Overline */}
-            <div className="text-xs font-heading font-extrabold uppercase tracking-widest text-[#B84A27]">
-              CULTURAL ITINERARY MATRIX : EDITION 01
+            {/* Minimal Typographic Overline & Corridor Toggle */}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="text-xs font-heading font-extrabold uppercase tracking-widest text-[#B84A27]">
+                YOUR CURATED TRIP PLAN
+              </div>
+
+              {/* 1-Click Route Architecture Toggle */}
+              <div className="inline-flex p-1 rounded-2xl bg-[#FAF0DF] border border-[#DFCBB2] text-xs sm:text-sm font-heading font-extrabold shadow-2xs">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (tripDetails.corridorMode === 'corridor') {
+                      useItineraryStore.getState().toggleCorridorMode();
+                    }
+                  }}
+                  className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all cursor-pointer text-xs sm:text-sm ${
+                    tripDetails.corridorMode !== 'corridor'
+                      ? 'bg-gradient-to-r from-[#B84A27] to-[#D47A39] text-[#FFFDF9] shadow-xs'
+                      : 'text-[#5C3D2E] hover:text-[#3B2316]'
+                  }`}
+                >
+                  Direct Trip (A to C)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (tripDetails.corridorMode !== 'corridor') {
+                      useItineraryStore.getState().toggleCorridorMode();
+                    }
+                  }}
+                  className={`px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all cursor-pointer flex items-center gap-1.5 text-xs sm:text-sm ${
+                    tripDetails.corridorMode === 'corridor'
+                      ? 'bg-gradient-to-r from-[#B84A27] to-[#D47A39] text-[#FFFDF9] shadow-xs'
+                      : 'text-[#5C3D2E] hover:text-[#3B2316]'
+                  }`}
+                >
+                  <span>✦ Multi-Stop Route (A to B to C)</span>
+                </button>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -75,9 +112,31 @@ export function TripHeaderOverview({
                 {tripDetails.title}
               </h1>
               <p className="text-xs sm:text-sm text-[#7A5C49] font-sans leading-relaxed">
-                Hand-curated regional experiences sequenced with verified local transit and crowd pacing.
+                Hand-picked local experiences with verified timing and easy transit.
               </p>
             </div>
+
+            {/* 3-Leg Expedition Ribbon */}
+            {tripDetails.corridorMode === 'corridor' && (
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-[#FAF4E8] via-[#FFFDF9] to-[#F3E7D6] border-2 border-[#D47A39] flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm font-heading font-extrabold text-[#3B2316] shadow-xs">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-3 py-1.5 rounded-xl bg-[#A67B5B] text-[#FFFDF9] font-heading font-bold text-xs sm:text-sm shadow-2xs">
+                    Stop 1: {tripDetails.originState || 'Maharashtra'} (Day 1)
+                  </span>
+                  <span className="text-[#A67B5B] font-bold text-sm">→</span>
+                  <span className="px-3 py-1.5 rounded-xl bg-[#D47A39] text-[#FFFDF9] font-heading font-bold text-xs sm:text-sm shadow-2xs">
+                    Stop 2: {tripDetails.intermediateState || 'Madhya Pradesh'} (Days 2 to 3)
+                  </span>
+                  <span className="text-[#A67B5B] font-bold text-sm">→</span>
+                  <span className="px-3 py-1.5 rounded-xl bg-[#B84A27] text-[#FFFDF9] font-heading font-bold text-xs sm:text-sm shadow-2xs">
+                    Final Stop: {tripDetails.state || 'Rajasthan'}
+                  </span>
+                </div>
+                <span className="text-xs sm:text-sm font-heading font-extrabold text-[#B84A27]">
+                  ✦ Smart Connected Route
+                </span>
+              </div>
+            )}
 
             {/* Editorial Magazine Masthead Sentence (Zero Boxed Clutter) */}
             <div className="pt-1 text-xs sm:text-sm font-sans text-[#5C3D2E] leading-relaxed">
@@ -122,54 +181,54 @@ export function TripHeaderOverview({
           {/* Right Column: Pricing Overview & Action Buttons */}
           <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-end justify-between gap-4 shrink-0 pt-4 lg:pt-0 border-t lg:border-t-0 border-[#E6DAC6]">
             <div className="text-left sm:text-right space-y-0.5">
-              <div className="text-xs font-meta uppercase tracking-wider text-[#7A5C49] font-bold">
+              <div className="text-xs sm:text-sm font-heading font-extrabold uppercase tracking-wider text-[#7A5C49]">
                 Total Estimated Spend
               </div>
               <div className="text-3xl sm:text-4xl lg:text-5xl font-display font-black text-[#3B2316] tracking-tight">
                 ₹{totalCost.toLocaleString('en-IN')}
               </div>
-              <div className="text-xs font-meta text-[#8C6751] font-semibold">
+              <div className="text-xs sm:text-sm font-sans font-semibold text-[#8C6751]">
                 ₹{perPersonCost.toLocaleString('en-IN')} per person ({travelersCount} travelers)
               </div>
 
               {/* Warm Saffron Gold Budget Seal (Zero Green) */}
               <div className="pt-1.5 flex items-center sm:justify-end">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FDF2E0] text-[#9E5414] border border-[#F0D2A4] text-xs font-meta font-bold shadow-2xs">
-                  <Target className="w-3.5 h-3.5 text-[#B5651D] shrink-0" />
+                <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FDF2E0] text-[#9E5414] border border-[#F0D2A4] text-xs sm:text-sm font-heading font-extrabold shadow-2xs">
+                  <Target className="w-4 h-4 text-[#B5651D] shrink-0" />
                   <span>
-                    {budgetUtilization}% Budget Utilization (₹{totalCost.toLocaleString('en-IN')} / ₹{budgetLimit.toLocaleString('en-IN')})
+                    {budgetUtilization}% Budget Used (₹{totalCost.toLocaleString('en-IN')} / ₹{budgetLimit.toLocaleString('en-IN')})
                   </span>
                 </span>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto pt-1">
+            {/* Action Buttons: Pencil, Share, Printer Icons */}
+            <div className="flex items-center gap-2 pt-1">
               <button
                 type="button"
                 onClick={onEditTrip}
-                className="px-3.5 py-2 bg-[#FAF6F0] hover:bg-[#F3ECE1] border border-[#E6DAC6] text-[#3B2316] rounded-xl text-xs font-heading font-bold uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                className="p-2.5 bg-[#FAF6F0] hover:bg-[#FAF0DF] border border-[#E6DAC6] hover:border-[#B84A27] text-[#3B2316] rounded-xl transition flex items-center justify-center cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+                title="Edit Trip Details"
               >
-                <Pencil className="w-3.5 h-3.5 text-[#B84A27]" />
-                <span>Edit Trip</span>
+                <Pencil className="w-4 h-4 text-[#B84A27]" />
               </button>
 
               <button
                 type="button"
                 onClick={onShare}
-                className="px-3.5 py-2 bg-gradient-to-r from-[#B84A27] to-[#D47A39] hover:opacity-95 text-[#FFFDF9] rounded-xl text-xs font-heading font-bold uppercase tracking-wider transition flex items-center gap-1.5 cursor-pointer shadow-md hover:scale-102 active:scale-98"
+                className="p-2.5 bg-gradient-to-r from-[#B84A27] to-[#D47A39] hover:opacity-95 text-[#FFFDF9] rounded-xl transition flex items-center justify-center cursor-pointer shadow-md hover:scale-105 active:scale-95"
+                title="Share Trip Plan"
               >
-                <Share2 className="w-3.5 h-3.5" />
-                <span>Share</span>
+                <Share2 className="w-4 h-4" />
               </button>
 
               <button
                 type="button"
                 onClick={onPrint}
-                className="p-2 bg-[#FAF6F0] hover:bg-[#F3ECE1] border border-[#E6DAC6] text-[#3B2316] rounded-xl text-xs transition cursor-pointer shadow-2xs"
+                className="p-2.5 bg-[#FAF6F0] hover:bg-[#FAF0DF] border border-[#E6DAC6] text-[#3B2316] rounded-xl transition flex items-center justify-center cursor-pointer shadow-2xs hover:border-[#B84A27] hover:scale-105 active:scale-95"
                 title="Print PDF Itinerary"
               >
-                <Printer className="w-3.5 h-3.5" />
+                <Printer className="w-4 h-4 text-[#7A5C49]" />
               </button>
             </div>
           </div>
@@ -177,9 +236,9 @@ export function TripHeaderOverview({
 
         {/* Visual Multi-Segment Proportion Ribbon (Replacing 3-Column Box Grid) */}
         <div className="pt-5 mt-4 border-t border-[#E6DAC6] space-y-4">
-          <div className="flex items-center justify-between text-xs font-heading font-bold text-[#3B2316]">
+          <div className="flex items-center justify-between text-sm sm:text-base font-heading font-extrabold text-[#3B2316]">
             <span>Category Budget Allocation</span>
-            <span className="font-meta text-[#7A5C49] font-normal">Calculated across verified ground rates</span>
+            <span className="font-sans text-xs sm:text-sm text-[#7A5C49] font-normal">Calculated across verified ground rates</span>
           </div>
 
           {/* Continuous Multi-Segment Proportion Ribbon */}
@@ -207,17 +266,17 @@ export function TripHeaderOverview({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#B84A27] shrink-0" />
-                <span className="text-xs font-heading font-bold text-[#3B2316]">
+                <span className="text-sm sm:text-base font-heading font-bold text-[#3B2316]">
                   Experiences &amp; Workshops
                 </span>
-                <span className="text-xs font-meta text-[#B84A27] font-bold">
+                <span className="text-xs sm:text-sm font-heading font-extrabold text-[#B84A27]">
                   {ticketsPercent}%
                 </span>
               </div>
-              <div className="text-xl font-display font-black text-[#3B2316] pl-4.5">
+              <div className="text-xl sm:text-2xl font-display font-black text-[#3B2316] pl-4.5">
                 ₹{ticketsCost.toLocaleString('en-IN')}
               </div>
-              <p className="text-[11px] font-sans text-[#7A5C49] pl-4.5 leading-snug">
+              <p className="text-xs sm:text-sm font-sans text-[#5C3D2E] pl-4.5 leading-snug">
                 Entrance fees, craft masterclasses and guild access
               </p>
             </div>
@@ -226,17 +285,17 @@ export function TripHeaderOverview({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#D98A36] shrink-0" />
-                <span className="text-xs font-heading font-bold text-[#3B2316]">
+                <span className="text-sm sm:text-base font-heading font-bold text-[#3B2316]">
                   Regional Culinary Trails
                 </span>
-                <span className="text-xs font-meta text-[#D98A36] font-bold">
+                <span className="text-xs sm:text-sm font-heading font-extrabold text-[#D98A36]">
                   {foodPercent}%
                 </span>
               </div>
-              <div className="text-xl font-display font-black text-[#3B2316] pl-4.5">
+              <div className="text-xl sm:text-2xl font-display font-black text-[#3B2316] pl-4.5">
                 ₹{foodCost.toLocaleString('en-IN')}
               </div>
-              <p className="text-[11px] font-sans text-[#7A5C49] pl-4.5 leading-snug">
+              <p className="text-xs sm:text-sm font-sans text-[#5C3D2E] pl-4.5 leading-snug">
                 Heritage breakfasts, thalis, tea houses and street trails
               </p>
             </div>
@@ -245,17 +304,17 @@ export function TripHeaderOverview({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#A67B5B] shrink-0" />
-                <span className="text-xs font-heading font-bold text-[#3B2316]">
+                <span className="text-sm sm:text-base font-heading font-bold text-[#3B2316]">
                   Dedicated Heritage Transit
                 </span>
-                <span className="text-xs font-meta text-[#A67B5B] font-bold">
+                <span className="text-xs sm:text-sm font-heading font-extrabold text-[#A67B5B]">
                   {transitPercent}%
                 </span>
               </div>
-              <div className="text-xl font-display font-black text-[#3B2316] pl-4.5">
+              <div className="text-xl sm:text-2xl font-display font-black text-[#3B2316] pl-4.5">
                 ₹{transitCost.toLocaleString('en-IN')}
               </div>
-              <p className="text-[11px] font-sans text-[#7A5C49] pl-4.5 leading-snug">
+              <p className="text-xs sm:text-sm font-sans text-[#7A5C49] pl-4.5 leading-snug">
                 Point-to-point autos, e-rickshaws and dedicated cabs
               </p>
             </div>

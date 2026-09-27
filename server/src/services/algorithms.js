@@ -74,43 +74,76 @@ export function scoreExperience(exp, intent, profile, weather) {
 
   // Parse JSON fields safely
   const tags = typeof exp.tags === 'string' ? JSON.parse(exp.tags || '[]') : exp.tags || [];
-  const interests = intent?.interests || (profile?.interests ? (typeof profile.interests === 'string' ? JSON.parse(profile.interests) : profile.interests) : []);
+  const interestsList = typeof exp.interests === 'string' ? JSON.parse(exp.interests || '[]') : exp.interests || [];
+  const combinedAffinity = Array.from(new Set([...tags, ...interestsList]));
+  const userInterests = intent?.interests || (profile?.interests ? (typeof profile.interests === 'string' ? JSON.parse(profile.interests) : profile.interests) : []);
 
-  // 1. Category and Interest Matching (+25 max)
+  // 1. Category and Interests Matching (+25 max)
   const expCategory = (exp.category || '').toLowerCase();
-  const matchedInterests = matchInterests(expCategory, tags, interests);
+  const matchedInterests = matchInterests(expCategory, combinedAffinity, userInterests);
   if (matchedInterests.length > 0) {
     score += Math.min(30, matchedInterests.length * 15);
     matchReasons.push(`Matches your interest in ${matchedInterests.join(', ')}`);
   }
 
-  // 2. Persona Match (Family / Solo / Couple)
+  // 2. Persona & Group Size Matching (+15 max)
   const travelerType = (intent?.traveler_type || profile?.traveler_type || 'Solo').toLowerCase();
-  if (travelerType.includes('family') && exp.is_family_friendly) {
-    score += 15;
-    matchReasons.push('Verified family-friendly pacing');
+  const groupSize = Number(intent?.group_size || profile?.group_size || 1);
+  const minGroup = Number(exp.min_group_size || 1);
+  const maxGroup = Number(exp.max_group_size || exp.max_capacity || 10);
+
+  if (groupSize >= minGroup && groupSize <= maxGroup) {
+    score += 10;
+    matchReasons.push(`Optimal group fit (${groupSize} guests within ${minGroup}-${maxGroup} limit)`);
   }
 
-  // 3. Accessibility / Low Walking Match
+  if (travelerType.includes('family') && exp.is_family_friendly) {
+    score += 15;
+    matchReasons.push('Verified family-friendly pacing & amenities');
+  } else if (travelerType.includes('solo') && (exp.group_type === 'solo_friendly' || minGroup === 1)) {
+    score += 10;
+    matchReasons.push('Solo-friendly host with no minimum party restriction');
+  }
+
+  // 3. Accessibility Constraint Solver
+  const accessPrefs = intent?.accessibility_prefs || profile?.accessibility_prefs || {};
+  if (accessPrefs.wheelchair && exp.wheelchair_accessible) {
+    score += 15;
+    matchReasons.push('Wheelchair accessible pathways & entrances');
+  }
+  if (accessPrefs.step_free && exp.step_free) {
+    score += 12;
+    matchReasons.push('Step-free barrier-free entrance');
+  }
+  if (accessPrefs.audio_guide && exp.audio_guide) {
+    score += 10;
+    matchReasons.push('Assistive audio commentary available');
+  }
   const lowWalking = intent?.accessibility_prefs?.low_walking ?? profile?.accessibility_prefs?.low_walking;
   if (lowWalking && exp.low_walking) {
     score += 15;
-    matchReasons.push('Low-walking & comfortable accessibility');
+    matchReasons.push('Low-walking & comfortable seated pacing');
   }
 
-  // 4. Hidden Gem Boost
+  // 4. Media & Visual Quality Boost
+  if (exp.video_url) {
+    score += 5;
+    matchReasons.push('Curated preview video reel available');
+  }
+
+  // 5. Hidden Gem Boost
   if (exp.is_hidden_gem) {
     score += 10;
     matchReasons.push('Authentic off-the-beaten-path hidden gem');
   }
 
-  // 5. Weather Suitability
-  if (weather?.is_raining && exp.is_indoor) {
+  // 6. Weather & Climate Suitability
+  if (weather?.is_raining && (exp.is_indoor || exp.is_rain_safe)) {
     score += 15;
-    matchReasons.push('Indoor experience sheltered from rain');
+    matchReasons.push('Indoor or rain-sheltered route');
   }
 
-  // 6. Confirmed Budget Fit (only applied when a brief declared a real ceiling)
+  // 7. Confirmed Budget Fit (only applied when a brief declared a real ceiling)
   const budgetCeiling = Number(intent?.budget);
   if (Number.isFinite(budgetCeiling) && budgetCeiling > 0 && budgetCeiling <= 15000) {
     const price = Number(exp.price) || 0;
@@ -125,7 +158,7 @@ export function scoreExperience(exp, intent, profile, weather) {
     }
   }
 
-  // 7. Quality & Rating
+  // 8. Quality & Host Rating
   score += (exp.rating || 4.5) * 3;
 
   return {

@@ -25,7 +25,9 @@ import {
   Landmark,
   Layers,
   Star,
+  Radio,
 } from 'lucide-react';
+import { DigitalTwinPage } from './DigitalTwinPage';
 
 interface AdminUser {
   id: number;
@@ -43,8 +45,8 @@ export function AdminDashboardPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Active Tab
-  const [activeTab, setActiveTab] = useState<'kyc' | 'experiences' | 'users' | 'activity'>('kyc');
+  // Active Tab: default to Live Twin Overall Dashboard for Administrator
+  const [activeTab, setActiveTab] = useState<'twin' | 'kyc' | 'experiences' | 'users' | 'activity'>('twin');
 
   // Search queries
   const [providerSearch, setProviderSearch] = useState('');
@@ -388,6 +390,15 @@ export function AdminDashboardPage() {
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-paper-300 pb-2">
           <div className="flex items-center bg-paper-200 p-1 rounded-2xl gap-1 overflow-x-auto max-w-full scrollbar-none [-webkit-overflow-scrolling:touch]">
             <button
+              onClick={() => setActiveTab('twin')}
+              className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 ${
+                activeTab === 'twin' ? 'bg-sky-600 text-white shadow-sm' : 'text-dusk hover:text-ink'
+              }`}
+            >
+              <Radio className="w-3.5 h-3.5 text-sky-300 animate-pulse" />
+              <span>Live Twin Overall Dashboard</span>
+            </button>
+            <button
               onClick={() => setActiveTab('kyc')}
               className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 ${
                 activeTab === 'kyc' ? 'bg-white text-ink shadow-sm' : 'text-dusk hover:text-ink'
@@ -456,6 +467,13 @@ export function AdminDashboardPage() {
             )}
           </div>
         </div>
+
+        {/* ================= TAB 0: LIVE TWIN OVERALL DASHBOARD ================= */}
+        {activeTab === 'twin' && (
+          <div className="rounded-3xl overflow-hidden border border-paper-400 bg-white shadow-md -mt-1">
+            <DigitalTwinPage />
+          </div>
+        )}
 
         {/* ================= TAB 1: ARTISAN KYC & PROVIDERS ================= */}
         {activeTab === 'kyc' && (

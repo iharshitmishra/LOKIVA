@@ -102,11 +102,19 @@ export function TravelerLoginPage() {
           </button>
         </form>
 
-        <div className="pt-2 text-center text-xs sm:text-sm text-[#7A5C49] font-sans border-t border-[#E2D5BE]">
-          New explorer?{' '}
-          <Link to="/register/traveler" className="text-[#B84A27] font-bold hover:underline underline-offset-4">
-            Create Traveler Account
-          </Link>
+        <div className="pt-2 text-center text-xs text-[#7A6B5D] font-sans border-t border-[#E5DFD5] space-y-2">
+          <div>
+            New explorer?{' '}
+            <Link to="/register/traveler" className="text-[#C1443B] font-heading font-bold hover:underline underline-offset-4">
+              Create Traveler Account
+            </Link>
+          </div>
+          <div>
+            Are you a Cultural Host or Tour Operator?{' '}
+            <Link to="/provider/login" className="text-[#12213B] font-heading font-bold hover:underline underline-offset-4">
+              Sign In to Provider Portal →
+            </Link>
+          </div>
         </div>
       </div>
     </div>
