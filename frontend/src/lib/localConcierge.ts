@@ -18,49 +18,79 @@ interface LocalConciergeResult {
   state: string;
 }
 
-// Known cities and states for instant entity resolution
+// Known cities, towns, and regions for instant high-precision entity resolution
 const KNOWN_DESTINATIONS = [
-  { city: 'Jaipur', state: 'Rajasthan', aliases: ['pink city', 'jaipur', 'rajasthan jaipur'] },
-  { city: 'Udaipur', state: 'Rajasthan', aliases: ['city of lakes', 'udaipur'] },
-  { city: 'Jodhpur', state: 'Rajasthan', aliases: ['sun city', 'blue city', 'jodhpur'] },
-  { city: 'Jaisalmer', state: 'Rajasthan', aliases: ['golden city', 'jaisalmer'] },
-  { city: 'Varanasi', state: 'Uttar Pradesh', aliases: ['banaras', 'kashi', 'varanasi'] },
-  { city: 'Agra', state: 'Uttar Pradesh', aliases: ['taj mahal', 'agra'] },
-  { city: 'Delhi', state: 'Delhi', aliases: ['new delhi', 'old delhi', 'dilli', 'delhi'] },
-  { city: 'Mumbai', state: 'Maharashtra', aliases: ['bombay', 'mumbai'] },
-  { city: 'Pune', state: 'Maharashtra', aliases: ['pune'] },
-  { city: 'Kochi', state: 'Kerala', aliases: ['cochin', 'fort kochi', 'kochi'] },
-  { city: 'Munnar', state: 'Kerala', aliases: ['munnar'] },
-  { city: 'Alleppey', state: 'Kerala', aliases: ['alappuzha', 'alleppey'] },
-  { city: 'Goa', state: 'Goa', aliases: ['north goa', 'south goa', 'panaji', 'goa'] },
-  { city: 'Hampi', state: 'Karnataka', aliases: ['hampi', 'vijayanagara'] },
+  // Maharashtra & Western India
+  { city: 'Panvel', state: 'Maharashtra', aliases: ['panvel', 'navi mumbai panvel', 'khandeshwar'] },
+  { city: 'Navi Mumbai', state: 'Maharashtra', aliases: ['navi mumbai', 'vashi', 'nerul', 'belapur', 'kharghar'] },
+  { city: 'Mumbai', state: 'Maharashtra', aliases: ['mumbai', 'bombay', 'bandra', 'colaba', 'kala ghoda'] },
+  { city: 'Pune', state: 'Maharashtra', aliases: ['pune', 'poona', 'shivajinagar', 'koregaon park'] },
+  { city: 'Nashik', state: 'Maharashtra', aliases: ['nashik', 'nasik', 'trimbak', 'sula'] },
+  { city: 'Lonavala', state: 'Maharashtra', aliases: ['lonavala', 'khandala', 'karla'] },
+  { city: 'Alibag', state: 'Maharashtra', aliases: ['alibag', 'alibaug', 'nagaon', 'kihim'] },
+  { city: 'Aurangabad', state: 'Maharashtra', aliases: ['aurangabad', 'chhatrapati sambhajinagar', 'ellora', 'ajanta'] },
+  { city: 'Kolhapur', state: 'Maharashtra', aliases: ['kolhapur', 'mahalaxmi'] },
+  { city: 'Nagpur', state: 'Maharashtra', aliases: ['nagpur'] },
+  // Rajasthan
+  { city: 'Jaipur', state: 'Rajasthan', aliases: ['jaipur', 'pink city', 'amer', 'sanganer'] },
+  { city: 'Udaipur', state: 'Rajasthan', aliases: ['udaipur', 'city of lakes', 'lake pichola'] },
+  { city: 'Jodhpur', state: 'Rajasthan', aliases: ['jodhpur', 'sun city', 'blue city', 'mehrangarh'] },
+  { city: 'Jaisalmer', state: 'Rajasthan', aliases: ['jaisalmer', 'golden city', 'sam dunes'] },
+  { city: 'Pushkar', state: 'Rajasthan', aliases: ['pushkar', 'brahma temple'] },
+  { city: 'Bikaner', state: 'Rajasthan', aliases: ['bikaner', 'junagarh'] },
+  // North India & Himalayas
+  { city: 'Delhi', state: 'Delhi', aliases: ['delhi', 'new delhi', 'old delhi', 'dilli', 'ncr'] },
+  { city: 'Varanasi', state: 'Uttar Pradesh', aliases: ['varanasi', 'banaras', 'kashi', 'ganga ghats'] },
+  { city: 'Agra', state: 'Uttar Pradesh', aliases: ['agra', 'taj mahal', 'fatehpur sikri'] },
+  { city: 'Lucknow', state: 'Uttar Pradesh', aliases: ['lucknow', 'awadh', 'chowk'] },
+  { city: 'Mathura', state: 'Uttar Pradesh', aliases: ['mathura', 'vrindavan'] },
+  { city: 'Ayodhya', state: 'Uttar Pradesh', aliases: ['ayodhya'] },
+  { city: 'Rishikesh', state: 'Uttarakhand', aliases: ['rishikesh', 'laxman jhula', 'triveni ghat'] },
+  { city: 'Haridwar', state: 'Uttarakhand', aliases: ['haridwar', 'har ki pauri'] },
+  { city: 'Shimla', state: 'Himachal Pradesh', aliases: ['shimla', 'kufri', 'mall road'] },
+  { city: 'Manali', state: 'Himachal Pradesh', aliases: ['manali', 'solang', 'old manali'] },
+  { city: 'Dharamshala', state: 'Himachal Pradesh', aliases: ['dharamshala', 'mcleodganj', 'kangra'] },
+  { city: 'Amritsar', state: 'Punjab', aliases: ['amritsar', 'golden temple', 'harmandir sahib'] },
+  { city: 'Srinagar', state: 'Jammu and Kashmir', aliases: ['srinagar', 'kashmir', 'dal lake', 'gulmarg'] },
+  { city: 'Leh', state: 'Ladakh', aliases: ['leh', 'ladakh', 'pangong', 'nubra'] },
+  // South India
+  { city: 'Kochi', state: 'Kerala', aliases: ['kochi', 'cochin', 'fort kochi', 'mattancherry'] },
+  { city: 'Munnar', state: 'Kerala', aliases: ['munnar', 'tea gardens'] },
+  { city: 'Alleppey', state: 'Kerala', aliases: ['alleppey', 'alappuzha', 'backwaters'] },
+  { city: 'Wayanad', state: 'Kerala', aliases: ['wayanad'] },
+  { city: 'Bengaluru', state: 'Karnataka', aliases: ['bengaluru', 'bangalore'] },
   { city: 'Mysuru', state: 'Karnataka', aliases: ['mysore', 'mysuru'] },
-  { city: 'Bengaluru', state: 'Karnataka', aliases: ['bangalore', 'bengaluru'] },
-  { city: 'Amritsar', state: 'Punjab', aliases: ['golden temple', 'amritsar'] },
-  { city: 'Srinagar', state: 'Jammu and Kashmir', aliases: ['kashmir', 'srinagar', 'dal lake'] },
-  { city: 'Dharamshala', state: 'Himachal Pradesh', aliases: ['mcleodganj', 'dharamshala'] },
-  { city: 'Shimla', state: 'Himachal Pradesh', aliases: ['shimla'] },
-  { city: 'Rishikesh', state: 'Uttarakhand', aliases: ['haridwar', 'rishikesh'] },
-  { city: 'Kolkata', state: 'West Bengal', aliases: ['calcutta', 'kolkata'] },
-  { city: 'Chennai', state: 'Tamil Nadu', aliases: ['madras', 'chennai'] },
-  { city: 'Madurai', state: 'Tamil Nadu', aliases: ['madurai'] },
-  { city: 'Hyderabad', state: 'Telangana', aliases: ['hyderabad'] },
-  { city: 'Ahmedabad', state: 'Gujarat', aliases: ['ahmedabad', 'amdavad'] },
-  { city: 'Kutch', state: 'Gujarat', aliases: ['rann of kutch', 'bhuj', 'kutch'] },
+  { city: 'Hampi', state: 'Karnataka', aliases: ['hampi', 'vijayanagara', 'tungabhadra'] },
+  { city: 'Coorg', state: 'Karnataka', aliases: ['coorg', 'kodagu', 'madikeri'] },
+  { city: 'Chennai', state: 'Tamil Nadu', aliases: ['chennai', 'madras', 'mylapore'] },
+  { city: 'Madurai', state: 'Tamil Nadu', aliases: ['madurai', 'meenakshi temple'] },
+  { city: 'Pondicherry', state: 'Puducherry', aliases: ['pondicherry', 'puducherry', 'auroville'] },
+  { city: 'Hyderabad', state: 'Telangana', aliases: ['hyderabad', 'charminar', 'secunderabad'] },
+  { city: 'Goa', state: 'Goa', aliases: ['goa', 'panaji', 'north goa', 'south goa', 'calangute', 'margao'] },
+  // East & Central India
+  { city: 'Kolkata', state: 'West Bengal', aliases: ['kolkata', 'calcutta', 'howrah', 'kumartuli'] },
+  { city: 'Darjeeling', state: 'West Bengal', aliases: ['darjeeling', 'ghoom'] },
+  { city: 'Bhopal', state: 'Madhya Pradesh', aliases: ['bhopal', 'sanchi', 'bhimbetka'] },
+  { city: 'Ujjain', state: 'Madhya Pradesh', aliases: ['ujjain', 'mahakaleshwar'] },
+  { city: 'Ahmedabad', state: 'Gujarat', aliases: ['ahmedabad', 'amdavad', 'sabarmati'] },
+  { city: 'Kutch', state: 'Gujarat', aliases: ['kutch', 'rann of kutch', 'bhuj', 'nirona'] },
 ];
 
 export function generateLocalConciergeResponse(
   message: string,
   existingCity?: string
 ): LocalConciergeResult {
-  const q = message.toLowerCase();
+  const q = message.toLowerCase().trim();
 
   // 1. Detect Destination (City and State)
   let detectedCity = existingCity || '';
   let detectedState = '';
 
   for (const dest of KNOWN_DESTINATIONS) {
-    if (dest.aliases.some((alias) => q.includes(alias)) || (detectedCity && detectedCity.toLowerCase() === dest.city.toLowerCase())) {
+    if (
+      dest.aliases.some((alias) => q.includes(alias)) ||
+      (detectedCity && detectedCity.toLowerCase() === dest.city.toLowerCase())
+    ) {
       detectedCity = dest.city;
       detectedState = dest.state;
       break;
@@ -78,14 +108,11 @@ export function generateLocalConciergeResponse(
     }
   }
 
-  if (!detectedCity) {
-    detectedCity = 'Jaipur';
-    detectedState = 'Rajasthan';
-  }
+  const isDestinationKnown = Boolean(detectedCity);
 
   // 2. Detect Group Size
   let groupSize = 1;
-  const numMatch = q.match(/(\d+)\s*(people|members|persons|pax|travelers|friends|adults|family)/i);
+  const numMatch = q.match(/(\d+)\s*(people|members|persons|pax|travelers|friends|adults|family|folks)/i);
   if (numMatch) {
     groupSize = parseInt(numMatch[1], 10);
   } else if (q.includes('four') || q.includes('4')) {
@@ -119,19 +146,18 @@ export function generateLocalConciergeResponse(
     }
   }
 
-  // 4. Retrieve Places for Destination
-  let cityPlaces = getPlacesByCity(detectedCity);
+  // 4. Retrieve Places for Destination or Fallback Selection
+  let cityPlaces = isDestinationKnown ? getPlacesByCity(detectedCity) : [];
   if (cityPlaces.length === 0 && detectedState) {
     cityPlaces = getPlacesByState(detectedState);
   }
-  if (cityPlaces.length === 0) {
+  if (cityPlaces.length === 0 && isDestinationKnown) {
     cityPlaces = searchAllPlaces(detectedCity, 10);
   }
   if (cityPlaces.length === 0) {
     cityPlaces = ALL_LOKIVA_PLACES.slice(0, 8);
   }
 
-  // Sort and select top experiences
   const topPlaces = cityPlaces.slice(0, 5);
 
   const suggested_experiences: ScoredExperience[] = topPlaces.map((place, idx) => {
@@ -165,31 +191,45 @@ export function generateLocalConciergeResponse(
     };
   });
 
-  // 5. Generate Warm Editorial Markdown Response
+  // 5. Generate Dynamic Logical Response
   const perPerson = budget && groupSize > 0 ? Math.round(budget / groupSize) : null;
   const perPersonText = perPerson ? `(₹${perPerson.toLocaleString('en-IN')} per traveler)` : '';
-  const totalBudgetText = budget ? `₹${budget.toLocaleString('en-IN')}` : 'a budget-friendly range';
+  const totalBudgetText = budget ? `₹${budget.toLocaleString('en-IN')}` : 'a tailored budget range';
 
-  let reply = `Padharo mhare desh! Welcome to **${detectedCity}**, ${detectedState || 'India'}.\n\n`;
+  let reply = '';
 
-  if (budget) {
-    reply += `I have tailored a high-value cultural plan for your group of **${groupSize} travelers** with a total budget of **${totalBudgetText}** ${perPersonText}.\n\n`;
+  if (isDestinationKnown) {
+    reply = `Welcome to **${detectedCity}**, ${detectedState || 'India'}.\n\n`;
+
+    if (budget) {
+      reply += `I have tailored a high-value cultural plan for your group of **${groupSize} traveler${groupSize > 1 ? 's' : ''}** with a total budget of **${totalBudgetText}** ${perPersonText}.\n\n`;
+    } else {
+      reply += `I have curated the signature cultural anchor points in **${detectedCity}** for your party of **${groupSize}**.\n\n`;
+    }
+
+    reply += `### Recommended Circuit Highlights:\n`;
+    topPlaces.forEach((p, i) => {
+      const costText = p.price > 0 ? `₹${p.price * groupSize} for ${groupSize}` : 'Free Entry';
+      reply += `${i + 1}. **${p.title}** (${p.category}): ${p.tagline || p.description.slice(0, 90)}... [${costText}]\n`;
+    });
+
+    reply += `\n**Practical Travel & Budget Advice:** Your allocation covers entry access, authentic local food stops, and intra-city transit with comfortable buffers remaining.\n\nWould you like me to build a sequential hourly route or focus on specific artisanal workshops?`;
   } else {
-    reply += `I have curated the top cultural anchor points in **${detectedCity}** for your party of **${groupSize}**.\n\n`;
+    // General Pan-India Inquiry
+    reply = `Welcome to LOKIVA AI Cultural Concierge.\n\n`;
+    if (budget) {
+      reply += `For your party of **${groupSize} traveler${groupSize > 1 ? 's' : ''}** with a budget of **${totalBudgetText}** ${perPersonText}, India offers diverse heritage corridors: royal architectural citadels, coastal backwaters, Himalayan nature retreats, or sacred river traditions.\n\n`;
+    } else {
+      reply += `I can help you curate immersive journeys across India's living cultural traditions, artisan guilds, and regional culinary trails.\n\n`;
+    }
+
+    reply += `Which specific city or region would you like to explore (for example: Mumbai, Panvel, Kochi, Varanasi, Jaipur, or Shimla)? Share your destination and timeline, and I will curate a precise circuit!`;
   }
 
-  reply += `### Recommended Circuit Highlights:\n`;
-  topPlaces.forEach((p, i) => {
-    const costText = p.price > 0 ? `₹${p.price * groupSize} for ${groupSize}` : 'Free Entry';
-    reply += `${i + 1}. **${p.title}** (${p.category}) - ${p.tagline || p.description.slice(0, 90)}... [${costText}]\n`;
-  });
-
-  reply += `\n**Budget Tip:** Your ₹${budget ? budget.toLocaleString('en-IN') : '10,000'} allocation covers entry access, signature street gastronomy (like Rawat Pyaaz Kachoris and kulhad lassi), and local e-rickshaw transit with comfortable buffers remaining.\n\nWould you like me to generate a complete multi-day itinerary or customize specific workshop stops?`;
-
   const extracted_intent: StructuredIntent = {
-    city: detectedCity,
-    state: detectedState,
-    destination: detectedCity,
+    city: detectedCity || undefined,
+    state: detectedState || undefined,
+    destination: detectedCity || undefined,
     budget: budget || undefined,
     group_size: groupSize,
     traveler_type: groupSize > 1 ? 'Group' : 'Solo',
@@ -202,8 +242,8 @@ export function generateLocalConciergeResponse(
     tokens_used: 120,
     model: 'lokiva-concierge-v2',
     extracted_intent,
-    suggested_experiences,
+    suggested_experiences: isDestinationKnown ? suggested_experiences : [],
     context_destination: detectedCity,
-    state: detectedState,
+    state: detectedState || 'India',
   };
 }

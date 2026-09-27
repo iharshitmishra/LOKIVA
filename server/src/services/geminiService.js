@@ -92,7 +92,7 @@ function candidateOrder() {
 /**
  * Execute chat inference using Groq Qwen (Ultra-fast Qwen 3.8 / 2.5 on Groq LPU).
  */
-export async function queryGroqQwen(prompt, { systemInstruction = '', history = [], maxTokens = 450, temperature = 0.3 } = {}) {
+export async function queryGroqQwen(prompt, { systemInstruction = '', history = [], maxTokens = 750, temperature = 0.3 } = {}) {
   const groqKey = process.env.GROQ_API_KEY;
   if (!groqKey) throw new Error('Groq API key not configured');
 
@@ -117,7 +117,7 @@ export async function queryGroqQwen(prompt, { systemInstruction = '', history = 
     body: JSON.stringify({
       model,
       messages: chatMessages,
-      max_tokens: Math.min(maxTokens, 450),
+      max_tokens: Math.min(maxTokens || 750, 800),
       temperature,
     }),
   });
@@ -455,34 +455,34 @@ export function generateIntelligentCulturalFallback({
   const dayMatch = lower.match(/(\d+)\s*(days?|nights?)/i);
   const durationDays = dayMatch ? parseInt(dayMatch[1], 10) : (lower.includes('weekend') ? 2 : (lower.includes('week') ? 7 : null));
 
-  // If user asks where to go with budget or duration, or general destination discovery:
+  // If user asks where to go with budget or duration, or general destination discovery (only when city is NOT known):
   const isWhereToGo = /(where\s*(should|can|to)\s*i\s*go|suggest|recommend|places\s*to\s*go|destinations?|vacation|trip\s*plan|itinerary|what\s*place)/i.test(lower);
 
-  if ((parsedBudget || durationDays) && (isWhereToGo || !city)) {
+  if ((parsedBudget || durationDays) && !city && isWhereToGo) {
     const budgetStr = parsedBudget ? `₹${parsedBudget.toLocaleString('en-IN')}` : 'your budget';
     const daysStr = durationDays ? `${durationDays} days` : '5 days';
     const effectiveDays = durationDays || 5;
     const dailySpend = parsedBudget ? Math.round(parsedBudget / effectiveDays) : 4000;
     const dailyNote = `(approx. ₹${dailySpend.toLocaleString('en-IN')}/day)`;
 
-    return `Namaste! With a budget of **${budgetStr}** for **${daysStr}** ${dailyNote}, you have wonderful choices for a deeply authentic cultural journey in India. Here are three signature circuits calibrated to your timeline and budget:
+    return `With a budget of **${budgetStr}** for **${daysStr}** ${dailyNote}, here are three signature regional corridors curated for your journey:
 
-1. **Rajasthan Royal & Artisan Corridor (Jaipur & Pushkar or Udaipur)**
-   - **Vibe:** Historic forts, generational craft masterclasses, and vibrant bazaars.
-   - **Highlights:** Sunrise over Nahargarh Fort, authentic Sanganeri hand block-printing workshops, Blue Pottery studios, and evening food walks for Pyaz Kachori and Lassiwala.
-   - **Realistic Budget Fit:** Heritage haveli stays (~₹1,500 to ₹1,800/night), authentic regional thalis (~₹750/day), local auto/rickshaws (~₹400/day), and workshop fees. Fits comfortably within ${budgetStr}.
+1. **Western & Coastal Gateway (Maharashtra & Konkan / Goa)**
+   - **Vibe:** Heritage forts, coastal gastronomy, and vibrant artisan enclaves.
+   - **Highlights:** Coastal heritage trails, historic stone stepwells and temples, generational street food, and artisan craft studios.
+   - **Realistic Budget Fit:** Boutique heritage stays (~₹1,500 to ₹1,800/night), authentic regional dining (~₹700/day), and local transit. Fits comfortably within ${budgetStr}.
 
-2. **Himachal Monastic & Mountain Trail (Dharamshala, McLeodGanj & Bir)**
-   - **Vibe:** Himalayan pine trails, Tibetan art institutes, and tea garden calm.
-   - **Highlights:** Dalai Lama Temple complex, Norbulingka Institute master wood-carving and Thangka art, Kangra valley tea walks, and sunset views over the Dhauladhar range.
-   - **Realistic Budget Fit:** Mountain homestays (~₹1,200 to ₹1,600/night), Tibetan cafes and thukpa (~₹600/day), and Delhi-Himachal Volvo transit. Very economical and rejuvenating.
+2. **Northern Mountain & Valley Trail (Himachal & Uttarakhand)**
+   - **Vibe:** Mountain pine trails, serene monastic centers, and valley walks.
+   - **Highlights:** Heritage architecture, craft wood-carving and handlooms, tea garden walks, and panoramic Himalayan vistas.
+   - **Realistic Budget Fit:** Mountain homestays (~₹1,200 to ₹1,600/night), local mountain cuisine (~₹600/day), and comfortable regional transit.
 
-3. **Kerala Tropical Heritage & Spice Coast (Fort Kochi & Munnar / Alleppey)**
-   - **Vibe:** Colonial heritage alleys, Kathakali traditional drama, and spice trading lanes.
-   - **Highlights:** Fort Kochi Jewish Synagogue, Chinese fishing nets at dusk, and fragrant spice plantation trails in the Western Ghats.
-   - **Realistic Budget Fit:** Coastal boutique homestays (~₹1,500 to ₹1,800/night), banana leaf sadhyas and coastal seafood (~₹700/day), and public ferry transit.
+3. **Southern Heritage & Spice Corridor (Karnataka & Kerala)**
+   - **Vibe:** Living Dravidian architecture, spice plantations, and classical arts.
+   - **Highlights:** Ancient stone architecture, backwater canals, and spice plantation trails.
+   - **Realistic Budget Fit:** Coastal and garden homestays (~₹1,500 to ₹1,800/night), traditional banana leaf dining (~₹700/day), and local ferries or auto transit.
 
-Which of these three atmospheres speaks to you most: **Royal Forts & Crafts**, **Mountain Monasteries**, or **Tropical Spice Coast**? Tell me, and I will tailor your step-by-step day plan!`;
+Which region or city would you like to explore in detail? Tell me, and I will tailor your step-by-step route!`;
   }
 
   // 0. Routes first. The cards below carry the whole itinerary, so the prose
@@ -674,18 +674,18 @@ Pick what you like below, or tell me to swap something out.`
 
       // If another city (e.g. Jaipur, Manali, Varanasi, etc.)
       if (isJaipur) {
-        return `Namaste! For a **${effectiveDays}-day cultural immersion in Jaipur**:
-• **Heritage & Royal Architecture:** Amer Fort sunrise, stepwells (Panna Meena Ka Kund), City Palace courtyards, and sunset over Nahargarh Fort hills.
-• **Living Crafts:** Hands-on Sanganeri hand block-printing workshop and master Blue Pottery studio visits.
-• **Signature Regional Food:** Rawat Mishtan Bhandar's legendary Pyaz Kachori, creamy lassi in clay kulhads at Lassiwala (since 1944), and royal Dal Baati Churma.
+        return `For a **${effectiveDays}-day cultural journey in Jaipur**:
+• **Heritage & Royal Architecture:** Amer Fort, ancient stepwells (Panna Meena Ka Kund), City Palace courtyards, and sunset views over Nahargarh Fort.
+• **Living Crafts:** Sanganeri hand block-printing workshops and master Blue Pottery ateliers.
+• **Regional Gastronomy:** Traditional Rajasthani thalis, ghewar sweets, and heritage spice trails.
 Would you like me to detail timings and transport for your days?`;
       }
 
       if (isVaranasi) {
-        return `Namaste! For a **${effectiveDays}-day spiritual and culinary journey in Varanasi**:
-• **Sacred River & Ghats:** Dawn rowboat ride from Assi to Manikarnika Ghat to watch the morning rituals, followed by evening Ganga Aarti chants at Dashashwamedh.
-• **Artisan Heritage:** Weaving heritage walks through Madanpura to observe master Zari and Banarasi silk looms.
-• **Iconic Food Trail:** Morning Kachori Jalebi at Ram Bhandar, creamy winter Malaiyo froth, refreshing Banarasi Paan, and famous Tamatar Chaat at Kashi Chaat Bhandar.
+        return `For a **${effectiveDays}-day spiritual and cultural journey in Varanasi**:
+• **Sacred River & Ghats:** Dawn rowboat ride from Assi to Manikarnika Ghat to observe morning rituals, followed by evening Ganga Aarti at Dashashwamedh.
+• **Artisan Heritage:** Heritage handloom walks through Madanpura to observe master Zari and Banarasi silk pit looms.
+• **Iconic Food Trail:** Morning kachori, fresh winter malaiyo, and traditional Banarasi street gastronomy.
 Would you like me to structure morning and evening schedules for your stay?`;
       }
 
@@ -806,29 +806,27 @@ ${usableRoutes
     ? "7. The traveler already confirmed the brief above. Curate straight away and do not ask any further setup questions. If something is genuinely missing, ask at most ONE short question of 15 words or fewer, never a numbered list."
     : "7. If a detail that would materially change the shortlist is missing (time window, who they are travelling with, or what they want most), ask exactly ONE focused question of 15 words or fewer at the end of your reply. Never send a numbered questionnaire, never ask three questions at once, and never re-ask something the traveler already told you.";
 
-  const systemPrompt = `You are LOKIVA's AI Cultural Concierge, an expert and welcoming cultural travel guide across all of India${city ? `, currently assisting with a focus on ${city}` : ''}.
+  const systemPrompt = `You are LOKIVA's AI Cultural Concierge, an expert and welcoming cultural travel guide across all 36 Indian states and union territories${city ? `, currently assisting with a focus on ${city}` : ''}.
 
 ${briefBlock}${routeBlock}${experiencesContext ? `Curated verified experiences in ${city}:\n${experiencesContext}\n` : ''}
 Your Core Rules:
-1. DIRECTLY and HELPFULLY answer whatever the traveler asks.
-   - If they ask about South India or choosing between states (e.g., after already visiting Kerala), recommend incredible alternatives like Karnataka (Hampi, Mysore, Coorg) or Tamil Nadu (Madurai, Thanjavur, Chettinad) with specific cultural highlights, vibe differences, and practical tips.
-   - Never say "I can only help with a specific city" or "I don't have information on other states". You are an expert guide covering all 36 states and union territories of India.
+1. DIRECTLY, THOROUGHLY and HELPFULLY answer whatever the traveler asks.
+   - If they ask for an itinerary (e.g. multi-day trip, weekend getaway, budget plan for a city or region):
+     * Provide a clear, well-structured day-by-day plan (Day 1, Day 2, Day 3, etc.) with morning, afternoon, and evening recommendations.
+     * Include a realistic budget allocation breakdown (accommodation, food, local transit, entry fees) that aligns with their stated budget.
+     * Highlight authentic local cuisine and signature dishes to taste.
+     * Provide practical insider tips (best times to visit, local transit advice, dress codes, cash tips).
+   - If they ask about places to visit, cultural traditions, food, weather, or travel advice:
+     * Provide culturally grounded, authentic, specific recommendations with clear context.
+   - If they ask about South India or choosing between regions:
+     * Recommend compelling alternatives with specific highlights, vibe differences, and practical tips.
 2. If the user mentions an expense (e.g., "I spent 200rs on rickshaw"), acknowledge it naturally and conversationally without generating an unsolicited trip budget breakdown.
 3. If the user asks an off-topic or greeting question, reply warmly and naturally without forcing travel recommendations.
-4. If the traveler is specifically asking about things to do in ${city || 'their destination'} and experiences are provided above, weave in 1 or 2 relevant experiences naturally.
-5. BREVITY IS MANDATORY. The traveler sees the itinerary as interactive cards underneath your reply, so your text is a caption, not a description.
-   - Hard limit: 90 words. Aim for 40 to 60.
-   - Never list the stops. Never repeat the travel legs, timings, distances or prices. They are already on the cards.
-   - Never restate the traveler's own brief back to them.
-   - Spend your words only on: the one thing that matters most, timing or seasonal advice, and anything surprising they would get wrong (a booking rule, a closed day, a dress code, a cash only stall, a best hour for light or crowds).
-   - No preamble, no sign off flourish, no "let me know if". Close with one short invitation to pick or adjust.
-6. Always complete all sentences, sections, and paragraphs fully. Never stop mid-thought or mid-sentence.
-${clarificationRule}
-8. Ground every price, timing and access claim in the provided experiences. If a detail is not available, say so plainly instead of inventing it.
-9. Never use em dashes or double dashes in your writing. Use commas, colons or parentheses instead.${usableRoutes.length ? `
-10. Three routes are attached. Name them in one line each only if a short framing helps. Never blend stops from different routes.
-11. Never quote a travel leg. Never invent a mode, a duration or a price.
-12. Practical knowledge beats description: a closed day, a cash only stall, the hour the light is best, a dress code, how early to arrive. One or two of these beat a paragraph about atmosphere.` : ''}`;
+4. If the traveler is specifically asking about things to do in ${city || 'their destination'} and experiences are provided above, weave in relevant experiences naturally.
+5. Always complete all sentences, sections, and paragraphs fully. Never stop mid-thought or mid-sentence.
+6. Ground every price, timing and access claim in realistic local knowledge.
+7. STRICT RULE: Never use em dashes (—) or double dashes (--). Use commas, colons, hyphens, or parentheses instead.
+8. Structure your answers with clean markdown headers (###), bold titles, and readable bullet points.`;
 
   try {
     const history = sanitizeHistory(chatHistory);
@@ -837,20 +835,20 @@ ${clarificationRule}
       systemInstruction: systemPrompt,
       history,
       generationConfig: {
-        maxOutputTokens: 2000,
-        temperature: 0.65,
+        maxOutputTokens: 800,
+        temperature: 0.4,
       },
     });
 
     const estimatedTokens = Math.floor((systemPrompt.length + userMessage.length + aiReply.length) / 4);
 
     return {
-      reply: condenseConciergeReply(aiReply),
+      reply: sanitizeAiText(aiReply),
       tokensUsed: estimatedTokens,
       model: modelName,
     };
   } catch (error) {
-    console.warn('Gemini API unavailable for concierge request, activating intelligent cultural fallback:', error.message);
+    console.warn('AI Concierge model unavailable, activating intelligent cultural fallback:', error.message);
     const fallbackText = generateIntelligentCulturalFallback({
       userMessage,
       chatHistory,
@@ -860,7 +858,7 @@ ${clarificationRule}
       routeOptions: usableRoutes,
     });
     return {
-      reply: fallbackText,
+      reply: sanitizeAiText(fallbackText),
       tokensUsed: 40,
       model: 'lokiva-cultural-engine',
     };

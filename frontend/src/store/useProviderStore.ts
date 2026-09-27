@@ -596,7 +596,7 @@ export const useProviderStore = create<ProviderStoreState>()(
         const profile: ProviderGuildProfile = {
           guildName: guildName || 'Heritage Artisan Collective',
           craftSpecialty: craftSpecialty || 'Living Indian Crafts',
-          city: city || 'Jaipur',
+          city: city || 'Mumbai',
           precinct: precinct || 'Old Heritage Precinct',
           generationalHeritage: heritage || 'Living Master Artisan Guild',
           isStepFreeAccessible: isAccessible,

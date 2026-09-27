@@ -33,6 +33,8 @@ providersRouter.get('/overview', async (req, res) => {
         COALESCE(SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END), 0) as cancelled_count
        FROM bookings 
        WHERE provider_id = ?`,
+      [providerId]
+    );
     // 1. KPIs - With realistic local provider baseline fallback if fresh
     const rawRevenue = Number(bookingStats?.total_revenue || 0);
     const rawBookings = Number(bookingStats?.total_bookings || 0);

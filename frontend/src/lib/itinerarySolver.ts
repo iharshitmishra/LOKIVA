@@ -97,7 +97,7 @@ export function timeStringToMinutes(timeStr: string): number {
 
 // Format minutes from midnight to clean 12-hour display e.g. "08:30 AM"
 export function formatMinutesTo12h(totalMinutes: number): string {
-  const normalized = Math.max(0, Math.min(24 * 60 - 1, Math.round(totalMinutes)));
+  const normalized = ((Math.round(totalMinutes) % (24 * 60)) + (24 * 60)) % (24 * 60);
   let hours = Math.floor(normalized / 60);
   const mins = normalized % 60;
   const meridian = hours >= 12 ? 'PM' : 'AM';
@@ -182,7 +182,11 @@ export function recalculateDaySchedule(
       act.breatherBeforeMinutes = 0;
     }
 
-    const startMin = currentClockMinutes;
+    let startMin = currentClockMinutes;
+    if (startMin >= 21 * 60 + 30) {
+      // If earlier activities ran long, pace subsequent stops into afternoon/evening
+      startMin = Math.min(21 * 60, (14 * 60) + (i * 90));
+    }
     const endMin = startMin + visitDuration;
 
     act.startTime = formatMinutesTo12h(startMin);
@@ -201,9 +205,11 @@ export function recalculateDaySchedule(
     // Transit calculation to next stop
     if (i < activities.length - 1) {
       const nextAct = activities[i + 1];
-      const distKm = getHaversineDistanceKm(act.lat, act.lng, nextAct.lat, nextAct.lng);
-      act.transitDistanceKm = distKm;
-      totalTransitDistanceKm += distKm;
+      const rawDistKm = getHaversineDistanceKm(act.lat, act.lng, nextAct.lat, nextAct.lng);
+      // Realistic intra-day sightseeing transfer distance cap
+      const distKm = Math.min(rawDistKm, 25);
+      act.transitDistanceKm = Math.round(distKm * 10) / 10;
+      totalTransitDistanceKm += act.transitDistanceKm;
 
       const dailyMeal = day.mealBudgetPerPerson || 350;
       const isLuxuryTier = dailyMeal >= 1800;
@@ -211,26 +217,26 @@ export function recalculateDaySchedule(
 
       if (distKm <= 1.0 && (act.walkingDistanceMeters || 600) <= 700 && day.activeFilter !== 'fatigue' && !isLuxuryTier) {
         act.transitMode = 'walking';
-        act.transitToNextMinutes = Math.max(5, Math.ceil((distKm / 4.0) * 60) + 2);
+        act.transitToNextMinutes = Math.max(5, Math.min(15, Math.ceil((distKm / 4.0) * 60) + 2));
         act.transitCost = 0;
         act.gettingThere = `Short ${Math.round(distKm * 1000)}m heritage walk (~${act.transitToNextMinutes} mins)`;
         totalWalkingMeters += Math.round(distKm * 1000);
       } else if (isLuxuryTier) {
         act.transitMode = 'heritage_cab';
-        act.transitToNextMinutes = Math.max(10, Math.ceil((distKm / 28.0) * 60) + 6);
-        act.transitCost = Math.round(450 + distKm * 40);
+        act.transitToNextMinutes = Math.max(10, Math.min(40, Math.ceil((distKm / 28.0) * 60) + 6));
+        act.transitCost = Math.round(350 + distKm * 30);
         act.gettingThere = `Dedicated private heritage chauffeur transfer (~${act.transitToNextMinutes} mins)`;
         totalTransitCost += act.transitCost;
       } else if (isComfortTier) {
         act.transitMode = 'private_cab';
-        act.transitToNextMinutes = Math.max(10, Math.ceil((distKm / 24.0) * 60) + 5);
-        act.transitCost = Math.round(200 + distKm * 25);
+        act.transitToNextMinutes = Math.max(10, Math.min(35, Math.ceil((distKm / 24.0) * 60) + 5));
+        act.transitCost = Math.round(180 + distKm * 20);
         act.gettingThere = `Private AC cab transfer (~${act.transitToNextMinutes} mins)`;
         totalTransitCost += act.transitCost;
       } else {
         act.transitMode = 'auto_rickshaw';
-        act.transitToNextMinutes = Math.max(10, Math.ceil((distKm / 20.0) * 60) + 5);
-        act.transitCost = Math.round(40 + distKm * 18);
+        act.transitToNextMinutes = Math.max(10, Math.min(35, Math.ceil((distKm / 20.0) * 60) + 5));
+        act.transitCost = Math.round(40 + distKm * 15);
         act.gettingThere = `Local auto-rickshaw transfer (~${act.transitToNextMinutes} mins)`;
         totalTransitCost += act.transitCost;
       }
@@ -607,21 +613,42 @@ export function generateDynamicTripPlan(options: GenerateTripOptions): {
   const candidatePoolSize = Math.max(totalNeeded, Math.min(uniqueCandidates.length, safeDays * activitiesPerDay * 2));
   const topCandidatePool = uniqueCandidates.slice(0, candidatePoolSize);
 
-  // Group candidate pool into spatial clusters (sorted by longitude / polar angle)
-  topCandidatePool.sort((a, b) => {
-    const latA = a.latitude || 26.9;
-    const lngA = a.longitude || 75.8;
-    const latB = b.latitude || 26.9;
-    const lngB = b.longitude || 75.8;
-    return (lngA + latA) - (lngB + latB);
+  // 1. Check if candidate pool spans multiple distinct cities (e.g. Rajasthan multi-city: Jaipur, Jodhpur, Udaipur)
+  const distinctCities: string[] = [];
+  topCandidatePool.forEach((p) => {
+    const c = (p.city || '').trim();
+    if (c && !distinctCities.some((dc) => dc.toLowerCase() === c.toLowerCase())) {
+      distinctCities.push(c);
+    }
   });
 
-  // Partition pool into N day buckets
   const dayBuckets: Experience[][] = Array.from({ length: safeDays }, () => []);
-  topCandidatePool.forEach((exp, idx) => {
-    const targetBucket = idx % safeDays;
-    dayBuckets[targetBucket].push(exp);
-  });
+
+  if (distinctCities.length >= safeDays) {
+    // Multi-city trip: Assign one distinct city / regional hub per day
+    for (let d = 0; d < safeDays; d++) {
+      const dayCity = distinctCities[d];
+      const cityPlaces = topCandidatePool.filter((p) => (p.city || '').toLowerCase() === dayCity.toLowerCase());
+      dayBuckets[d] = cityPlaces;
+    }
+  } else {
+    // Single-city or 2-city trip: Group candidate pool into contiguous spatial clusters
+    topCandidatePool.sort((a, b) => {
+      const cityA = (a.city || '').toLowerCase();
+      const cityB = (b.city || '').toLowerCase();
+      if (cityA !== cityB) return cityA.localeCompare(cityB);
+      const latA = a.latitude || 26.9;
+      const lngA = a.longitude || 75.8;
+      const latB = b.latitude || 26.9;
+      const lngB = b.longitude || 75.8;
+      return (latA + lngA) - (latB + lngB);
+    });
+
+    const chunkSize = Math.max(activitiesPerDay, Math.ceil(topCandidatePool.length / safeDays));
+    for (let d = 0; d < safeDays; d++) {
+      dayBuckets[d] = topCandidatePool.slice(d * chunkSize, (d + 1) * chunkSize);
+    }
+  }
 
   const days: ItineraryDay[] = [];
   const baseDate = startDate ? new Date(startDate) : new Date();
