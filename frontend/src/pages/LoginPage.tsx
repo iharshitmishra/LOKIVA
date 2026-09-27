@@ -25,7 +25,8 @@ export function LoginPage() {
     setError(null);
     try {
       await login(email.trim(), password, role);
-      navigate(redirectTo);
+      const target = (redirectTo === '/explore' && role === 'provider') ? '/provider/dashboard' : redirectTo;
+      navigate(target);
     } catch (err: any) {
       setError(err.message || 'Login failed. Please verify your credentials.');
     } finally {
