@@ -711,6 +711,7 @@ export async function chatWithCulturalConcierge({
   availableExperiences = [],
   tripProfile = null,
   routeOptions = [],
+  weatherContext = null,
 }) {
   const experiencesContext = availableExperiences.length > 0
     ? availableExperiences.slice(0, 5)
@@ -747,9 +748,21 @@ ${usableRoutes
     ? "7. The traveler already confirmed the brief above. Curate straight away and do not ask any further setup questions. If something is genuinely missing, ask at most ONE short question of 15 words or fewer, never a numbered list."
     : "7. If a detail that would materially change the shortlist is missing (time window, who they are travelling with, or what they want most), ask exactly ONE focused question of 15 words or fewer at the end of your reply. Never send a numbered questionnaire, never ask three questions at once, and never re-ask something the traveler already told you.";
 
+  const weatherBlock = weatherContext
+    ? `LIVE WEATHER DATA for ${city} (Open-Meteo real-time, fetched just now):
+Current conditions: ${weatherContext.currentCondition} at ${weatherContext.currentTempCelsius}\u00B0C.
+${weatherContext.todaySummary}
+Rain expected: ${weatherContext.rainExpected ? `YES - peak probability ${weatherContext.peakRainProbability}%` : 'No significant rain expected'}
+Hourly highlights: ${weatherContext.hourlyHighlights.slice(0, 6).map(h => `${h.time}: ${h.condition}, ${h.temp}\u00B0C, ${h.rainProb}% rain`).join('; ')}
+
+WEATHER ADVISORY: ${weatherContext.weatherAdvisory}
+
+`
+    : '';
+
   const systemPrompt = `You are LOKIVA's AI Cultural Concierge, an expert and welcoming cultural travel guide across all of India${city ? `, currently assisting with a focus on ${city}` : ''}.
 
-${briefBlock}${routeBlock}${experiencesContext ? `Curated verified experiences in ${city}:\n${experiencesContext}\n` : ''}
+${briefBlock}${routeBlock}${weatherBlock}${experiencesContext ? `Curated verified experiences in ${city}:\n${experiencesContext}\n` : ''}
 Your Core Rules:
 1. DIRECTLY and HELPFULLY answer whatever the traveler asks.
    - If they ask about South India or choosing between states (e.g., after already visiting Kerala), recommend incredible alternatives like Karnataka (Hampi, Mysore, Coorg) or Tamil Nadu (Madurai, Thanjavur, Chettinad) with specific cultural highlights, vibe differences, and practical tips.
@@ -766,10 +779,16 @@ Your Core Rules:
 6. Always complete all sentences, sections, and paragraphs fully. Never stop mid-thought or mid-sentence.
 ${clarificationRule}
 8. Ground every price, timing and access claim in the provided experiences. If a detail is not available, say so plainly instead of inventing it.
-9. Never use em dashes or double dashes in your writing. Use commas, colons or parentheses instead.${usableRoutes.length ? `
-10. Three routes are attached. Name them in one line each only if a short framing helps. Never blend stops from different routes.
-11. Never quote a travel leg. Never invent a mode, a duration or a price.
-12. Practical knowledge beats description: a closed day, a cash only stall, the hour the light is best, a dress code, how early to arrive. One or two of these beat a paragraph about atmosphere.` : ''}`;
+9. Never use em dashes or double dashes in your writing. Use commas, colons or parentheses instead.${weatherContext ? `
+10. WEATHER-AWARE RECOMMENDATIONS: Live real-time weather data is provided above. Use it actively.
+   - If rain is expected, prioritize indoor or covered stops, mention rain gear, and suggest timing shifts.
+   - If extreme heat is forecast, recommend indoor stops during midday and hydration.
+   - If conditions are pleasant, highlight outdoor stops and open-air experiences.
+   - Never contradict the weather data. If it says rain, do not suggest a rooftop sunset walk.
+   - Weave weather advice naturally into your response, not as a separate forecast report.` : ''}${usableRoutes.length ? `
+11. Three routes are attached. Name them in one line each only if a short framing helps. Never blend stops from different routes.
+12. Never quote a travel leg. Never invent a mode, a duration or a price.
+13. Practical knowledge beats description: a closed day, a cash only stall, the hour the light is best, a dress code, how early to arrive. One or two of these beat a paragraph about atmosphere.` : ''}`;
 
   try {
     const history = sanitizeHistory(chatHistory);
@@ -923,12 +942,26 @@ export async function generateDayPlanWithGemini({
   food_preferences,
   mobility,
   vibe,
+  weatherContext = null,
 }) {
-  const systemPrompt = `You are Lokiva's day-plan generator. You build a single-day itinerary in a
+  const weatherBlock = weatherContext
+    ? `LIVE WEATHER DATA for ${destination} (Open-Meteo real-time, fetched just now):
+Current conditions: ${weatherContext.currentCondition} at ${weatherContext.currentTempCelsius}\u00B0C.
+${weatherContext.todaySummary}
+Rain expected: ${weatherContext.rainExpected ? `YES - peak probability ${weatherContext.peakRainProbability}%` : 'No significant rain expected'}
+Hourly highlights: ${weatherContext.hourlyHighlights.slice(0, 6).map(h => `${h.time}: ${h.condition}, ${h.temp}\u00B0C, ${h.rainProb}% rain`).join('; ')}
+
+WEATHER ADVISORY: ${weatherContext.weatherAdvisory}
+
+`
+    : '';
+
+  const systemPrompt = `You are LOKIVA's day-plan generator. You build a single-day itinerary in a
 specific Indian city using ONLY the user's onboarding answers as constraints.
 Never default to a city's most famous landmarks unless they genuinely win
 against alternatives on these specific constraints.
 
+${weatherBlock}
 INPUTS you will receive: destination, time_available, budget, group_type,
 interests (multi-select: heritage & history / food & street eats / art &
 local markets / nature & scenic spots / shopping / offbeat & local life),
@@ -937,7 +970,7 @@ happy-to-walk), vibe (relaxed-and-slow / efficient-and-packed / a-mix).
 
 RULES:
 1. Constraint priority when trade-offs are needed: mobility > time_available >
-   budget > interests > vibe > food_preferences.
+   budget > interests > vibe > food_preferences${weatherContext ? ' > weather' : ''}.
 2. Every stop must satisfy the mobility constraint literally: if
    low-walking-or-wheelchair is selected, do not include a stop requiring
    sustained walking or stairs without step-free access, even if it's
@@ -953,11 +986,20 @@ RULES:
 5. If interests include food & street eats, at least one stop should be a
    specific eating experience (not a generic "explore the area"), and it must
    respect food_preferences.
-6. feasibility_score (0–100) must be recomputed from how well the FULL plan
+6. feasibility_score (0\u2013100) must be recomputed from how well the FULL plan
    satisfies ALL constraints together: mobility violations or budget
    overruns should visibly drop the score, not be hidden behind a high number.
 7. If fewer than 3 genuinely good matches exist for these constraints, return
-   fewer stops rather than padding with irrelevant ones.
+   fewer stops rather than padding with irrelevant ones.${weatherContext ? `
+8. WEATHER-AWARE PLANNING: Live real-time weather data is provided above.
+   - If rain is expected, prioritize indoor or covered stops, and avoid
+     open-air rooftops, garden walks, or exposed viewpoints during rain hours.
+   - If extreme heat is forecast, schedule indoor stops during midday hours
+     (11am to 4pm) and keep outdoor stops for early morning or evening.
+   - If conditions are pleasant, prioritize outdoor stops and open-air experiences.
+   - Never contradict the weather data. If it says rain, do not plan an
+     open-air riverside walk during peak rain probability hours.
+   - Adjust stop timing to avoid peak precipitation windows.` : ''}
 
 Return ONLY valid JSON, no markdown fences, no preamble:
 

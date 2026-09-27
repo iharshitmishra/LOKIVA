@@ -24,7 +24,8 @@ export type BriefDimension =
   | 'startTime'
   | 'crowdVibe'
   | 'accessibility'
-  | 'dietary';
+  | 'dietary'
+  | 'weatherConcern';
 
 export interface TripBrief {
   destination: string | null;
@@ -38,6 +39,7 @@ export interface TripBrief {
   crowdVibe: string | null;
   accessibility: string | null;
   dietary: string | null;
+  weatherConcern: string | null;
 }
 
 export interface BriefOption {
@@ -68,6 +70,7 @@ export const EMPTY_BRIEF: TripBrief = {
   crowdVibe: null,
   accessibility: null,
   dietary: null,
+  weatherConcern: null,
 };
 
 // Canonical interest keys intentionally mirror the categories and tags stored
@@ -185,6 +188,18 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
       { label: 'No restriction', value: 'No restriction', emoji: '\u{1F37F}\uFE0F' },
     ],
   },
+  {
+    id: 'weatherConcern',
+    required: false,
+    question: 'How do you feel about rain or extreme heat?',
+    rationale: 'I can prioritize indoor venues or plan around weather windows.',
+    options: [
+      { label: 'Avoid rain', value: 'Avoid rain', emoji: '\u{1F327}\uFE0F' },
+      { label: 'Avoid heat', value: 'Avoid heat', emoji: '\u{1F321}\uFE0F' },
+      { label: 'Either is fine', value: 'Either is fine', emoji: '\u{1F324}\uFE0F' },
+      { label: 'No preference', value: 'No preference', emoji: '\u{1F32A}\uFE0F' },
+    ],
+  },
 ];
 
 export const INTEREST_LABELS: Record<string, string> = INTERVIEW_QUESTIONS.find(
@@ -238,6 +253,12 @@ const DIETARY_RULES: Array<{ value: string; re: RegExp }> = [
   { value: 'Jain', re: /\b(jain)\b/i },
   { value: 'Vegetarian', re: /\b(vegetarian|veg only|veg\b|shakahari| Jain\b)\b/i },
   { value: 'No restriction', re: /\b(no restriction|no preference|eat anything|non veg|nonveg)\b/i },
+];
+
+const WEATHER_RULES: Array<{ value: string; re: RegExp }> = [
+  { value: 'Avoid rain', re: /\b(avoid rain|rain concern|scared of rain|hate rain|monsoon issue|get wet|stay dry)\b/i },
+  { value: 'Avoid heat', re: /\b(avoid heat|too hot|heat concern|can\'t handle hot|sun issue|heatstroke)\b/i },
+  { value: 'Either is fine', re: /\b(either is fine|don\'t care about weather|any weather|weather doesn\'t matter)\b/i },
 ];
 
 const INTEREST_RULES: Array<{ value: string; re: RegExp }> = [
@@ -412,6 +433,16 @@ export function harvestBriefFromText(text: string, base: TripBrief = EMPTY_BRIEF
     }
   }
 
+  // Weather concern
+  if (!next.weatherConcern) {
+    for (const rule of WEATHER_RULES) {
+      if (rule.re.test(text)) {
+        next.weatherConcern = rule.value;
+        break;
+      }
+    }
+  }
+
   // Interests are additive
   for (const rule of INTEREST_RULES) {
     if (rule.re.test(text) && !next.interests.includes(rule.value)) {
@@ -436,6 +467,8 @@ export const isDimensionAnswered = (brief: TripBrief, id: BriefDimension): boole
       return brief.dietary !== null && brief.dietary !== 'No restriction';
     case 'crowdVibe':
       return brief.crowdVibe !== null && brief.crowdVibe !== 'Balanced';
+    case 'weatherConcern':
+      return brief.weatherConcern !== null && brief.weatherConcern !== 'No preference';
     default:
       return Boolean((brief as unknown as Record<string, unknown>)[id]);
   }
@@ -584,6 +617,12 @@ export function answerToSentence(
       return values[0] === 'No restriction'
         ? `No food restrictions${where}.`
         : `${values[0]} food${where}.`;
+    case 'weatherConcern':
+      return values[0] === 'No preference'
+        ? `No weather preference${where}.`
+        : values[0] === 'Either is fine'
+        ? `I am fine with any weather${where}.`
+        : `I would like to ${values[0].toLowerCase()}${where}.`;
     default:
       return `${values.join(', ')}${where}.`;
   }
@@ -641,13 +680,17 @@ export function buildBriefSummary(brief: TripBrief): string {
   if (brief.crowdVibe) parts.push(`Crowd preference: ${brief.crowdVibe}`);
   if (brief.accessibility) parts.push(`Mobility: ${brief.accessibility}`);
   if (brief.dietary) parts.push(`Food: ${brief.dietary}`);
+  if (brief.weatherConcern) parts.push(`Weather concern: ${brief.weatherConcern}`);
   return parts.join('\n');
 }
 
 /** The single message that triggers the final, fully grounded curation pass. */
-export function buildCurationPrompt(brief: TripBrief): string {
+export function buildCurationPrompt(brief: TripBrief, weatherContext?: string | null): string {
   const where = brief.destination ? ` in ${brief.destination}` : '';
-  return `Here is my complete brief${where}, please curate it now.\n\n${buildBriefSummary(brief)}\n\nGive me the best matches for this exact brief. Rank them, then tell me in one short line each why it fits, what it costs, and the best time to go.`;
+  const weatherBlock = weatherContext
+    ? `\n\nLIVE WEATHER CONTEXT (real-time, use this to factor live conditions into recommendations):\n${weatherContext}\n`
+    : '';
+  return `Here is my complete brief${where}, please curate it now.\n\n${buildBriefSummary(brief)}${weatherBlock}\n\nGive me the best matches for this exact brief. Rank them, then tell me in one short line each why it fits, what it costs, and the best time to go.`;
 }
 
 /** Structured profile handed to the concierge endpoint for grounding and ranking. */
@@ -668,6 +711,7 @@ export function briefToProfilePayload(brief: TripBrief): Record<string, unknown>
     crowd_preference: brief.crowdVibe,
     accessibility: brief.accessibility,
     dietary: brief.dietary,
+    weather_concern: brief.weatherConcern,
     summary: buildBriefSummary(brief),
   };
 }

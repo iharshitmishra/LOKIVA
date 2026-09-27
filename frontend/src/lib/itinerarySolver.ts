@@ -17,6 +17,7 @@ import {
 import { getPlacesByCity, getPlacesByState, ALL_LOKIVA_PLACES, getStateForCity } from '../data/places';
 import { USER_CURATED_PLACES } from '../data/userVerifiedPlacesData';
 import { resolveImageUrl } from './api';
+import { fetchWeatherContextForAI } from '../services/openMeteoService';
 
 export interface GenerateTripOptions {
   city: string;
@@ -396,7 +397,8 @@ export function scorePlaceForInterests(
   chosenInterests: string[],
   targetPerActivityTicket: number,
   weatherPreference?: string,
-  accessibility?: { low_walking?: boolean; wheelchair?: boolean; step_free?: boolean }
+  accessibility?: { low_walking?: boolean; wheelchair?: boolean; step_free?: boolean },
+  liveWeather?: { currentTempCelsius: number; currentCondition: string; rainExpected: boolean; peakRainProbability: number } | null
 ): number {
   let score = 0;
   const text = `${exp.title || ''} ${exp.category || ''} ${exp.description || ''} ${exp.tagline || ''} ${(exp.tags || []).join(' ')}`.toLowerCase();
@@ -430,9 +432,41 @@ export function scorePlaceForInterests(
     }
   }
 
-  // 2. Weather calibration (+10)
+  // 2. Weather calibration (+10 seasonal, +15 live weather)
   const isIndoor = cat.includes('craft') || cat.includes('art') || cat.includes('food') || cat.includes('culinary') || cat.includes('museum') || cat.includes('haveli');
-  if (weatherPreference === 'monsoon') {
+
+  // Live weather scoring (higher priority than seasonal preference)
+  if (liveWeather) {
+    if (liveWeather.rainExpected) {
+      // Boost indoor venues when rain is expected
+      if (isIndoor) {
+        score += 15;
+      } else if (text.includes('fort') || text.includes('palace') || text.includes('stepwell') || text.includes('ghat') || text.includes('courtyard')) {
+        score += 5; // Semi-covered heritage structures still viable
+      }
+    } else {
+      // Good weather: boost outdoor experiences
+      if (!isIndoor || text.includes('view') || text.includes('sunset') || text.includes('garden') || text.includes('terrace')) {
+        score += 10;
+      }
+    }
+
+    // Extreme heat adjustment
+    if (liveWeather.currentTempCelsius > 35) {
+      if (isIndoor) {
+        score += 10;
+      } else if (text.includes('fort') || text.includes('palace') || text.includes('stepwell')) {
+        score += 3; // Heritage structures have thick walls, some relief
+      }
+    }
+
+    // Cold weather adjustment
+    if (liveWeather.currentTempCelsius < 12) {
+      if (isIndoor || text.includes('museum') || text.includes('workshop')) {
+        score += 8;
+      }
+    }
+  } else if (weatherPreference === 'monsoon') {
     if (isIndoor || text.includes('canal') || text.includes('backwater') || text.includes('greenery') || text.includes('plantation')) {
       score += 10;
     }
@@ -490,11 +524,11 @@ export function scorePlaceForInterests(
 /**
  * Generate a complete multi-day dynamic trip plan using the 5,000+ national places catalog.
  */
-export function generateDynamicTripPlan(options: GenerateTripOptions): {
+export async function generateDynamicTripPlan(options: GenerateTripOptions): Promise<{
   tripDetails: ItineraryTripDetails;
   days: ItineraryDay[];
   practicalInfo: ItineraryPracticalInfo;
-} {
+}> {
   const {
     city,
     state = '',
@@ -508,6 +542,14 @@ export function generateDynamicTripPlan(options: GenerateTripOptions): {
     weatherPreference = 'winter',
     accessibility,
   } = options;
+
+  // Fetch live weather for the destination to inform planning decisions
+  const liveWeather = await fetchWeatherContextForAI(city);
+  const weatherContext = liveWeather
+    ? `Live weather for ${city}: ${liveWeather.aiPromptContext}`
+    : `Weather data unavailable for ${city}. Planning for general conditions.`;
+  const isRainLikely = liveWeather?.rainExpected ?? false;
+  const currentTemp = liveWeather?.currentTempCelsius ?? 28;
 
   const safeDays = Math.max(1, daysCount);
   const safeTravelers = Math.max(1, travelers);
@@ -591,8 +633,8 @@ export function generateDynamicTripPlan(options: GenerateTripOptions): {
 
   // Score all candidates with multi-factor weighting
   uniqueCandidates.sort((a, b) => {
-    const scoreA = scorePlaceForInterests(a, userInterests, targetPerActivityTicket, weatherPreference, accessibility);
-    const scoreB = scorePlaceForInterests(b, userInterests, targetPerActivityTicket, weatherPreference, accessibility);
+    const scoreA = scorePlaceForInterests(a, userInterests, targetPerActivityTicket, weatherPreference, accessibility, liveWeather);
+    const scoreB = scorePlaceForInterests(b, userInterests, targetPerActivityTicket, weatherPreference, accessibility, liveWeather);
     return scoreB - scoreA;
   });
 
@@ -643,8 +685,8 @@ export function generateDynamicTripPlan(options: GenerateTripOptions): {
     if (availablePool.length > 0) {
       // Pick best anchor site
       availablePool.sort((a, b) => {
-        const scoreA = scorePlaceForInterests(a, userInterests, targetPerActivityTicket, weatherPreference, accessibility);
-        const scoreB = scorePlaceForInterests(b, userInterests, targetPerActivityTicket, weatherPreference, accessibility);
+        const scoreA = scorePlaceForInterests(a, userInterests, targetPerActivityTicket, weatherPreference, accessibility, liveWeather);
+        const scoreB = scorePlaceForInterests(b, userInterests, targetPerActivityTicket, weatherPreference, accessibility, liveWeather);
         return scoreB - scoreA;
       });
 
@@ -899,7 +941,14 @@ export function generateDynamicTripPlan(options: GenerateTripOptions): {
     state || (candidates[0]?.state || 'India'),
     weatherPreference,
     accessibility,
-    userInterests
+    userInterests,
+    liveWeather ? {
+      currentTempCelsius: liveWeather.currentTempCelsius,
+      currentCondition: liveWeather.currentCondition,
+      rainExpected: liveWeather.rainExpected,
+      peakRainProbability: liveWeather.peakRainProbability,
+      todaySummary: liveWeather.todaySummary,
+    } : null
   );
 
   return {
@@ -1395,26 +1444,51 @@ export function resolvePracticalBriefingForDestination(
   state: string,
   weatherPreference?: string,
   accessibility?: any,
-  userInterests: string[] = []
+  userInterests: string[] = [],
+  liveWeather?: { currentTempCelsius: number; currentCondition: string; rainExpected: boolean; peakRainProbability: number; todaySummary: string } | null
 ): ItineraryPracticalInfo {
   const dynamicIntelligence = resolveRegionalIntelligence(city, state);
   const isMountain = state.toLowerCase().includes('himachal') || state.toLowerCase().includes('uttarakhand') || state.toLowerCase().includes('sikkim') || state.toLowerCase().includes('ladakh') || state.toLowerCase().includes('kashmir') || weatherPreference === 'summer_hills';
   const isCoastal = state.toLowerCase().includes('kerala') || state.toLowerCase().includes('goa') || state.toLowerCase().includes('tamil') || state.toLowerCase().includes('maharashtra') || state.toLowerCase().includes('odisha');
 
+  // Use live weather data when available, fall back to seasonal estimates
+  const weatherSummary = liveWeather
+    ? liveWeather.todaySummary
+    : isMountain
+    ? 'Cool mountain breezes with panoramic Himalayan clarity'
+    : isCoastal
+    ? 'Pleasant coastal breezes with mild tropical sunny skies'
+    : 'Sunny with crisp morning air and golden evening warmth';
+
+  const temperature = liveWeather
+    ? `${liveWeather.currentTempCelsius}°C (live)`
+    : isMountain ? '14°C to 22°C' : isCoastal ? '22°C to 29°C' : '18°C to 28°C';
+
+  const packingList = liveWeather
+    ? [
+        'Breathable natural cotton or linen attire',
+        'Comfortable slip-on footwear for heritage monuments and temples',
+        'Modesty scarf for sacred shrines and sanctums',
+        liveWeather.rainExpected
+          ? `Waterproof jacket and umbrella (rain expected, ${liveWeather.peakRainProbability}% probability)`
+          : liveWeather.currentTempCelsius > 30
+          ? 'Sunscreen, sunglasses and hydration flask'
+          : liveWeather.currentTempCelsius < 15
+          ? 'Light thermal layer for temperature drop'
+          : 'Sunscreen, sunglasses and hydration flask',
+      ]
+    : [
+        'Breathable natural cotton or linen attire',
+        'Comfortable slip-on footwear for heritage monuments and temples',
+        'Modesty scarf for sacred shrines and sanctums',
+        isMountain ? 'Light thermal layer for evening temperature drop' : 'Sunscreen, sunglasses and hydration flask',
+      ];
+
   return {
     ...dynamicIntelligence,
-    weatherSummary: isMountain
-      ? 'Cool mountain breezes with panoramic Himalayan clarity'
-      : isCoastal
-      ? 'Pleasant coastal breezes with mild tropical sunny skies'
-      : 'Sunny with crisp morning air and golden evening warmth',
-    temperature: isMountain ? '14°C to 22°C' : isCoastal ? '22°C to 29°C' : '18°C to 28°C',
-    packingList: [
-      'Breathable natural cotton or linen attire',
-      'Comfortable slip-on footwear for heritage monuments and temples',
-      'Modesty scarf for sacred shrines and sanctums',
-      isMountain ? 'Light thermal layer for evening temperature drop' : 'Sunscreen, sunglasses and hydration flask',
-    ],
+    weatherSummary,
+    temperature,
+    packingList,
     accessibilityNotes: accessibility?.wheelchair
       ? 'Route prioritized for ramped promenades and step-free entries.'
       : 'Major heritage avenues feature level access; historic alleys and older temple complexes have traditional steps.',

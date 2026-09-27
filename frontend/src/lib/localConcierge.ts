@@ -7,6 +7,7 @@ import {
   INDIAN_STATES_AND_CITIES,
 } from '../data/places';
 import { resolveImageUrl } from './api';
+import { fetchWeatherContextForAI } from '../services/openMeteoService';
 
 interface LocalConciergeResult {
   reply: string;
@@ -49,10 +50,10 @@ const KNOWN_DESTINATIONS = [
   { city: 'Kutch', state: 'Gujarat', aliases: ['rann of kutch', 'bhuj', 'kutch'] },
 ];
 
-export function generateLocalConciergeResponse(
+export async function generateLocalConciergeResponse(
   message: string,
   existingCity?: string
-): LocalConciergeResult {
+): Promise<LocalConciergeResult> {
   const q = message.toLowerCase();
 
   // 1. Detect Destination (City and State)
@@ -82,6 +83,12 @@ export function generateLocalConciergeResponse(
     detectedCity = 'Jaipur';
     detectedState = 'Rajasthan';
   }
+
+  // Fetch live weather for the destination to ground recommendations
+  const liveWeather = await fetchWeatherContextForAI(detectedCity);
+  const weatherNote = liveWeather
+    ? ` Current conditions: ${liveWeather.currentCondition} at ${liveWeather.currentTempCelsius}°C.${liveWeather.rainExpected ? ` Rain likely (${liveWeather.peakRainProbability}% probability), so indoor alternatives are prioritized.` : ' No rain expected, good conditions for outdoor exploration.'}`
+    : '';
 
   // 2. Detect Group Size
   let groupSize = 1;
@@ -179,12 +186,13 @@ export function generateLocalConciergeResponse(
   }
 
   reply += `### Recommended Circuit Highlights:\n`;
+  reply += `**Weather Brief:**${weatherNote}\n\n`;
   topPlaces.forEach((p, i) => {
     const costText = p.price > 0 ? `₹${p.price * groupSize} for ${groupSize}` : 'Free Entry';
     reply += `${i + 1}. **${p.title}** (${p.category}) - ${p.tagline || p.description.slice(0, 90)}... [${costText}]\n`;
   });
 
-  reply += `\n**Budget Tip:** Your ₹${budget ? budget.toLocaleString('en-IN') : '10,000'} allocation covers entry access, signature street gastronomy (like Rawat Pyaaz Kachoris and kulhad lassi), and local e-rickshaw transit with comfortable buffers remaining.\n\nWould you like me to generate a complete multi-day itinerary or customize specific workshop stops?`;
+  reply += `\n**Budget Tip:** Your ₹${budget ? budget.toLocaleString('en-IN') : '10,000'} allocation covers entry access, signature street gastronomy (like Rawat Pyaaz Kachoris and kulhad lassi), and local e-rickshaw transit with comfortable buffers remaining.\n\n${liveWeather?.rainExpected ? '**Rain Advisory:** Based on live forecast data, I recommend carrying waterproof gear and prioritizing covered indoor venues (museums, artisan workshops, heritage havelis) during peak rain hours. I have already biased the recommendations below toward weather-appropriate experiences.' : '**Weather Outlook:** Conditions look favorable for outdoor exploration. I have balanced the itinerary with a mix of open-air and covered experiences.'}\n\nWould you like me to generate a complete multi-day itinerary or customize specific workshop stops?`;
 
   const extracted_intent: StructuredIntent = {
     city: detectedCity,

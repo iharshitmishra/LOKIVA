@@ -25,6 +25,7 @@ import { nearestCity, requestCurrentPosition } from '../lib/geo';
 import { ConciergeQuestionPanel } from '../components/ai/ConciergeQuestionPanel';
 import { RouteBoard } from '../components/ai/RouteBoard';
 import { RoutePlan } from '../lib/routePlanner';
+import { fetchWeatherContextForAI, WeatherContextForAI } from '../services/openMeteoService';
 import {
   TripBrief,
   InterviewQuestion,
@@ -1021,11 +1022,20 @@ export function AiGuidePage() {
             Boolean(activeBrief.pace) ||
             Boolean(activeBrief.startTime) ||
             activeBrief.interests.length > 0;
+
+          // Fetch live weather for the destination to ground concierge recommendations
+          const destCity = currentCity || activeBrief.destination || undefined;
+          const weatherContext: WeatherContextForAI | null = destCity
+            ? await fetchWeatherContextForAI(destCity)
+            : null;
+
           const chatRes = await api.chatWithConcierge({
             message: textToSend,
-            city: currentCity || activeBrief.destination || undefined,
+            city: destCity,
             chat_history: messages.slice(-10).map((m) => ({ role: m.role, content: m.content })),
             trip_profile: hasBrief ? briefToProfilePayload(activeBrief) : null,
+            weather_context: weatherContext || undefined,
+            weather_advisory: weatherContext?.weatherAdvisory || undefined,
           });
           if (chatRes.context_destination) setCurrentCity(chatRes.context_destination);
           botContent = chatRes.reply;
@@ -1037,7 +1047,7 @@ export function AiGuidePage() {
           if (options.source === 'interview') setInterviewDismissed(true);
         } catch (conciergeErr: any) {
           console.warn('[AiGuide] API chatWithConcierge fallback activated:', conciergeErr);
-          const fallbackRes = generateLocalConciergeResponse(textToSend, currentCity || undefined);
+          const fallbackRes = await generateLocalConciergeResponse(textToSend, currentCity || undefined);
           if (fallbackRes.context_destination) setCurrentCity(fallbackRes.context_destination);
           botContent = fallbackRes.reply;
           spokenText = fallbackRes.reply;

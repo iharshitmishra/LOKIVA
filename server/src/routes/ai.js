@@ -32,6 +32,7 @@ aiRouter.post('/day-plan', async (req, res) => {
       food_preferences,
       mobility,
       vibe,
+      weather_context,
     } = req.body;
 
     const plan = await generateDayPlanWithGemini({
@@ -43,6 +44,7 @@ aiRouter.post('/day-plan', async (req, res) => {
       food_preferences,
       mobility,
       vibe,
+      weatherContext: weather_context || null,
     });
 
     res.json(plan);
@@ -208,6 +210,7 @@ aiRouter.post('/concierge', async (req, res) => {
       city: requestedCity,
       state = 'India',
       trip_profile: tripProfile = null,
+      weather_context = null,
     } = req.body;
     if (!message) return res.status(400).json({ detail: 'Message is required' });
 
@@ -269,6 +272,7 @@ aiRouter.post('/concierge', async (req, res) => {
           city: null,
           availableExperiences: [],
           tripProfile: confirmedProfile,
+          weatherContext: weather_context || null,
         });
       } catch (aiErr) {
         console.warn('AI Concierge (general) model unavailable, using fallback:', aiErr.message);
@@ -384,6 +388,7 @@ aiRouter.post('/concierge', async (req, res) => {
         availableExperiences: topRecommendations.map((r) => r.experience),
         tripProfile: confirmedProfile,
         routeOptions,
+        weatherContext: weather_context || null,
       });
     } catch (aiErr) {
       console.warn('AI Concierge model unavailable, using contextual fallback:', aiErr.message);
@@ -413,7 +418,7 @@ aiRouter.post('/concierge', async (req, res) => {
 // POST /ai/chat - legacy endpoint (falls back to rule-based if Gemini not configured)
 aiRouter.post('/chat', async (req, res) => {
   try {
-    const { message, chat_history = [], city = 'Jaipur' } = req.body;
+    const { message, chat_history = [], city = 'Jaipur', weather_context = null } = req.body;
     if (!message) return res.status(400).json({ detail: 'Message is required' });
 
     // Check if Gemini is configured
@@ -445,6 +450,7 @@ aiRouter.post('/chat', async (req, res) => {
       chatHistory: chat_history,
       city,
       availableExperiences: cityExps,
+      weatherContext: weather_context || null,
     });
 
     const intent = await extractTravelIntent(message);
