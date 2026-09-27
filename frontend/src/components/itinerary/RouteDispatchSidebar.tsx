@@ -86,8 +86,8 @@ export function RouteDispatchSidebar({
       }).setView([20.5937, 78.9629], 12);
 
       const cartoApiKey = (
-        HARDCODED_CARTO_API_KEY ||
         (import.meta.env.VITE_CARTO_API_KEY as string | undefined) ||
+        HARDCODED_CARTO_API_KEY ||
         ''
       )
         .trim()
