@@ -22,6 +22,52 @@ export function estimateTravelTimeMins(distanceKm) {
 }
 
 // Multi-Factor Recommendation Scorer
+// Aliases let a confirmed traveler brief (for example "culture" or "food")
+// match the richer compound categories and tags stored on each experience.
+const INTEREST_ALIASES = {
+  culture: [
+    'culture', 'cultural', 'heritage', 'history', 'historic', 'monument', 'palace', 'fort',
+    'fortress', 'architecture', 'museum', 'archaeolog', 'landmark', 'haveli', 'mausoleum',
+    'tomb', 'mosque', 'cathedral', 'church', 'synagogue', 'temple town', 'old city', 'walled city',
+  ],
+  food: [
+    'food', 'culinary', 'cuisine', 'thali', 'street food', 'snack', 'dessert', 'sweets', 'mithai',
+    'dining', 'cafe', 'chai', 'tea', 'biryani', 'chaat', 'breakfast', 'lunch', 'dinner',
+    'food trail', 'kitchen', 'beverage', 'brewery', 'ice cream', 'bakery', 'pastry',
+  ],
+  workshop: [
+    'workshop', 'workshops', 'craft', 'artisan', 'pottery', 'textile', 'weav', 'handloom',
+    'block printing', 'embroid', 'master', 'hands-on', 'hands on', 'carpenter', 'metalwork',
+    'woodcraft', 'clay', 'painting', 'folk art', 'stone carving', 'loom',
+  ],
+  hidden_gem: ['hidden gem', 'hidden', 'offbeat', 'off the beaten', 'local spot', 'secret', 'under the radar', 'authentic'],
+  nature: [
+    'nature', 'wildlife', 'bird', 'scenic', 'garden', 'lake', 'beach', 'backwater', 'waterfall',
+    'hill', 'mountain', 'forest', 'sanctuary', 'national park', 'botanical', 'sunset point',
+    'boating', 'canyon', 'trek', 'hike', 'trail', 'valley', 'mangrove', 'desert', 'camel',
+  ],
+  spiritual: [
+    'spiritual', 'temple', 'ghat', 'aarti', 'yoga', 'meditation', 'ashram', 'sacred', 'shrine',
+    'pilgrim', 'puja', 'ritual', 'wellness', 'ayurveda', 'riverfront', 'ashrams', 'mandir',
+    'gurudwara', 'stupa', 'monastery', 'sound healing', 'fauna',
+  ],
+  shopping: ['shopping', 'market', 'bazaar', 'souvenir', 'jewellery', 'jewelry', 'spices', 'textile weaving', 'craft market', 'bangle'],
+  adventure: ['adventure', 'rafting', 'kayak', 'kayaking', 'cycling', 'safari', 'trek', 'canyoning', 'zipline', 'paragliding', 'camp'],
+  nightlife: ['nightlife', 'music', 'dance', 'qawwali', 'classical', 'rooftop', 'bar', 'pub', 'brewery', 'live band', 'jazz', 'night market', 'cafe'],
+  events: ['festival', 'event', 'fair', 'mela', 'celebration', 'carnival', 'procession', 'concert'],
+};
+
+function matchInterests(expCategory, tags, interests) {
+  const haystack = [expCategory || '', ...(Array.isArray(tags) ? tags : [])]
+    .join(' • ')
+    .toLowerCase();
+  return (interests || []).filter((interest) => {
+    const key = String(interest).toLowerCase().trim();
+    const aliases = INTEREST_ALIASES[key] || [key];
+    return aliases.some((alias) => haystack.includes(alias));
+  });
+}
+
 export function scoreExperience(exp, intent, profile, weather) {
   let score = 50.0;
   const matchReasons = [];
@@ -32,11 +78,9 @@ export function scoreExperience(exp, intent, profile, weather) {
 
   // 1. Category and Interest Matching (+25 max)
   const expCategory = (exp.category || '').toLowerCase();
-  const matchedInterests = interests.filter((i) =>
-    expCategory.includes(i.toLowerCase()) || tags.some((t) => t.toLowerCase().includes(i.toLowerCase()))
-  );
+  const matchedInterests = matchInterests(expCategory, tags, interests);
   if (matchedInterests.length > 0) {
-    score += Math.min(25, matchedInterests.length * 12);
+    score += Math.min(30, matchedInterests.length * 15);
     matchReasons.push(`Matches your interest in ${matchedInterests.join(', ')}`);
   }
 
@@ -66,7 +110,22 @@ export function scoreExperience(exp, intent, profile, weather) {
     matchReasons.push('Indoor experience sheltered from rain');
   }
 
-  // 6. Quality & Rating
+  // 6. Confirmed Budget Fit (only applied when a brief declared a real ceiling)
+  const budgetCeiling = Number(intent?.budget);
+  if (Number.isFinite(budgetCeiling) && budgetCeiling > 0 && budgetCeiling <= 15000) {
+    const price = Number(exp.price) || 0;
+    if (price === 0) {
+      score += 6;
+      matchReasons.push('Free entry, zero ticket cost');
+    } else if (price <= budgetCeiling) {
+      score += 8;
+      matchReasons.push(`Comfortably inside your budget (Rs.${price})`);
+    } else {
+      score -= 10;
+    }
+  }
+
+  // 7. Quality & Rating
   score += (exp.rating || 4.5) * 3;
 
   return {

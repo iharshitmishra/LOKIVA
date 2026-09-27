@@ -18,7 +18,6 @@ import {
   RefreshCw,
   Trash2,
   RotateCcw,
-  Building,
   Sliders,
   ChevronRight,
   Compass,
@@ -56,7 +55,6 @@ export function SavedPage() {
     saveItineraryWithDate,
     swapStopForTimeInterval,
     undoSwapStop,
-    toggleSimulatedRainForStop,
     removeSavedItinerary,
   } = useMyItinerariesStore();
 
@@ -120,14 +118,12 @@ export function SavedPage() {
 
     Promise.all(
       currentDay.stops.map(async (stop) => {
-        const isSimulatedRain = Boolean(stop.disruptionState?.weatherAlertActive);
         const res = await checkStopWeatherForecast({
           city: currentItinerary.city,
           placeTitle: stop.title,
           dateIso: stop.dateIso,
           startTime: stop.startTime,
           endTime: stop.endTime,
-          simulateRainOverride: isSimulatedRain,
         });
         newStatuses[String(stop.stopId)] = res;
       })
@@ -423,23 +419,8 @@ export function SavedPage() {
                       </div>
                     </div>
 
-                    {/* Top Right Demo Helper Bar & Switcher */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 shrink-0">
-                      {/* 1-Tap Weather API Rain Alert Trigger */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (currentItinerary && currentDay) {
-                            toggleSimulatedRainForStop(currentItinerary.itineraryId, currentDay.dayNumber);
-                          }
-                        }}
-                        className="px-3.5 py-2 rounded-xl bg-[#FAF0DF] hover:bg-[#F2D5A7] border border-[#F2D5A7] text-[#B84A27] text-xs font-heading font-extrabold uppercase tracking-wide transition flex items-center gap-2 cursor-pointer shadow-2xs"
-                        title="Simulate Weather API precipitation alert for presentation demo"
-                      >
-                        <CloudRain className="w-4 h-4" />
-                        <span>🌧️ Demo Rain Alert on Day {currentDay?.dayNumber}</span>
-                      </button>
-
+                    {/* Top Right Actions */}
+                    <div className="flex items-center gap-2.5 shrink-0">
                       {currentItinerary && (
                         <button
                           type="button"
@@ -500,7 +481,7 @@ export function SavedPage() {
                     <div className="space-y-4">
                       {currentDay.stops.map((stop, idx) => {
                         const weatherInfo = weatherStatuses[String(stop.stopId)];
-                        const hasRain = weatherInfo?.hasRainAlert || Boolean(stop.disruptionState?.weatherAlertActive);
+                        const hasRain = Boolean(weatherInfo?.hasRainAlert);
                         const isRescheduled = Boolean(stop.disruptionState?.previousStopTitle);
 
                         return (
@@ -605,7 +586,7 @@ export function SavedPage() {
                                 </div>
                               </div>
 
-                              {/* Right Pricing & Reschedule Action */}
+                              {/* Right Pricing */}
                               <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-[#DFCBB2]">
                                 <div className="text-left md:text-right">
                                   <span className="text-[10px] font-mono text-[#A67B5B] uppercase block font-bold">
@@ -615,17 +596,6 @@ export function SavedPage() {
                                     {stop.estAccessInr === 0 ? 'Free Open' : `₹${stop.estAccessInr.toLocaleString('en-IN')}`}
                                   </span>
                                 </div>
-
-                                {/* On-Ground Closed Temple/Shop Reschedule Button */}
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenRescheduleModal(stop, 'temple_or_shop_closed')}
-                                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#FAF0DF] hover:bg-[#F2D5A7] border border-[#DFCBB2] hover:border-[#B84A27] text-[#B84A27] text-xs font-heading font-extrabold uppercase tracking-wide transition cursor-pointer shadow-2xs active:scale-[0.98]"
-                                  title="Arrived and found the venue closed or crowded? Reschedule this exact slot"
-                                >
-                                  <Building className="w-3.5 h-3.5" />
-                                  <span>🚪 Temple / Shop Closed? Reschedule Slot</span>
-                                </button>
                               </div>
                             </div>
                           </div>
