@@ -92,7 +92,7 @@ function candidateOrder() {
 /**
  * Execute chat inference using Groq Qwen (Ultra-fast Qwen 3.8 / 2.5 on Groq LPU).
  */
-export async function queryGroqQwen(prompt, { systemInstruction = '', history = [], maxTokens = 750, temperature = 0.3 } = {}) {
+export async function queryGroqQwen(prompt, { systemInstruction = '', history = [], maxTokens = 650, temperature = 0.3 } = {}) {
   const groqKey = process.env.GROQ_API_KEY;
   if (!groqKey) throw new Error('Groq API key not configured');
 
@@ -108,28 +108,52 @@ export async function queryGroqQwen(prompt, { systemInstruction = '', history = 
     chatMessages.push({ role: 'user', content: prompt });
   }
 
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${groqKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model,
-      messages: chatMessages,
-      max_tokens: Math.min(maxTokens || 750, 800),
-      temperature,
-    }),
-  });
+  let attempt = 0;
+  let currentMaxTokens = Math.min(maxTokens || 650, 700);
 
-  if (!res.ok) {
+  while (attempt < 2) {
+    attempt++;
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${groqKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        messages: chatMessages,
+        max_tokens: currentMaxTokens,
+        temperature,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content || '';
+      return { text: sanitizeAiText(text), modelName: model };
+    }
+
     const errText = await res.text();
+    if (res.status === 429 && attempt < 2) {
+      // Parse retry delay from error if available (e.g. "try again in 840ms")
+      const delayMatch = errText.match(/try again in (\d+(?:\.\d+)?)(ms|s)/i);
+      let waitMs = 1500;
+      if (delayMatch) {
+        const val = parseFloat(delayMatch[1]);
+        const unit = delayMatch[2].toLowerCase();
+        waitMs = unit === 's' ? Math.round(val * 1000) + 300 : Math.round(val) + 300;
+      }
+      waitMs = Math.min(Math.max(waitMs, 500), 3000);
+      console.warn(`[Groq Qwen] Rate limit hit, retrying in ${waitMs}ms...`);
+      currentMaxTokens = Math.min(currentMaxTokens, 550);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+      continue;
+    }
+
     throw new Error(`Groq Qwen error ${res.status}: ${errText}`);
   }
 
-  const data = await res.json();
-  const text = data.choices?.[0]?.message?.content || '';
-  return { text: sanitizeAiText(text), modelName: model };
+  throw new Error('Groq Qwen request failed after retry.');
 }
 
 /**
@@ -825,10 +849,10 @@ ${briefBlock}${routeBlock}${weatherBlock}${experiencesContext ? `Curated verifie
 Your Core Rules:
 1. DIRECTLY, THOROUGHLY and HELPFULLY answer whatever the traveler asks.
    - If they ask for an itinerary (e.g. multi-day trip, weekend getaway, budget plan for a city or region):
-     * Provide a clear, well-structured day-by-day plan (Day 1, Day 2, Day 3, etc.) with morning, afternoon, and evening recommendations.
-     * Include a realistic budget allocation breakdown (accommodation, food, local transit, entry fees) that aligns with their stated budget.
-     * Highlight authentic local cuisine and signature dishes to taste.
-     * Provide practical insider tips (best times to visit, local transit advice, dress codes, cash tips).
+     * Structure as a clean day-by-day plan (Day 1, Day 2, Day 3, etc.).
+     * Keep each day to exactly 3 concise bullet points (Morning, Afternoon, Evening) with 1 to 2 short sentences each.
+     * Include a compact 4-line budget breakdown (stays, food, transit, entry fees) matching their budget.
+     * Conclude with signature dishes to taste and essential tips. Keep total length around 280 to 380 words so all days finish completely without truncation.
    - If they ask about places to visit, cultural traditions, food, weather, or travel advice:
      * Provide culturally grounded, authentic, specific recommendations with clear context.
    - If they ask about South India or choosing between regions:
