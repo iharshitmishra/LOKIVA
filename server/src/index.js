@@ -14,8 +14,8 @@ import { reviewsRouter } from './routes/reviews.js';
 import { router as ingestionRouter } from './routes/ingestion.js';
 import { mediaRouter } from './routes/media.js';
 import { voiceRouter } from './routes/voice.js';
-import { ttsRouter } from './routes/tts.js';
 import { digitalTwinRouter } from './routes/digitalTwin.js';
+import { paymentsRouter } from './routes/payments.js';
 import http from 'http';
 import { setupVoiceWebSocketServer } from './services/voiceStreamService.js';
 
@@ -47,9 +47,8 @@ app.use('/api/v1/reviews', reviewsRouter);
 app.use('/api/v1/digital-twin', digitalTwinRouter);
 app.use('/api/v1/ingestion', ingestionRouter);
 app.use('/api/v1/media', mediaRouter);
-app.use('/voice', ttsRouter);
-app.use('/api/v1/voice', ttsRouter);
-app.use('/api/voice', ttsRouter);
+app.use('/api/v1/payments', paymentsRouter);
+app.use('/api/payments', paymentsRouter);
 app.use('/api/v1/voice', voiceRouter);
 app.use('/voice', voiceRouter);
 

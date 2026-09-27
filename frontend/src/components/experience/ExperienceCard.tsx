@@ -15,8 +15,10 @@ import {
   Compass,
   Building2,
   Accessibility,
+  CheckCircle2,
 } from 'lucide-react';
 import { api, resolveImageUrl } from '../../lib/api';
+import { usePassWalletStore } from '../../store/usePassWalletStore';
 
 interface ExperienceCardProps {
   experience: Experience;
@@ -132,6 +134,7 @@ export function ExperienceCard({
 
   const duration = experience.duration_mins || experience.approx_duration_mins || 60;
   const isWheelchair = experience.wheelchair_accessible ?? experience.accessibility_wheelchair;
+  const isBooked = usePassWalletStore((s) => s.isPlaceBooked(experience.id) || s.isPlaceBooked(experience.title));
 
   return (
     <Link
@@ -188,9 +191,17 @@ export function ExperienceCard({
 
         {/* Step-Free / Wheelchair Tag */}
         {isWheelchair && (
-          <div className="absolute bottom-3 left-3 flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/95 backdrop-blur-xs text-ink text-[10px] font-mono border border-paper-400 shadow-xs">
+          <div className="absolute bottom-3 left-3 flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/95 backdrop-blur-xs text-ink text-[10px] font-mono border border-paper-400 shadow-xs z-20">
             <Accessibility className="w-3 h-3 text-pine" />
             <span>Step-Free Ramp</span>
+          </div>
+        )}
+
+        {/* Verified Pass Unlocked Badge */}
+        {isBooked && (
+          <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#FAF0DF] text-[#9E5414] text-[10px] font-heading font-extrabold uppercase tracking-wide border border-[#F2D5A7] shadow-sm">
+            <CheckCircle2 className="w-3 h-3 text-[#B84A27]" />
+            <span>Pass Booked</span>
           </div>
         )}
       </div>

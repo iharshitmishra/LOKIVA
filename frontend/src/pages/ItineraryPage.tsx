@@ -376,6 +376,14 @@ export function ItineraryPage() {
                         duration: `${durationMins} mins`,
                       })
                     }
+                    onUpdateActivityTiming={(dayNum, actId, customStartMinutes, durationMins) =>
+                      updateActivity(dayNum, actId, {
+                        customStartMinutes,
+                        visitDurationMinutes: durationMins,
+                        durationMins,
+                        duration: `${durationMins} mins`,
+                      })
+                    }
                     onMoveActivity={(dayNum, fromIdx, toIdx) =>
                       reorderActivity(dayNum, fromIdx, toIdx)
                     }

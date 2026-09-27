@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Cusped Jharokha Royal Arch -->
+  <path d="M40 180 V90 C40 60 65 35 100 20 C135 35 160 60 160 90 V180" stroke-width="2"/>
+  <path d="M50 180 V95 C50 70 72 48 100 35 C128 48 150 70 150 95 V180"/>
+  <!-- Multi-foiled Cusps -->
+  <path d="M60 95 C60 80 72 70 82 78 C90 70 100 70 100 70 C100 70 110 70 118 78 C128 70 140 80 140 95"/>
+  <!-- Ornate Lattice Jaali Grid -->
+  <line x1="60" y1="110" x2="140" y2="110" stroke-dasharray="3 3"/>
+  <line x1="60" y1="125" x2="140" y2="125" stroke-dasharray="3 3"/>
+  <line x1="60" y1="140" x2="140" y2="140" stroke-dasharray="3 3"/>
+  <line x1="60" y1="155" x2="140" y2="155" stroke-dasharray="3 3"/>
+  <line x1="60" y1="170" x2="140" y2="170" stroke-dasharray="3 3"/>
+  <line x1="75" y1="100" x2="75" y2="180" stroke-dasharray="3 3"/>
+  <line x1="90" y1="80" x2="90" y2="180" stroke-dasharray="3 3"/>
+  <line x1="100" y1="70" x2="100" y2="180" stroke-width="1.5"/>
+  <line x1="110" y1="80" x2="110" y2="180" stroke-dasharray="3 3"/>
+  <line x1="125" y1="100" x2="125" y2="180" stroke-dasharray="3 3"/>
+  <!-- Floral Crown Finial -->
+  <circle cx="100" cy="15" r="4" fill="currentColor"/>
+  <path d="M96 20 C92 24 92 28 100 28 C108 28 108 24 104 20"/>
+  <!-- Corner Floral Flourish -->
+  <circle cx="40" cy="90" r="3"/>
+  <circle cx="160" cy="90" r="3"/>
+</svg>

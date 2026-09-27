@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Dravidian Gopuram Tiered Silhouette -->
+  <!-- Top Kalasham Finials -->
+  <path d="M85 30 H115"/>
+  <circle cx="90" cy="24" r="2.5" fill="currentColor"/>
+  <circle cx="100" cy="22" r="3" fill="currentColor"/>
+  <circle cx="110" cy="24" r="2.5" fill="currentColor"/>
+  <!-- Tier 1 -->
+  <path d="M80 30 L85 55 H115 L120 30 Z"/>
+  <line x1="88" y1="42" x2="112" y2="42"/>
+  <!-- Tier 2 -->
+  <path d="M72 55 L78 85 H122 L128 55 Z"/>
+  <line x1="80" y1="70" x2="120" y2="70"/>
+  <!-- Tier 3 -->
+  <path d="M64 85 L70 120 H130 L136 85 Z"/>
+  <line x1="72" y1="102" x2="128" y2="102"/>
+  <!-- Base Gateway (Torana) -->
+  <path d="M55 120 L58 175 H142 L145 120 Z" stroke-width="2"/>
+  <!-- Entrance Arch -->
+  <path d="M85 175 V145 C85 135 115 135 115 145 V175" stroke-width="2"/>
+  <!-- Kolam Symmetry Dots -->
+  <circle cx="45" cy="150" r="2" fill="currentColor"/>
+  <circle cx="45" cy="165" r="2" fill="currentColor"/>
+  <circle cx="155" cy="150" r="2" fill="currentColor"/>
+  <circle cx="155" cy="165" r="2" fill="currentColor"/>
+</svg>

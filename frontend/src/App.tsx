@@ -31,6 +31,8 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { ProviderDashboardPage } from './pages/ProviderDashboardPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
+import { VerifyPassPage } from './pages/VerifyPassPage';
+import { CulturalPassportReceiptModal } from './components/pass/CulturalPassportReceiptModal';
 
 function AppShell() {
   const location = useLocation();
@@ -69,6 +71,7 @@ function AppShell() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/discovery-map" element={<DiscoveryMapPage />} />
           <Route path="/digital-twin" element={<Navigate to="/admin" replace />} />
+          <Route path="/verify-pass/:passId" element={<VerifyPassPage />} />
 
           {/* Lokiva Group Hub Routes - Protected by RequireAuth */}
           <Route
@@ -117,6 +120,9 @@ function AppShell() {
 
       {/* First-visit onboarding modal */}
       {!isProviderWorkspace && <LocationDecisionModal isOpen={showModal} onClose={closeModal} />}
+
+      {/* Global Cultural Passport Receipt & QR Modal */}
+      <CulturalPassportReceiptModal />
     </div>
   );
 }
