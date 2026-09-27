@@ -751,25 +751,25 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
       {
         title: 'Serene Kettuvallam Backwaters',
         description: 'Glide on handcrafted thatched houseboats past water lilies, duck farms, and timeless village canals.',
-        image: 'https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1000&q=80',
+        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQRBCompw7tU4Zfu3e_wjdjaaTTthfSRLxNwo6xa3AH2EZQVvRbIDYhang&s=10',
         tag: 'Waterway Magic',
       },
       {
         title: 'High Altitude Tea & Spice Highlands',
         description: 'Inhale cardamom-scented mountain air in Munnar and Wayanad where rolling tea carpet hills touch misty clouds.',
-        image: 'https://images.unsplash.com/photo-1596401057633-54a8fe8ef647?auto=format&fit=crop&w=1000&q=80',
+        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS7GtAEdE2yMM6HhxJJ-t75Kprgde0aqKbRNfJyK04yOYdWdBPJq1tOdLs&s=10',
         tag: 'Highland Serenity',
       },
       {
         title: 'Authentic 5,000-Year Ayurveda',
         description: 'Restore body and mind through authentic Panchakarma therapies using medicinal herbal oils and natural springs.',
-        image: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1000&q=80',
+        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkc_jIk3I-ZsuM_qYf1PdHEai95Xd-AVMK2WKvyDw63SPYmUomIm50ecds&s=10',
         tag: 'Holistic Wellness',
       },
       {
         title: 'Centuries of Global Spice Trade',
         description: 'Wander Fort Kochi’s pastel colonial streets, Chinese fishing nets, and ancient Jewish spice warehouses.',
-        image: 'https://images.unsplash.com/photo-1588096344356-9b441f71df44?auto=format&fit=crop&w=1000&q=80',
+        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPtYlvJ8066pXpVW3QHxuGI8kywI5FgxpCx-lhbPs_lw&s=10',
         tag: 'Coastal Heritage',
       },
     ],
@@ -779,7 +779,7 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
         timePeriod: '3rd Century BCE - 12th Century CE',
         headline: 'The global maritime trade epicenter linking Rome, Arabia, and the Malabar coast',
         narrative: 'Centuries before modern ports, Muziris was the world\'s greatest spice emporium, exporting black gold (pepper), cardamom, and cinnamon to the Roman Empire, Phoenicians, and Arabian merchants, fostering ancient cosmopolitan settlements.',
-        image: 'https://images.unsplash.com/photo-1593693397690-362cb9666fc2?auto=format&fit=crop&w=1200&q=80',
+        image: 'https://www.poojn.in/wp-content/uploads/2025/04/Muziris-Ancient-Spice-Route-of-India-A-History.jpeg.jpg',
         imageCaption: 'Padmanabhaswamy Temple & Ancient Malabar Shrines',
         monumentsBuilt: ['Muziris Ancient Port Shrines', 'Cheraman Juma Mosque', 'St. Thomas Mar Thoma Shrines', 'Kodungallur Bhagavathy Temple'],
         impactOnToday: 'Established Kerala\'s open multicultural ethos, ancient spice agriculture, and the historic Muziris Heritage Project corridor.',
@@ -789,7 +789,7 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
         timePeriod: '14th Century - 18th Century CE',
         headline: 'Naval victories, temple architecture without iron nails, and Kathakali royal courts',
         narrative: 'Under the Zamorins of Kozhikode and King Marthanda Varma of Travancore, Kerala defended its spice sovereignty, notably defeating the Dutch East India Company at the Battle of Colachel in 1741. Royal courts nurtured Kathakali dance dramas, Kalaripayattu martial academies, and Naalukettu wooden architecture.',
-        image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1200&q=80',
+        image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSFRlS4Fzu5NT4GuzMIqv_kJFOL3N9Ir5ONorzO7e2NZDqjrAaFZCk3jPck&s=10',
         imageCaption: 'Historic Fort Kochi Malabar Spice Port & Timber Architecture',
         monumentsBuilt: ['Padmanabhaswamy Temple Vaults', 'Padmanabhapuram Wooden Palace', 'Bekal Coastal Bastion', 'Mattancherry Dutch Palace'],
         impactOnToday: 'Preserved authentic 5,000-year Ayurveda lineages, classical temple arts, and distinctive sloping-roof timber architecture.',
@@ -1976,7 +1976,7 @@ export const STATE_OVERVIEWS: Record<string, StateOverview> = {
  */
 export function getStateOverview(stateSlug: string): StateOverview | null {
   const normalized = (stateSlug || '').toLowerCase().trim().replace(/_/g, '-');
-  
+
   if (STATE_OVERVIEWS[normalized]) {
     return STATE_OVERVIEWS[normalized];
   }
