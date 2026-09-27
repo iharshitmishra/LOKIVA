@@ -27,7 +27,7 @@ import { generateCurvedFlightArc } from './ItineraryMapRoute';
 import L from 'leaflet';
 
 // CARTO Basemaps API Key
-const HARDCODED_CARTO_API_KEY = 'cb1_2x3k_2_130ef72eae12cbf223f5381d';
+const HARDCODED_CARTO_API_KEY = 'cb1_2x3k_1_ad093820ec995z1ca03fd4793';
 
 interface ItineraryMapViewProps {
   days: ItineraryDay[];
@@ -147,22 +147,10 @@ export function ItineraryMapView({
         scrollWheelZoom: false,
       }).setView([20.5937, 78.9629], 5);
 
-      const cartoApiKey = (
-        (import.meta.env.VITE_CARTO_API_KEY as string | undefined) ||
-        HARDCODED_CARTO_API_KEY ||
-        ''
-      )
-        .trim()
-        .replace(/^["']|["']$/g, '');
-
-      const tileUrl = cartoApiKey
-        ? `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${encodeURIComponent(cartoApiKey)}`
-        : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png';
-
-      L.tileLayer(tileUrl, {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-        subdomains: 'abcd',
-        maxZoom: 20,
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        subdomains: 'abc',
+        maxZoom: 19,
       }).addTo(map);
 
       mapInstanceRef.current = map;

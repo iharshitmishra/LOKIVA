@@ -20,7 +20,7 @@ import {
   getWindCategory,
 } from '../../data/popularCities55Data';
 
-const HARDCODED_CARTO_API_KEY = 'cb1_2x3k_2_130ef72eae12cbf223f5381d';
+const HARDCODED_CARTO_API_KEY = 'cb1_2x3k_1_ad093820ec995z1ca03fd4793';
 
 export interface CityLiveData {
   cityId: string;
@@ -349,24 +349,11 @@ export function DigitalTwinMapLayer({
 
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    // Clean CARTO Voyager Tile Layer
-    const cartoApiKey = (
-      (import.meta.env.VITE_CARTO_API_KEY as string | undefined) ||
-      HARDCODED_CARTO_API_KEY
-    )
-      .trim()
-      .replace(/^["']|["']$/g, '');
-
-    const tileUrl = cartoApiKey
-      ? `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=${encodeURIComponent(
-          cartoApiKey
-        )}`
-      : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-
-    L.tileLayer(tileUrl, {
-      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-      subdomains: 'abcd',
-      maxZoom: 18,
+    // Clean OpenStreetMap Tile Layer with Zero Watermark
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      subdomains: 'abc',
+      maxZoom: 19,
       minZoom: 4,
     }).addTo(map);
 
