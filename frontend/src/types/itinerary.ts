@@ -80,6 +80,15 @@ export interface ItineraryActivity {
   lng?: number;
   customStartMinutes?: number;
   breatherBeforeMinutes?: number;
+  isInterStateCrossing?: boolean;
+  crossingDetails?: {
+    fromCity: string;
+    fromState: string;
+    toCity: string;
+    toState: string;
+    distanceKm: number;
+    transitMode: string;
+  };
 }
 
 export interface ItineraryDay {
@@ -95,6 +104,12 @@ export interface ItineraryDay {
   originalActivities?: ItineraryActivity[];
   mealBudgetPerPerson?: number;
   metrics?: DayFeasibilityMetrics;
+  stateLeg?: string;
+  stateCode?: string;
+  city?: string;
+  isBridgeDay?: boolean;
+  isInterStateCrossing?: boolean;
+  corridorTransitSummary?: string;
 }
 
 export interface ItineraryTripDetails {
@@ -107,6 +122,12 @@ export interface ItineraryTripDetails {
   totalBudgetLimit: number;
   hotel: string;
   pace?: 'relaxed' | 'balanced' | 'packed';
+  corridorMode?: 'direct' | 'corridor';
+  corridorEvaluation?: any;
+  originCity?: string;
+  originState?: string;
+  intermediateCity?: string;
+  intermediateState?: string;
 }
 
 export interface RegionalFoodGuide {

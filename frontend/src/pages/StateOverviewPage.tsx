@@ -33,6 +33,7 @@ import {
   Quote,
 } from 'lucide-react';
 import { getStateOverview, StateOverview, SeasonTimelineItem, HistoryEra, StateThemePalette, getStateThemePalette } from '../data/stateOverviewData';
+import { CulturalIntelligencePanel } from '../components/culture/CulturalIntelligencePanel';
 
 const NAV_SECTIONS = [
   { id: 'overview', label: 'Overview', icon: BookOpen },
@@ -267,6 +268,11 @@ export function StateOverviewPage() {
   const [saveToast, setSaveToast] = useState<string | null>(null);
   const [activeCultureCategory, setActiveCultureCategory] = useState<string>('All');
 
+  // Always scroll to top on destination page load/change
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, [stateSlug]);
+
   // Check saved state from localStorage
   useEffect(() => {
     if (!stateData) return;
@@ -380,7 +386,7 @@ export function StateOverviewPage() {
     stateData.seasons.find((s) => s.season === selectedSeason) || stateData.seasons[0];
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#12213B] selection:bg-[#FFC067] selection:text-[#12213B]">
+    <div className="min-h-screen bg-transparent text-[#12213B] selection:bg-[#FFC067] selection:text-[#12213B]">
       {/* Toast Notification */}
       <AnimatePresence>
         {saveToast && (
@@ -1261,6 +1267,15 @@ export function StateOverviewPage() {
               ))}
             </div>
           </div>
+
+          {/* ═══════════════════════════════════════════════════════════════════════
+              NUGEN-POWERED CULTURAL INTELLIGENCE PANEL (State-Agnostic Grounded Layer)
+          ═══════════════════════════════════════════════════════════════════════ */}
+          <CulturalIntelligencePanel
+            stateSlug={stateSlug || stateData.id}
+            palette={statePalette}
+            stateName={stateData.name}
+          />
         </div>
       </section>
 

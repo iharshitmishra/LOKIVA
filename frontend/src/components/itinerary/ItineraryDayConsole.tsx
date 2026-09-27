@@ -102,8 +102,13 @@ export function ItineraryDayConsole({
                   />
                 )}
 
-                <span className={`relative z-10 font-heading text-sm ${isSelected ? 'text-[#FFFDF9]' : 'text-[#3B2316]'}`}>
-                  Day {day.dayNumber}
+                <span className={`relative z-10 font-heading text-sm font-extrabold flex items-center gap-1.5 ${isSelected ? 'text-[#FFFDF9]' : 'text-[#3B2316]'}`}>
+                  <span>Day {day.dayNumber}</span>
+                  {day.stateCode && (
+                    <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${isSelected ? 'bg-white/20 text-[#FFFDF9]' : 'bg-[#FAF4E8] text-[#B84A27] border border-[#DFCBB2]'}`}>
+                      {day.stateCode}
+                    </span>
+                  )}
                 </span>
 
                 <span

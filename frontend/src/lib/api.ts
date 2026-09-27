@@ -241,6 +241,12 @@ export const api = {
     chat_history?: any[];
     city?: string;
     state?: string;
+    /**
+     * Structured traveler brief collected by the concierge interview.
+     * When present the backend uses it to ground the prompt and to re-rank
+     * verified experiences, so recommendations match the confirmed brief.
+     */
+    trip_profile?: Record<string, unknown> | null;
   }): Promise<{
     reply: string;
     tokens_used: number;

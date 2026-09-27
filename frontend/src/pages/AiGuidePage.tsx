@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import { useAuth } from '../lib/auth-context';
@@ -20,6 +20,31 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { AudioWaveformVisualizer } from '../components/voice/AudioWaveformVisualizer';
 import { VoiceRecordingSheet } from '../components/voice/VoiceRecordingSheet';
 import { FormattedMessageContent } from '../components/ui/FormattedMessageContent';
+import { TypewriterText } from '../components/ui/TypewriterText';
+import { nearestCity, requestCurrentPosition } from '../lib/geo';
+import { ConciergeQuestionPanel } from '../components/ai/ConciergeQuestionPanel';
+import { RouteBoard } from '../components/ai/RouteBoard';
+import { RoutePlan } from '../lib/routePlanner';
+import {
+  TripBrief,
+  InterviewQuestion,
+  EMPTY_BRIEF,
+  applyAnswer,
+  answerToSentence,
+  briefToProfilePayload,
+  buildBriefSummary,
+  buildCurationPrompt,
+  buildQuestionSpokenText,
+  clearStoredBrief,
+  getBriefProgress,
+  getNextQuestion,
+  getQuestionById,
+  harvestBriefFromText,
+  isBriefCuratable,
+  isBriefReady,
+  loadStoredBrief,
+  saveStoredBrief,
+} from '../lib/conciergeInterview';
 import {
   Sparkles,
   Send,
@@ -40,6 +65,9 @@ import {
   X,
   Compass,
   Loader2,
+  Wand2,
+  LocateFixed,
+  AlertTriangle,
 } from 'lucide-react';
 
 // ===========================================================================
@@ -81,6 +109,7 @@ interface ChatMessage {
   spokenText?: string;
   timestamp: string;
   recommendations?: ScoredExperience[];
+  routes?: RoutePlan[];
   intent?: string;
   weatherData?: WeatherData;
   experienceData?: ExperienceData;
@@ -97,9 +126,9 @@ const DEFAULT_WELCOME_MESSAGE: ChatMessage = {
   role: 'assistant',
   timestamp: 'Just now',
   content:
-    'Namaste! Welcome to LOKIVA, your AI Cultural Concierge.\n\nWhere are you heading to in India, and what are your interests? Tell me your destination (like Jaipur, Varanasi, Mumbai, or Goa) and whether you are drawn to royal heritage, street food, artisan workshops, or quiet temples, and I will curate the best spots for you!',
+    'Namaste! I am your LOKIVA cultural concierge. Tell me your city, or tap "Use my location", and I will build three routes with travel details for each one.',
   spokenText:
-    'Namaste! Welcome to Lokiva. Where in India are you heading to, and what are your interests? Tell me your destination and what you want to experience!',
+    'Namaste! I am your Lokiva cultural concierge. Tell me your city, or tap use my location, and I will build three routes with travel details for each one.',
 };
 
 const INTEREST_OPTIONS = [
@@ -321,6 +350,28 @@ function isWeatherQuery(text: string): boolean {
   return /(^|\b)(what('s| is) the (weather|temperature|forecast)|is it raining in|weather in|how is the weather)(\b|$)/i.test(text);
 }
 
+const WINDOW_HOURS: Record<string, number> = {
+  '2 to 3 hours': 3,
+  'Half day': 5,
+  'Full day': 8,
+  'Two days': 16,
+};
+
+const START_CLOCK: Record<string, string> = {
+  Morning: '09:00',
+  Afternoon: '13:00',
+  Evening: '16:30',
+  Night: '21:00',
+};
+
+/** Hours available, used by the route board to flag an over packed day. */
+const routeWindowHours = (timeBudget: string | null): number =>
+  (timeBudget && WINDOW_HOURS[timeBudget]) || 8;
+
+/** Start clock for the route timeline, derived from the confirmed brief. */
+const routeStartTime = (startTime: string | null): string =>
+  (startTime && START_CLOCK[startTime]) || '09:00';
+
 // ===========================================================================
 // Component
 // ===========================================================================
@@ -384,6 +435,43 @@ export function AiGuidePage() {
   const [isTotalLoading, setIsTotalLoading] = useState(false);
   const [ttsActiveMessageId, setTtsActiveMessageId] = useState<string | null>(null);
   const [voiceSpeakingState, setVoiceSpeakingState] = useState(false);
+
+  // ---------------------------------------------------------------------------
+  // Concierge interview state
+  // The interview collects a structured travel brief so the concierge can
+  // curate a genuinely tailored shortlist instead of guessing from one line.
+  // ---------------------------------------------------------------------------
+  const [tripBrief, setTripBrief] = useState<TripBrief>(() => loadStoredBrief());
+  const [skippedQuestions, setSkippedQuestions] = useState<string[]>([]);
+  const [interviewDismissed, setInterviewDismissed] = useState(false);
+  const [refineMode, setRefineMode] = useState(false);
+  const [pendingQuestionId, setPendingQuestionId] = useState<string | null>(null);
+
+  // The interview only runs while the traveler is in discovery mode, so a
+  // quick expense log or a weather check never gets hijacked by a question.
+  const [discoverMode, setDiscoverMode] = useState(false);
+  const interviewVisibleRef = useRef(false);
+
+  // Always holds the freshest brief so async handlers never read stale state
+  const tripBriefRef = useRef<TripBrief>(tripBrief);
+  useEffect(() => {
+    tripBriefRef.current = tripBrief;
+  }, [tripBrief]);
+
+  const updateTripBrief = useCallback((updater: (prev: TripBrief) => TripBrief) => {
+    setTripBrief((prev) => {
+      const next = updater(prev);
+      tripBriefRef.current = next;
+      saveStoredBrief(next);
+      return next;
+    });
+  }, []);
+
+  // Keeps the brief destination in lockstep with the active city selector
+  useEffect(() => {
+    if (!currentCity) return;
+    updateTripBrief((prev) => (prev.destination === currentCity ? prev : { ...prev, destination: currentCity }));
+  }, [currentCity, updateTripBrief]);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const latestReplyRef = useRef<HTMLDivElement>(null);
@@ -706,6 +794,16 @@ export function AiGuidePage() {
     setCurrentCity(null);
     setInputMessage('');
 
+    // A fresh conversation deserves a fresh brief
+    clearStoredBrief();
+    setTripBrief({ ...EMPTY_BRIEF, interests: [] });
+    tripBriefRef.current = { ...EMPTY_BRIEF, interests: [] };
+    setSkippedQuestions([]);
+    setPendingQuestionId(null);
+    setRefineMode(false);
+    setInterviewDismissed(false);
+    setDiscoverMode(false);
+
     if (user) {
       const key = getChatStorageKey(user);
       if (key) localStorage.removeItem(key);
@@ -715,16 +813,43 @@ export function AiGuidePage() {
 
   const isSendingRef = useRef(false);
 
+  // The assistant reply currently being typed out word by word
+  const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
+
+  // "Use my location" flow state
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
+
+  // Auto-clear the location error notice after a while
+  useEffect(() => {
+    if (!locationError) return;
+    const t = setTimeout(() => setLocationError(null), 6000);
+    return () => clearTimeout(t);
+  }, [locationError]);
+
+  // Type the welcome message out on first load, like a live agent
+  useEffect(() => {
+    if (messages.length === 1 && messages[0]?.id === 'welcome-msg' && !typingMessageId) {
+      setTypingMessageId('welcome-msg');
+    }
+    // Only run on mount: restored chats never re-animate history
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ===========================================================================
-  // Unified send handler (typed, chip tap, voice)
+  // Unified send handler (typed, chip tap, voice, interview curation)
   // ===========================================================================
-  const handleSend = async (customText?: string, voiceInitiated = false) => {
+  const handleSend = async (
+    customText?: string,
+    voiceInitiated = false,
+    options: { skipIntentRouting?: boolean; transcriptText?: string; source?: 'user' | 'interview' } = {}
+  ) => {
     if (!isAuthenticated || !user) return;
     if (isSendingRef.current) return;
     const textToSend = cleanSpeechTranscript(customText || inputMessage).trim();
     if (!textToSend) return;
     // Prevent double submits from typing, but never drop spoken voice input
-    if (isLoading && !customText) return;
+    if (isLoading && !customText && options.source !== 'interview') return;
 
     isSendingRef.current = true;
 
@@ -734,11 +859,16 @@ export function AiGuidePage() {
     // Safely disarm mic without triggering double-submit recursion
     cancelListening();
 
+    // Every traveler utterance teaches us something about their trip
+    if (options.source !== 'interview') {
+      updateTripBrief((prev) => harvestBriefFromText(textToSend, prev));
+    }
+
     const userMsgId = `user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const userMsg: ChatMessage = {
       id: userMsgId,
       role: 'user',
-      content: textToSend,
+      content: options.transcriptText || textToSend,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       isVoiceInitiated: voiceInitiated,
     };
@@ -751,14 +881,22 @@ export function AiGuidePage() {
       let botContent = '';
       let spokenText = '';
       let recommendations: ScoredExperience[] | undefined;
+      let routes: RoutePlan[] | undefined;
       let weatherData: WeatherData | undefined;
       let experienceData: ExperienceData | undefined;
       let expenseData: ExpenseData | undefined;
       let detectedIntent: ChatMessage['intent'] = 'none';
 
       // 1. Detect Expense Logging (typed or spoken)
-      const parsedExpense = parseExpenseText(textToSend);
+      // Interview driven curation always goes straight to the concierge so a
+      // budget figure inside the brief is never mistaken for a new expense.
+      const conciergeOnly = options.skipIntentRouting === true;
+      const parsedExpense = conciergeOnly ? null : parseExpenseText(textToSend);
       if (parsedExpense) {
+        // A ledger entry is not a discovery moment, so the interview stays quiet
+        if (!interviewVisibleRef.current) {
+          setDiscoverMode(false);
+        }
         detectedIntent = 'log_expense';
         const { amount, note, category } = parsedExpense;
         const optimisticTotal = todayTotal + amount;
@@ -832,7 +970,10 @@ export function AiGuidePage() {
 
         botContent = `Recorded \u20B9${amount.toLocaleString('en-IN')} for ${note}. Today's total spend is now \u20B9${finalTotal.toLocaleString('en-IN')}.\n\nWhere are you heading to next, and what are your interests?`;
         spokenText = `Recorded ${amount} rupees for ${note}. Today's total spend is now ${finalTotal} rupees. Where are you heading to next, and what are your interests?`;
-      } else if (isExpenseInquiry(textToSend)) {
+      } else if (!conciergeOnly && isExpenseInquiry(textToSend)) {
+        if (!interviewVisibleRef.current) {
+          setDiscoverMode(false);
+        }
         // 2. Direct Expense Summary Inquiry (typed or spoken)
         detectedIntent = 'get_expense_summary';
         const currentSpend = todayTotal;
@@ -850,7 +991,10 @@ export function AiGuidePage() {
           currentSpend > 0
             ? `You have spent ${currentSpend} rupees today. Where are you heading to next, and what are your interests?`
             : 'You have not recorded any expenses yet for today. Where in India are you heading to, and what are your interests?';
-      } else if (isWeatherQuery(textToSend)) {
+      } else if (!conciergeOnly && isWeatherQuery(textToSend)) {
+        if (!interviewVisibleRef.current) {
+          setDiscoverMode(false);
+        }
         // 3. Live Weather Sensor Inquiry (typed or spoken)
         const context: UserSessionContext = {
           currentLocationName: currentCity ? currentCity : 'Jaipur',
@@ -866,16 +1010,31 @@ export function AiGuidePage() {
         }
       } else {
         // 4. Cultural Concierge for destination exploration, questions, itineraries, greetings
+        setDiscoverMode(true);
         try {
+          const activeBrief = tripBriefRef.current;
+          const hasBrief =
+            Boolean(activeBrief.destination) ||
+            Boolean(activeBrief.companions) ||
+            Boolean(activeBrief.timeBudget) ||
+            Boolean(activeBrief.budget) ||
+            Boolean(activeBrief.pace) ||
+            Boolean(activeBrief.startTime) ||
+            activeBrief.interests.length > 0;
           const chatRes = await api.chatWithConcierge({
             message: textToSend,
-            city: currentCity || undefined,
+            city: currentCity || activeBrief.destination || undefined,
             chat_history: messages.slice(-10).map((m) => ({ role: m.role, content: m.content })),
+            trip_profile: hasBrief ? briefToProfilePayload(activeBrief) : null,
           });
           if (chatRes.context_destination) setCurrentCity(chatRes.context_destination);
           botContent = chatRes.reply;
           spokenText = chatRes.reply;
-          recommendations = chatRes.suggested_experiences || [];
+          // Routes are the primary answer shape, the flat list is a fallback
+          routes = (chatRes as { routes?: RoutePlan[] }).routes;
+          recommendations = routes?.length ? [] : chatRes.suggested_experiences || [];
+          // A completed brief means the interview has done its job
+          if (options.source === 'interview') setInterviewDismissed(true);
         } catch (conciergeErr: any) {
           console.warn('[AiGuide] API chatWithConcierge fallback activated:', conciergeErr);
           const fallbackRes = generateLocalConciergeResponse(textToSend, currentCity || undefined);
@@ -926,6 +1085,7 @@ export function AiGuidePage() {
         content: cleanBotContent,
         spokenText: cleanSpokenText,
         recommendations,
+        routes,
         intent: detectedIntent,
         weatherData,
         experienceData,
@@ -934,6 +1094,7 @@ export function AiGuidePage() {
       };
 
       setMessages((prev) => [...prev, botMsg]);
+      setTypingMessageId(botMsgId);
 
       // STRICT REQUIREMENT: After every answer through chat or mic, deliver response in both chat and audio
       if (cleanSpokenText) {
@@ -973,6 +1134,215 @@ export function AiGuidePage() {
     }
   };
 
+  // Reads the traveler's position and rounds it to the nearest known city,
+  // so skipping the city picker never blocks the conversation
+  const handleUseLocation = useCallback(async () => {
+    unlockAudio();
+    setLocationError(null);
+    setIsLocating(true);
+    try {
+      const position = await requestCurrentPosition();
+      const nearest = nearestCity(position.coords.latitude, position.coords.longitude);
+      if (!nearest) throw new Error('no-city');
+      setCurrentCity(nearest.city);
+      handleSend(`I am currently in ${nearest.city}. What authentic experiences do you recommend?`, false);
+    } catch {
+      setLocationError(
+        'Could not detect your location. Pick a city above, or allow location access in your browser.'
+      );
+    } finally {
+      setIsLocating(false);
+    }
+  }, [handleSend]);
+
+  // ===========================================================================
+  // Concierge interview: ask, record, and curate from a confirmed brief
+  // ===========================================================================
+
+  const interviewSpeakTimerRef = useRef<number | null>(null);
+  useEffect(() => {
+    return () => {
+      if (interviewSpeakTimerRef.current) {
+        window.clearTimeout(interviewSpeakTimerRef.current);
+      }
+    };
+  }, []);
+
+  const briefReady = isBriefReady(tripBrief, skippedQuestions);
+  const activeQuestion = useMemo<InterviewQuestion | null>(() => {
+    if (interviewDismissed) return null;
+    if (briefReady && !refineMode) return null;
+    const forced = pendingQuestionId ? getQuestionById(pendingQuestionId) : null;
+    if (forced) return forced;
+    return getNextQuestion(tripBrief, skippedQuestions, { includeOptional: refineMode });
+  }, [interviewDismissed, briefReady, refineMode, pendingQuestionId, tripBrief, skippedQuestions]);
+
+  const interviewProgress = useMemo(
+    () => getBriefProgress(tripBrief, skippedQuestions),
+    [tripBrief, skippedQuestions]
+  );
+
+  const hasUserTurn = messages.some((m) => m.role === 'user');
+  const showInterviewPanel =
+    isAuthenticated && !authLoading && hasUserTurn && discoverMode && Boolean(activeQuestion);
+  const showBriefStrip =
+    isAuthenticated && !authLoading && hasUserTurn && discoverMode && briefReady;
+
+  useEffect(() => {
+    interviewVisibleRef.current = showInterviewPanel;
+  }, [showInterviewPanel]);
+
+  /** Speaks the question, waiting longer when the concierge is still talking. */
+  const speakNextQuestion = useCallback(
+    (
+      nextQuestion: InterviewQuestion,
+      briefSnapshot: TripBrief,
+      step: number,
+      total: number,
+      delayMs = 480
+    ) => {
+      if (!voiceSupported) return;
+      if (interviewSpeakTimerRef.current) {
+        window.clearTimeout(interviewSpeakTimerRef.current);
+      }
+      const spoken = buildQuestionSpokenText(
+        nextQuestion,
+        step,
+        total,
+        briefSnapshot.destination || currentCity
+      );
+      interviewSpeakTimerRef.current = window.setTimeout(() => {
+        handleSpeak(`interview-${nextQuestion.id}`, spoken);
+      }, delayMs);
+    },
+    [voiceSupported, handleSpeak, currentCity]
+  );
+
+  // The concierge reads every question aloud, so the voice path and the panel
+  // never disagree about what was asked.
+  const spokenQuestionRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!showInterviewPanel || !activeQuestion) {
+      spokenQuestionRef.current = null;
+      return;
+    }
+    if (spokenQuestionRef.current === activeQuestion.id) return;
+    spokenQuestionRef.current = activeQuestion.id;
+    const conciergeIsTalking = Boolean(ttsActiveMessageId) || voiceSpeakingState;
+    speakNextQuestion(
+      activeQuestion,
+      tripBriefRef.current,
+      interviewProgress.stage,
+      interviewProgress.total,
+      conciergeIsTalking ? 3200 : 480
+    );
+  }, [
+    showInterviewPanel,
+    activeQuestion,
+    interviewProgress,
+    speakNextQuestion,
+    ttsActiveMessageId,
+    voiceSpeakingState,
+  ]);
+
+  /** Fires the fully grounded curation pass from the confirmed brief. */
+  const runCurationFromBrief = useCallback(
+    (briefSnapshot: TripBrief) => {
+      const where = briefSnapshot.destination ? ` in ${briefSnapshot.destination}` : '';
+      handleSend(buildCurationPrompt(briefSnapshot), false, {
+        skipIntentRouting: true,
+        source: 'interview',
+        transcriptText: `Curate my shortlist${where} from this brief.`,
+      });
+    },
+    [handleSend]
+  );
+
+  const handleBriefAnswer = useCallback(
+    (question: InterviewQuestion, values: string[]) => {
+      if (isSendingRef.current) return;
+      if (!values.length) return;
+
+      const nextBrief = applyAnswer(tripBriefRef.current, question.id, values);
+      updateTripBrief(() => nextBrief);
+      setSkippedQuestions((prev) => prev.filter((id) => id !== question.id));
+      setPendingQuestionId(null);
+
+      const destination = nextBrief.destination || currentCity;
+
+      // Echo the answer as a real traveler turn so the transcript stays coherent
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `user-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          role: 'user',
+          content: answerToSentence(question, values, destination),
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ]);
+
+      const remainingSkips = skippedQuestions.filter((id) => id !== question.id);
+      const ready = isBriefReady(nextBrief, remainingSkips);
+
+      if (ready && !refineMode) {
+        // Enough signal for a genuinely tailored shortlist, curate immediately
+        setInterviewDismissed(true);
+        runCurationFromBrief(nextBrief);
+        return;
+      }
+
+      // The follow up question is spoken by the panel effect above
+      if (refineMode && !getNextQuestion(nextBrief, remainingSkips, { includeOptional: true })) {
+        // Refinement queue is exhausted, re-curate against the sharper brief
+        setRefineMode(false);
+        setInterviewDismissed(true);
+        runCurationFromBrief(nextBrief);
+      }
+    },
+    [currentCity, refineMode, skippedQuestions, runCurationFromBrief, updateTripBrief]
+  );
+
+  const handleSkipQuestion = useCallback(
+    (question: InterviewQuestion) => {
+      if (isSendingRef.current) return;
+      setSkippedQuestions((prev) => (prev.includes(question.id) ? prev : [...prev, question.id]));
+      setPendingQuestionId(null);
+
+      const nextBrief = tripBriefRef.current;
+      const remainingSkips = skippedQuestions.includes(question.id)
+        ? skippedQuestions
+        : [...skippedQuestions, question.id];
+
+      // If nothing is left to ask, curate with whatever we have
+      if (getNextQuestion(nextBrief, remainingSkips, { includeOptional: refineMode })) return;
+
+      if (refineMode) setRefineMode(false);
+      setInterviewDismissed(true);
+      if (isBriefCuratable(nextBrief)) {
+        runCurationFromBrief(nextBrief);
+      }
+    },
+    [refineMode, skippedQuestions, runCurationFromBrief]
+  );
+
+  const handleCurateNow = useCallback(() => {
+    if (isSendingRef.current) return;
+    const nextBrief = tripBriefRef.current;
+    if (!isBriefCuratable(nextBrief)) return;
+    setRefineMode(false);
+    setInterviewDismissed(true);
+    runCurationFromBrief(nextBrief);
+  }, [runCurationFromBrief]);
+
+  const handleResumeInterview = useCallback(() => {
+    if (!isAuthenticated) return;
+    setPendingQuestionId(null);
+    setSkippedQuestions([]);
+    // The required dimensions are already answered, so resume into refinement
+    setRefineMode(true);
+    setInterviewDismissed(false);
+  }, [isAuthenticated]);
+
   // ===========================================================================
   // Render
   // ===========================================================================
@@ -980,8 +1350,31 @@ export function AiGuidePage() {
   // Input display: show recognized speech (stored in inputMessage or interimTranscript)
   const inputDisplayValue = inputMessage || (isListening || isTranscribing ? (interimTranscript || '') : '');
 
+  // The docked composer grows when the interview panel opens, so measure it and
+  // reserve exactly that much scroll space instead of guessing with fixed padding.
+  const composerRef = useRef<HTMLDivElement>(null);
+  const [composerHeight, setComposerHeight] = useState(240);
+
+  useEffect(() => {
+    const el = composerRef.current;
+    if (!el) return;
+    const measure = () => setComposerHeight(el.offsetHeight);
+    measure();
+    const observer =
+      typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
+    observer?.observe(el);
+    window.addEventListener('resize', measure);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-ink pb-72 sm:pb-88 pt-6 sm:pt-8 relative overflow-hidden">
+    <div
+      className="min-h-screen bg-transparent text-ink pt-6 sm:pt-8 relative overflow-hidden"
+      style={{ paddingBottom: Math.max(composerHeight, 240) + 24 }}
+    >
       {/* Subtle radial warmth behind the concierge header */}
       <div
         className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[450px] bg-gradient-to-b from-[#F0A63B]/10 via-[#FAF7F2]/40 to-transparent blur-3xl -z-10"
@@ -997,7 +1390,7 @@ export function AiGuidePage() {
               <h1 className="text-2xl sm:text-4xl font-display font-bold text-ink tracking-tight">
                 LOKIVA Concierge
               </h1>
-              <p className="text-xs sm:text-sm text-dusk-600 font-sans max-w-xl leading-relaxed">
+              <p className="text-xs sm:text-sm   text-dusk-600 font-sans max-w-xl leading-relaxed">
                 Ask me anything about travel, culture, food, and experiences across India. Use the microphone or type freely.
               </p>
             </div>
@@ -1125,8 +1518,16 @@ export function AiGuidePage() {
                           </div>
                         </div>
 
-                        {/* Text content with bold & markdown rendering */}
-                        <FormattedMessageContent content={msg.content} isUser={isUser} />
+                        {/* Text content: assistant replies type out word by word like a live agent */}
+                        {isUser ? (
+                          <FormattedMessageContent content={msg.content} isUser={isUser} />
+                        ) : (
+                          <TypewriterText
+                            content={msg.content}
+                            animate={msg.id === typingMessageId}
+                            onDone={() => setTypingMessageId((cur) => (cur === msg.id ? null : cur))}
+                          />
+                        )}
 
                         {/* Weather data card - distinct inset panel */}
                         {msg.weatherData && (
@@ -1263,7 +1664,35 @@ export function AiGuidePage() {
                             </motion.div>
                           )}
 
-                        {/* AI Recommended Experiences (cultural concierge results) */}
+                        {/* Routes: three distinct ways to spend the day, each editable.
+                            This is the primary answer shape for a discovery reply. */}
+                        {msg.routes && msg.routes.length > 0 && (
+                          <RouteBoard
+                            routes={msg.routes}
+                            destination={currentCity || tripBrief.destination}
+                            groupSize={tripBrief.groupSize || 1}
+                            availableHours={routeWindowHours(tripBrief.timeBudget)}
+                            lowWalking={
+                              tripBrief.accessibility === 'Minimal walking' ||
+                              tripBrief.accessibility === 'Step free'
+                            }
+                            startTime={routeStartTime(tripBrief.startTime)}
+                            onAskConcierge={(question, route) => {
+                              const where = route.title ? ` "${route.title}"` : '';
+                              handleSend(
+                                `Rework${where}: ${question}. Keep my brief exactly as it is (${buildBriefSummary(
+                                  tripBriefRef.current
+                                )
+                                  .replace(/\n/g, ', ')
+                                  .replace(/:/g, '')}).`,
+                                false,
+                                { skipIntentRouting: true, source: 'interview' }
+                              );
+                            }}
+                          />
+                        )}
+
+                        {/* Flat experience cards, used when no route could be built */}
                         {msg.recommendations && msg.recommendations.length > 0 && (
                           <div className="bg-white rounded-3xl border border-[#E5DFD5] p-5 sm:p-6 shadow-xs space-y-4">
                             <div className="pb-3 border-b border-[#E5DFD5] text-xs font-mono">
@@ -1293,6 +1722,7 @@ export function AiGuidePage() {
               })}
             </AnimatePresence>
 
+            
             {/* Auth Gate Card */}
             {!isAuthenticated && (
               <div className="bg-white rounded-3xl border border-paper-400 p-6 sm:p-8 shadow-md space-y-6 max-w-xl mx-auto my-6 text-center">
@@ -1393,7 +1823,7 @@ export function AiGuidePage() {
         )}
 
         {/* Fixed Input Bar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-paper/95 backdrop-blur-md border-t border-paper-300 p-2.5 sm:p-4 z-40">
+        <div ref={composerRef} className="fixed bottom-0 left-0 right-0 bg-paper/95 backdrop-blur-md border-t border-paper-300 p-2.5 sm:p-4 z-40">
           <div className="max-w-4xl mx-auto space-y-2">
             {!isAuthenticated ? (
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 py-1 px-2">
@@ -1421,10 +1851,27 @@ export function AiGuidePage() {
               <>
                 {/* Active Destination selector row */}
                 {!currentCity ? (
+                  <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full scrollbar-none [-webkit-overflow-scrolling:touch] text-xs">
                     <span className="text-dusk-600 font-mono text-[10px] uppercase tracking-wider flex-shrink-0 font-bold">
                       Destination:
                     </span>
+                    <motion.button
+                      type="button"
+                      whileHover={shouldReduceMotion ? undefined : { y: -1.5, scale: 1.02 }}
+                      whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
+                      transition={{ duration: 0.15 }}
+                      onClick={handleUseLocation}
+                      disabled={isLocating}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#F0A63B] rounded-full text-xs font-heading font-medium text-ink transition flex-shrink-0 shadow-xs cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+                    >
+                      {isLocating ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin text-[#C1443B]" />
+                      ) : (
+                        <LocateFixed className="w-3.5 h-3.5 text-[#C1443B]" />
+                      )}
+                      <span>{isLocating ? 'Detecting...' : 'Use my location'}</span>
+                    </motion.button>
                     {['Jaipur', 'Varanasi', 'Goa', 'Mumbai', 'Delhi', 'Kochi', 'Udaipur'].map((city) => (
                       <motion.button
                         key={city}
@@ -1445,6 +1892,13 @@ export function AiGuidePage() {
                         <span>{city}</span>
                       </motion.button>
                     ))}
+                  </div>
+                  {locationError && (
+                    <div className="flex items-center gap-2 text-[11px] font-sans font-semibold text-amber-800 bg-amber-50/80 border border-amber-200/80 rounded-xl px-3 py-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span>{locationError}</span>
+                    </div>
+                  )}
                   </div>
                 ) : (
                   <div className="space-y-1.5">
@@ -1491,34 +1945,87 @@ export function AiGuidePage() {
                   </div>
                 )}
 
-                {/* Suggestion chips - horizontally scrollable from central config */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none [-webkit-overflow-scrolling:touch]">
-                  <span className="text-dusk-600 font-mono text-[10px] uppercase tracking-wider flex-shrink-0 font-bold hidden sm:block">
-                    Try:
-                  </span>
-                  {VOICE_SUGGESTIONS.map((suggestion, idx) => (
-                    <motion.button
-                      key={idx}
-                      type="button"
-                      whileHover={shouldReduceMotion ? undefined : { y: -1.5, scale: 1.02 }}
-                      whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
-                      transition={{ duration: 0.15 }}
-                      onClick={() => {
-                        unlockAudio();
-                        handleSend(suggestion.query, false);
-                      }}
-                      disabled={isLoading}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#C1443B]/60 rounded-full text-xs font-heading font-medium text-ink transition flex-shrink-0 shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {suggestion.icon && (
-                        <span className="w-4 h-4 rounded-full bg-paper-100 flex items-center justify-center text-[11px]">
-                          {suggestion.icon}
+                {/* Concierge interview: one clarifying question at a time */}
+                <AnimatePresence initial={false} mode="wait">
+                  {showInterviewPanel && activeQuestion && (
+                    <ConciergeQuestionPanel
+                      key={activeQuestion.id}
+                      question={activeQuestion}
+                      brief={tripBrief}
+                      skipped={skippedQuestions}
+                      destination={tripBrief.destination || currentCity}
+                      canCurateNow={isBriefCuratable(tripBrief)}
+                      isRefine={refineMode}
+                      isBusy={isLoading || isTranscribing}
+                      onAnswer={handleBriefAnswer}
+                      onSkip={handleSkipQuestion}
+                      onCurateNow={handleCurateNow}
+                      onDismiss={() => setInterviewDismissed(true)}
+                    />
+                  )}
+                </AnimatePresence>
+
+                {/* Compact brief summary once the interview is complete */}
+                {showBriefStrip && !showInterviewPanel && (
+                  <motion.button
+                    type="button"
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+                    onClick={handleResumeInterview}
+                    className="w-full flex items-center justify-between gap-3 px-3.5 py-2.5 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#F0A63B] rounded-2xl shadow-xs transition cursor-pointer text-left"
+                  >
+                    <span className="flex items-center gap-2 min-w-0">
+                      <span className="w-6 h-6 rounded-lg bg-[#FAF7F2] border border-[#E5DFD5] text-[#C1443B] flex items-center justify-center flex-shrink-0">
+                        <Wand2 className="w-3.5 h-3.5" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-[10px] font-heading font-extrabold uppercase tracking-widest text-[#C1443B]">
+                          Travel brief locked
                         </span>
-                      )}
-                      <span>{suggestion.label}</span>
-                    </motion.button>
-                  ))}
-                </div>
+                        <span className="block text-[11px] font-mono text-dusk-600 truncate">
+                          {interviewProgress.answered} details captured, curated for your exact trip
+                        </span>
+                      </span>
+                    </span>
+                    <span className="flex items-center gap-1 text-[11px] font-heading font-bold text-ink flex-shrink-0">
+                      <span>Tune</span>
+                      <ArrowRight className="w-3.5 h-3.5 text-[#C1443B]" />
+                    </span>
+                  </motion.button>
+                )}
+
+                {/* Suggestion chips - horizontally scrollable from central config.
+                    Hidden while the interview is asking, so the question owns the composer. */}
+                {!showInterviewPanel && (
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none [-webkit-overflow-scrolling:touch]">
+                    <span className="text-dusk-600 font-mono text-[10px] uppercase tracking-wider flex-shrink-0 font-bold hidden sm:block">
+                      Try:
+                    </span>
+                    {VOICE_SUGGESTIONS.map((suggestion, idx) => (
+                      <motion.button
+                        key={idx}
+                        type="button"
+                        whileHover={shouldReduceMotion ? undefined : { y: -1.5, scale: 1.02 }}
+                        whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
+                        transition={{ duration: 0.15 }}
+                        onClick={() => {
+                          unlockAudio();
+                          handleSend(suggestion.query, false);
+                        }}
+                        disabled={isLoading}
+                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#C1443B]/60 rounded-full text-xs font-heading font-medium text-ink transition flex-shrink-0 shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {suggestion.icon && (
+                          <span className="w-4 h-4 rounded-full bg-paper-100 flex items-center justify-center text-[11px]">
+                            {suggestion.icon}
+                          </span>
+                        )}
+                        <span>{suggestion.label}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                )}
 
                 {/* Signature Voice Capture Panel docked right above input bar */}
                 <AnimatePresence>

@@ -269,7 +269,7 @@ export function SavedPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#3B2316] py-8 sm:py-12">
+    <div className="min-h-screen bg-transparent text-[#3B2316] py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Top Header & Segmented Tab Navigation */}
         <div className="space-y-4">

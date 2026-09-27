@@ -36,6 +36,83 @@ const THEMATIC_PERSPECTIVES = [
 
 const MAX_BUDGET_CEILING = 25000;
 
+function TransparentCulturalFlank({
+  src,
+  alt,
+  className,
+  imgClassName,
+}: {
+  src: string;
+  alt: string;
+  className?: string;
+  imgClassName?: string;
+}) {
+  const [processedSrc, setProcessedSrc] = useState<string>(src);
+
+  useEffect(() => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = src;
+
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        ctx.drawImage(img, 0, 0);
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+
+        let modified = false;
+        for (let i = 0; i < data.length; i += 4) {
+          const a = data[i + 3];
+          if (a === 0) continue;
+
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+
+          // Strip pure white and bright pale studio background pixels to 100% transparent alpha
+          const isWhiteBackground = r > 230 && g > 230 && b > 225;
+          const isNearWhite = r > 245 && g > 245 && b > 240;
+
+          if (isWhiteBackground || isNearWhite) {
+            data[i + 3] = 0;
+            modified = true;
+          }
+        }
+
+        if (modified) {
+          ctx.putImageData(imgData, 0, 0);
+          setProcessedSrc(canvas.toDataURL('image/png'));
+        } else {
+          setProcessedSrc(src);
+        }
+      } catch {
+        setProcessedSrc(src);
+      }
+    };
+
+    img.onerror = () => {
+      setProcessedSrc(src);
+    };
+  }, [src]);
+
+  return (
+    <div className={className}>
+      <img
+        src={processedSrc}
+        alt={alt}
+        loading="lazy"
+        className={imgClassName || 'w-full h-auto object-contain filter drop-shadow-[0_10px_22px_rgba(59,35,22,0.08)]'}
+      />
+    </div>
+  );
+}
+
 export function ExplorePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialState = searchParams.get('state') || '';
@@ -297,48 +374,40 @@ export function ExplorePage() {
   const activeCity = selectedCity || (POPULAR_CITIES_LIST.find((c) => c.toLowerCase() === locationInput.toLowerCase()) || (locationInput.length > 2 ? locationInput : ''));
 
   return (
-    <div className="relative min-h-screen bg-paper text-ink selection:bg-marigold selection:text-ink pt-16 sm:pt-18 pb-16 overflow-hidden">
+    <div className="relative min-h-screen bg-transparent text-ink selection:bg-marigold selection:text-ink pt-16 sm:pt-18 pb-16 overflow-hidden">
       {/* Decorative Indian Living Cultural Cutouts (Asymmetrically Flanking Negative Space) */}
       <div className="pointer-events-none select-none z-0 absolute inset-0 overflow-hidden hidden lg:block" aria-hidden="true">
-        {/* 1. Kathakali Mask (Kerala Performing Arts) - Upper Left */}
-        <div className="absolute left-0 xl:left-4 top-3 xl:top-4 w-28 lg:w-36 xl:w-44 -rotate-6 transition-transform duration-700 ease-out hover:rotate-0">
-          <img
-            src="/assets/cultural/kathakali-mask-cutout.png"
-            alt="Kathakali classical dance mask cutout"
-            loading="lazy"
-            className="w-full h-auto object-contain opacity-75 xl:opacity-85 filter drop-shadow-[0_8px_20px_rgba(18,33,59,0.06)]"
-          />
-        </div>
+        {/* 1. Kathakali Performing Arts Mask - Upper Left */}
+        <TransparentCulturalFlank
+          src="/assets/cultural/kathakali-mask-cutout.png"
+          alt="Kathakali classical dance mask cutout"
+          className="absolute left-0 xl:left-4 top-3 xl:top-4 h-36 lg:h-44 xl:h-52 flex items-start -rotate-3 transition-transform duration-700 ease-out hover:rotate-0"
+          imgClassName="h-full w-auto object-contain opacity-65 xl:opacity-70 filter drop-shadow-[0_8px_18px_rgba(59,35,22,0.06)]"
+        />
 
-        {/* 2. Classical Sitar / Veena (Music & Oral Traditions) - Upper Right */}
-        <div className="absolute right-0 xl:right-4 top-2 xl:top-3 w-32 lg:w-40 xl:w-48 rotate-6 transition-transform duration-700 ease-out hover:rotate-0">
-          <img
-            src="/assets/cultural/sitar-veena-cutout.png"
-            alt="Classical sitar veena musical instrument cutout"
-            loading="lazy"
-            className="w-full h-auto object-contain opacity-75 xl:opacity-85 filter drop-shadow-[0_8px_20px_rgba(18,33,59,0.06)]"
-          />
-        </div>
+        {/* 2. Traditional Indian Folk Dancer (Living Performing Traditions) - Upper Right */}
+        <TransparentCulturalFlank
+          src="/assets/cultural/folk-dancer-cutout.png"
+          alt="Traditional Indian folk dancer in cultural attire"
+          className="absolute right-0 xl:right-4 top-3 xl:top-4 h-36 lg:h-44 xl:h-52 flex items-start rotate-3 transition-transform duration-700 ease-out hover:rotate-0"
+          imgClassName="h-full w-auto object-contain opacity-35 xl:opacity-40 filter drop-shadow-[0_8px_18px_rgba(59,35,22,0.05)]"
+        />
 
-        {/* 3. Artisan Pottery & Kalash (Craft Guilds) - Mid Left Accent */}
-        <div className="hidden xl:block absolute left-6 top-[260px] w-24 lg:w-28 -rotate-3 transition-transform duration-700 ease-out hover:rotate-0">
-          <img
-            src="/assets/cultural/artisan-pottery-cutout.png"
-            alt="Traditional handcrafted terracotta pottery cutout"
-            loading="lazy"
-            className="w-full h-auto object-contain opacity-70 xl:opacity-80 filter drop-shadow-[0_8px_16px_rgba(18,33,59,0.06)]"
-          />
-        </div>
+        {/* 3. Handcrafted Terracotta Chai Kulhad & Spices (Street Food & Culinary Guilds) - Mid Left */}
+        <TransparentCulturalFlank
+          src="/assets/cultural/kulhad-chai-cutout.jpg"
+          alt="Handcrafted Indian terracotta chai kulhad cup with spices"
+          className="hidden xl:flex absolute left-5 top-[250px] h-28 lg:h-32 xl:h-36 items-start -rotate-2 transition-transform duration-700 ease-out hover:rotate-0"
+          imgClassName="h-full w-auto object-contain opacity-35 xl:opacity-40 filter drop-shadow-[0_8px_18px_rgba(59,35,22,0.05)]"
+        />
 
-        {/* 4. Royal Peacock / Mayura (Sacred Folklore) - Mid Right Accent */}
-        <div className="hidden xl:block absolute right-6 top-[250px] w-28 lg:w-32 rotate-4 transition-transform duration-700 ease-out hover:rotate-0">
-          <img
-            src="/assets/cultural/royal-peacock-cutout.png"
-            alt="Royal peacock cultural motif cutout"
-            loading="lazy"
-            className="w-full h-auto object-contain opacity-70 xl:opacity-80 filter drop-shadow-[0_8px_16px_rgba(18,33,59,0.06)]"
-          />
-        </div>
+        {/* 4. Handcrafted Traditional Pottery Vase (Master Artisan Guilds) - Mid Right */}
+        <TransparentCulturalFlank
+          src="/assets/cultural/tribal-pottery-cutout.png"
+          alt="Traditional handcrafted Indian tribal pottery vase"
+          className="hidden xl:flex absolute right-5 top-[250px] h-28 lg:h-32 xl:h-36 items-start rotate-2 transition-transform duration-700 ease-out hover:rotate-0"
+          imgClassName="h-full w-auto object-contain opacity-65 xl:opacity-70 filter drop-shadow-[0_8px_18px_rgba(59,35,22,0.06)]"
+        />
       </div>
 
       {/* 1. EDITORIAL MASTHEAD (Seamlessly integrated with bg-paper) */}

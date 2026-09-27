@@ -473,30 +473,30 @@ export function ItineraryMapView({
         {/* Right Action Controls: Days Filter + Digital Twin Toggle */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Day selection chips */}
-          <div className="flex items-center gap-1 overflow-x-auto pb-0.5">
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
             <button
               type="button"
               onClick={() => setSelectedDayIndex('all')}
-              className={`px-2.5 py-1 rounded-xl text-xs font-meta font-bold transition cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-heading font-extrabold transition cursor-pointer ${
                 selectedDayIndex === 'all'
-                  ? 'bg-[#12213B] text-white shadow-2xs'
-                  : 'bg-white text-ink hover:bg-[#FAF8F5] border border-[#E5DFD5]'
+                  ? 'bg-gradient-to-r from-[#B84A27] to-[#D47A39] text-[#FFFDF9] shadow-2xs'
+                  : 'bg-white text-[#3B2316] hover:bg-[#FAF8F5] border border-[#E5DFD5]'
               }`}
             >
-              All
+              All Days
             </button>
             {days.map((day, idx) => (
               <button
                 key={day.dayNumber}
                 type="button"
                 onClick={() => setSelectedDayIndex(idx)}
-                className={`px-2.5 py-1 rounded-xl text-xs font-meta font-bold transition cursor-pointer ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-heading font-extrabold transition cursor-pointer ${
                   selectedDayIndex === idx
-                    ? 'bg-[#12213B] text-white shadow-2xs'
-                    : 'bg-white text-ink hover:bg-[#FAF8F5] border border-[#E5DFD5]'
+                    ? 'bg-gradient-to-r from-[#B84A27] to-[#D47A39] text-[#FFFDF9] shadow-2xs'
+                    : 'bg-white text-[#3B2316] hover:bg-[#FAF8F5] border border-[#E5DFD5]'
                 }`}
               >
-                D{day.dayNumber}
+                Day {day.dayNumber}
               </button>
             ))}
           </div>

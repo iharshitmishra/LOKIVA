@@ -7,6 +7,7 @@ import {
   checkGeminiHealth,
   generateDayPlanWithGemini,
 } from '../services/geminiService.js';
+import { buildRouteOptions } from '../services/routeBuilder.js';
 
 export const aiRouter = express.Router();
 
@@ -116,6 +117,61 @@ function detectCityFromText(text) {
   return null;
 }
 
+/**
+ * Folds a confirmed traveler brief (collected by the concierge interview) into
+ * the parsed intent so the deterministic ranking engine scores against the
+ * traveler's real constraints instead of raw keyword guesses.
+ */
+function mergeTripProfile(intent, profile) {
+  if (!profile || typeof profile !== 'object') return intent;
+  const merged = { ...intent };
+  const p = profile;
+
+  if (Array.isArray(p.interests) && p.interests.length > 0) {
+    merged.interests = p.interests.filter((i) => typeof i === 'string' && i.trim());
+  }
+  const budgetInr = Number(p.budget_inr);
+  if (Number.isFinite(budgetInr) && budgetInr > 0) merged.budget = budgetInr;
+  const hours = Number(p.available_hours);
+  if (Number.isFinite(hours) && hours > 0) {
+    merged.available_hours = hours;
+    merged.duration_days = hours >= 16 ? 2 : 1;
+  }
+  if (typeof p.traveler_type === 'string' && p.traveler_type.trim()) {
+    merged.traveler_type = p.traveler_type.trim();
+  }
+  const groupSize = Number(p.group_size);
+  if (Number.isFinite(groupSize) && groupSize > 0) merged.group_size = groupSize;
+  if (typeof p.start_time === 'string' && p.start_time.trim()) {
+    merged.preferred_start_time = p.start_time.trim();
+  }
+
+  const accessibility = typeof p.accessibility === 'string' ? p.accessibility : '';
+  const lowWalking = /walking|step|seating/i.test(accessibility);
+  const wheelchair = /steps*free|wheelchair/i.test(accessibility);
+  const isFamily = /family|elder|parent|senior/i.test(String(p.companions || ''));
+  if (lowWalking || wheelchair || isFamily) {
+    merged.accessibility_prefs = {
+      ...(merged.accessibility_prefs || {}),
+      low_walking: lowWalking || Boolean(merged.accessibility_prefs?.low_walking),
+      wheelchair,
+      family_friendly: isFamily,
+    };
+  }
+  return merged;
+}
+
+/**
+ * Shortlist size follows the confirmed time window. Two stops for a tight
+ * window, three when the traveler has half a day or more.
+ */
+function recommendationLimitForProfile(profile) {
+  const hours = Number(profile?.available_hours);
+  if (Number.isFinite(hours) && hours >= 16) return 4;
+  if (Number.isFinite(hours) && hours >= 5) return 3;
+  return 2;
+}
+
 // Helper: Generate contextual rule-based response when Gemini is offline
 export function generateFallbackResponse(message, city, recommendedPlaces = []) {
   const msg = (message || '').toLowerCase();
@@ -146,8 +202,21 @@ export function generateFallbackResponse(message, city, recommendedPlaces = []) 
 // POST /ai/concierge - real AI Cultural Concierge using destination-first flow
 aiRouter.post('/concierge', async (req, res) => {
   try {
-    const { message, chat_history = [], city: requestedCity, state = 'India' } = req.body;
+    const {
+      message,
+      chat_history = [],
+      city: requestedCity,
+      state = 'India',
+      trip_profile: tripProfile = null,
+    } = req.body;
     if (!message) return res.status(400).json({ detail: 'Message is required' });
+
+    // Confirmed brief from the concierge interview, if the traveler answered
+    const confirmedProfile =
+      tripProfile && typeof tripProfile === 'object' && typeof tripProfile.summary === 'string' && tripProfile.summary.trim()
+        ? tripProfile
+        : null;
+    const hasConfirmedBrief = Boolean(confirmedProfile);
 
     const cleanMsg = message.trim().toLowerCase();
     const isGreeting = /^(hi|hello|hey|namaste|hola|good\s+(morning|afternoon|evening)|sup|yo|start|help|hi there|hello there|hi how are you|hello how are you|how are you|hey there|greetings)[\s!.]*$/i.test(cleanMsg);
@@ -179,8 +248,16 @@ aiRouter.post('/concierge', async (req, res) => {
     // If the message is asking about a region, multi-state comparison, or general advice across India, don't lock to a single city
     const isRegionalOrGeneral = /(which state|suggest.*state|what state|south india|north india|east india|west india|where to go in india|where should i go|already visited|other than|except|outside of|compare)/i.test(cleanMsg);
 
-    let activeCity = isRegionalOrGeneral ? null : (mentionedInMessage || cleanRequestedCity || cityInUserHistory || null);
-    const intent = parseIntentFromPrompt(message);
+    const profileCity =
+      confirmedProfile && typeof confirmedProfile.destination === 'string' && confirmedProfile.destination.trim()
+        ? confirmedProfile.destination.trim()
+        : null;
+
+    let activeCity = isRegionalOrGeneral
+      ? null
+      : (mentionedInMessage || cleanRequestedCity || cityInUserHistory || profileCity || null);
+    // Intent starts from the raw prompt, then the confirmed brief overrides it
+    const intent = mergeTripProfile(parseIntentFromPrompt(message), confirmedProfile);
 
     // 2. CASE: General inquiries, multi-day plans, or region discovery (No single city fixed)
     if (!activeCity || isGreeting) {
@@ -191,6 +268,7 @@ aiRouter.post('/concierge', async (req, res) => {
           chatHistory: chat_history,
           city: null,
           availableExperiences: [],
+          tripProfile: confirmedProfile,
         });
       } catch (aiErr) {
         console.warn('AI Concierge (general) model unavailable, using fallback:', aiErr.message);
@@ -227,7 +305,9 @@ aiRouter.post('/concierge', async (req, res) => {
 
     if (isJustCity) {
       return res.json({
-        reply: sanitizeAiText(`Wonderful! **${activeCity}** has an incredible cultural fabric.\n\nTo ensure I recommend the 2 best places tailored specifically to your visit:\n1. **How much time do you have?** (e.g., 2-3 hours, half a day, or a full day?)\n2. **Who is traveling and what's your rough budget?** (Solo explorer, couple, or family with kids/elders?)\n3. **What excites you most?** (Royal architecture & forts, hands-on master artisan workshops like pottery/textiles, or authentic regional food trails?)\n\nTell me where you're heading and what your interests are, and I'll curate the top 2 spots for you!`),
+        reply: sanitizeAiText(
+          `**${activeCity}** is a wonderful pick. Before I shortlist anything: how much time do you have in the city?`
+        ),
         tokens_used: 20,
         model: 'lokiva-instant',
         extracted_intent: intent,
@@ -241,10 +321,11 @@ aiRouter.post('/concierge', async (req, res) => {
     // Query experiences for activeCity
     const cityExps = await dbAll(
       `SELECT id, title, category, price, approx_duration_mins, tagline, description, cultural_context,
+              area_name, latitude, longitude, best_time_of_day, is_family_friendly, rating,
               wheelchair_accessible, low_walking, is_indoor, is_rain_safe, is_hidden_gem, image_urls, tags
        FROM experiences
        WHERE LOWER(city) = ? AND is_active = 1
-       LIMIT 15`,
+       LIMIT 40`,
       [activeCity.toLowerCase()]
     );
 
@@ -269,8 +350,20 @@ aiRouter.post('/concierge', async (req, res) => {
     });
 
     scoredExperiences.sort((a, b) => b.score - a.score);
-    // User directive: "just recommend 2 places, and you can ask more questions to them based on the answers we will change our places recommendation"
-    const topRecommendations = scoredExperiences.slice(0, 2);
+
+    // Three distinct routes, each with a leg by leg travel synopsis. This is
+    // the primary answer shape, the flat shortlist stays for compatibility.
+    const routeOptions = buildRouteOptions({
+      experiences: scoredExperiences,
+      intent,
+      profile: confirmedProfile || {},
+      city: activeCity,
+    });
+
+    // Keep the shortlist tight, and widen it only when the confirmed brief
+    // genuinely leaves room for more than a couple of stops.
+    const shortlistSize = recommendationLimitForProfile(confirmedProfile);
+    const topRecommendations = scoredExperiences.slice(0, shortlistSize);
 
     // Check if the user is asking for places/activities or sharing constraints (vs asking general knowledge question)
     const hasPreferencesOrSeekingRecs =
@@ -280,7 +373,7 @@ aiRouter.post('/concierge', async (req, res) => {
       Boolean(intent.traveler_type && intent.traveler_type !== 'Solo Explorer') ||
       Boolean(intent.interests && intent.interests.length > 0);
 
-    const placesToAttach = hasPreferencesOrSeekingRecs ? topRecommendations : [];
+    const placesToAttach = hasPreferencesOrSeekingRecs || hasConfirmedBrief ? topRecommendations : [];
 
     let aiResponse;
     try {
@@ -289,6 +382,8 @@ aiRouter.post('/concierge', async (req, res) => {
         chatHistory: chat_history,
         city: activeCity,
         availableExperiences: topRecommendations.map((r) => r.experience),
+        tripProfile: confirmedProfile,
+        routeOptions,
       });
     } catch (aiErr) {
       console.warn('AI Concierge model unavailable, using contextual fallback:', aiErr.message);
@@ -305,6 +400,7 @@ aiRouter.post('/concierge', async (req, res) => {
       model: aiResponse.model || 'gemini-3.1-flash-lite',
       extracted_intent: intent,
       suggested_experiences: placesToAttach,
+      routes: routeOptions,
       context_destination: activeCity,
       state,
     });
