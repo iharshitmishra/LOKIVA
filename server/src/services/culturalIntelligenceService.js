@@ -596,6 +596,39 @@ export async function chatWithCulturalAssistant({ stateSlug, query, conversation
   ];
 
   try {
+    // 1. Try Groq Qwen if configured (Sub-second response)
+    if (process.env.GROQ_API_KEY) {
+      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: process.env.GROQ_MODEL || 'qwen/qwen3.8-27b',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            ...conversationHistory.map((m) => ({
+              role: m.role === 'user' ? 'user' : 'assistant',
+              content: m.content,
+            })),
+            { role: 'user', content: query },
+          ],
+          max_tokens: 450,
+          temperature: 0.1,
+        }),
+      });
+
+      if (groqRes.ok) {
+        const groqData = await groqRes.json();
+        const rawContent = groqData.choices?.[0]?.message?.content || '';
+        if (rawContent) {
+          return parseCulturalModelResponse(rawContent, dataset, 'groq_qwen_aligned');
+        }
+      }
+    }
+
+    // 2. Secondary: Nugen Qwen
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 6000);
 
@@ -607,7 +640,7 @@ export async function chatWithCulturalAssistant({ stateSlug, query, conversation
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        max_tokens: 600,
+        max_tokens: 450,
         model: NUGEN_MODEL,
         messages,
         stream: false,
@@ -621,68 +654,12 @@ export async function chatWithCulturalAssistant({ stateSlug, query, conversation
     if (response.ok) {
       const data = await response.json();
       const rawContent = data.choices?.[0]?.message?.content || '';
-
       if (rawContent) {
-        let answer = rawContent;
-        let groundingTag = `Grounded in: ${dataset.stateName} Cultural Dataset`;
-        let followUps = [];
-        let planIntent = null;
-
-        const groundMatch = answer.match(/\[GROUNDED_IN:\s*([^\]]+)\]/i);
-        if (groundMatch) {
-          groundingTag = cleanText(groundMatch[1]);
-          answer = answer.replace(groundMatch[0], '');
-        }
-
-        const followMatch = answer.match(/\[FOLLOW_UP:\s*([^\]]+)\]/i);
-        if (followMatch) {
-          followUps = followMatch[1].split('|').map((q) => cleanText(q.trim())).filter(Boolean);
-          answer = answer.replace(followMatch[0], '');
-        }
-
-        const planMatch = answer.match(/\[PLAN_INTENT:\s*({[^}]+})\]/i);
-        if (planMatch) {
-          try {
-            planIntent = JSON.parse(planMatch[1]);
-          } catch {
-            // ignore
-          }
-          answer = answer.replace(planMatch[0], '');
-        }
-
-        let excerpt = dataset.culturalEssence;
-        const matchedChapter = dataset.chapters.find((c) =>
-          groundingTag.toLowerCase().includes(c.eraName.toLowerCase()) ||
-          groundingTag.toLowerCase().includes(`chapter ${c.chapterNumber}`)
-        );
-        if (matchedChapter) {
-          excerpt = matchedChapter.excerpt;
-        } else {
-          const matchedFest = dataset.festivalCalendar.find((f) =>
-            groundingTag.toLowerCase().includes(f.name.toLowerCase())
-          );
-          if (matchedFest) excerpt = matchedFest.excerpt;
-        }
-
-        return {
-          status: 'success',
-          answer: cleanText(answer),
-          grounding: {
-            tag: groundingTag,
-            excerpt: cleanText(excerpt),
-          },
-          followUps: followUps.length > 0 ? followUps : [
-            `What are the signature foods in ${dataset.stateName}?`,
-            `What are the top landmarks to visit?`,
-            `What is the best time to explore?`,
-          ],
-          planIntent,
-          source: 'nugen_aligned_model',
-        };
+        return parseCulturalModelResponse(rawContent, dataset, 'nugen_aligned_model');
       }
     }
   } catch (err) {
-    console.warn('Nugen API call failed, falling back to LOKIVA Grounded Synthesis Engine:', err.message);
+    console.warn('Qwen API call fell back to LOKIVA Grounded Synthesis Engine:', err.message);
   }
 
   // Graceful deterministic fallback
@@ -690,5 +667,64 @@ export async function chatWithCulturalAssistant({ stateSlug, query, conversation
   return {
     status: 'success',
     ...fallback,
+  };
+}
+
+function parseCulturalModelResponse(rawContent, dataset, sourceName) {
+  let answer = rawContent;
+  let groundingTag = `Grounded in: ${dataset.stateName} Cultural Dataset`;
+  let followUps = [];
+  let planIntent = null;
+
+  const groundMatch = answer.match(/\[GROUNDED_IN:\s*([^\]]+)\]/i);
+  if (groundMatch) {
+    groundingTag = cleanText(groundMatch[1]);
+    answer = answer.replace(groundMatch[0], '');
+  }
+
+  const followMatch = answer.match(/\[FOLLOW_UP:\s*([^\]]+)\]/i);
+  if (followMatch) {
+    followUps = followMatch[1].split('|').map((q) => cleanText(q.trim())).filter(Boolean);
+    answer = answer.replace(followMatch[0], '');
+  }
+
+  const planMatch = answer.match(/\[PLAN_INTENT:\s*({[^}]+})\]/i);
+  if (planMatch) {
+    try {
+      planIntent = JSON.parse(planMatch[1]);
+    } catch {
+      // ignore
+    }
+    answer = answer.replace(planMatch[0], '');
+  }
+
+  let excerpt = dataset.culturalEssence;
+  const matchedChapter = dataset.chapters.find((c) =>
+    groundingTag.toLowerCase().includes(c.eraName.toLowerCase()) ||
+    groundingTag.toLowerCase().includes(`chapter ${c.chapterNumber}`)
+  );
+  if (matchedChapter) {
+    excerpt = matchedChapter.excerpt;
+  } else {
+    const matchedFest = dataset.festivalCalendar.find((f) =>
+      groundingTag.toLowerCase().includes(f.name.toLowerCase())
+    );
+    if (matchedFest) excerpt = matchedFest.excerpt;
+  }
+
+  return {
+    status: 'success',
+    answer: cleanText(answer),
+    grounding: {
+      tag: groundingTag,
+      excerpt: cleanText(excerpt),
+    },
+    followUps: followUps.length > 0 ? followUps : [
+      `What are the signature foods in ${dataset.stateName}?`,
+      `What are the top landmarks to visit?`,
+      `What is the best time to explore?`,
+    ],
+    planIntent,
+    source: sourceName || 'qwen_aligned_model',
   };
 }

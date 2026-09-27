@@ -90,12 +90,72 @@ function candidateOrder() {
 }
 
 /**
- * Run a prompt against the first Gemini model that answers.
+ * Execute chat inference using Groq Qwen (Ultra-fast Qwen 3.8 / 2.5 on Groq LPU).
+ */
+export async function queryGroqQwen(prompt, { systemInstruction = '', history = [], maxTokens = 450, temperature = 0.3 } = {}) {
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey) throw new Error('Groq API key not configured');
+
+  const model = process.env.GROQ_MODEL || 'qwen/qwen3.8-27b';
+  const chatMessages = [];
+  if (systemInstruction) {
+    chatMessages.push({ role: 'system', content: systemInstruction });
+  }
+  if (history && history.length > 0) {
+    chatMessages.push(...history);
+  }
+  if (prompt) {
+    chatMessages.push({ role: 'user', content: prompt });
+  }
+
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${groqKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model,
+      messages: chatMessages,
+      max_tokens: Math.min(maxTokens, 450),
+      temperature,
+    }),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Groq Qwen error ${res.status}: ${errText}`);
+  }
+
+  const data = await res.json();
+  const text = data.choices?.[0]?.message?.content || '';
+  return { text: sanitizeAiText(text), modelName: model };
+}
+
+/**
+ * Run a prompt against Groq Qwen first, then fallback to Gemini models.
  * @returns {Promise<{text: string, modelName: string}>}
  */
 async function generateWithFallback(prompt, { systemInstruction, generationConfig, history } = {}) {
+  // 1. Try Groq Qwen First if configured
+  if (process.env.GROQ_API_KEY) {
+    try {
+      const groqResult = await queryGroqQwen(prompt, {
+        systemInstruction,
+        history,
+        maxTokens: generationConfig?.maxOutputTokens || 1200,
+        temperature: generationConfig?.temperature || 0.3,
+      });
+      if (groqResult && groqResult.text) {
+        return groqResult;
+      }
+    } catch (groqErr) {
+      console.warn('[Groq Qwen] Inference failed, trying fallback:', groqErr.message);
+    }
+  }
+
   if (!process.env.GEMINI_API_KEY) {
-    throw new Error('Gemini API key not configured. Please add GEMINI_API_KEY to your .env file.');
+    throw new Error('Gemini API key not configured.');
   }
 
   if (Date.now() < quotaExhaustedUntil) {
@@ -1537,6 +1597,38 @@ Return ONLY a valid JSON object with the following fields:
   }
 }
 
+function extractActionCard(text) {
+  if (!text) return { cleanMessage: text, actionCard: null };
+
+  const markerIdx = text.indexOf('ACTION_CARD_JSON:');
+  if (markerIdx === -1) return { cleanMessage: text, actionCard: null };
+
+  const jsonPortion = text.substring(markerIdx + 'ACTION_CARD_JSON:'.length).trim();
+  const cleanMessage = text.substring(0, markerIdx).trim();
+
+  const startIdx = jsonPortion.indexOf('{');
+  const endIdx = jsonPortion.lastIndexOf('}');
+
+  if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+    try {
+      const rawJson = jsonPortion
+        .substring(startIdx, endIdx + 1)
+        .replace(/```(?:json)?/gi, '')
+        .replace(/```/g, '')
+        .replace(/,\s*([}\]])/g, '$1')
+        .trim();
+      const parsed = JSON.parse(rawJson);
+      if (parsed && parsed.actionType && parsed.title) {
+        return { cleanMessage, actionCard: parsed };
+      }
+    } catch (err) {
+      console.warn('[ActionCard] Extraction notice:', err.message);
+    }
+  }
+
+  return { cleanMessage, actionCard: null };
+}
+
 /**
  * LOKIVA Provider AI Concierge: Grounded Business Intelligence & Action Recommendation
  */
@@ -1598,7 +1690,35 @@ ACTION_CARD_JSON:
 }
 - STRICT RULE: Never use double dashes (--) or em dashes (—). Use colons, commas, clean hyphens, or parentheses instead.`;
 
-  // 1. Primary Engine: Qwen Model via Nugen / Groq API
+  // 1. Primary Engine: Groq Qwen (Sub-second response)
+  if (process.env.GROQ_API_KEY) {
+    try {
+      const groqHistory = conversationHistory.slice(-6).map((m) => ({
+        role: m.role === 'user' ? 'user' : 'assistant',
+        content: m.content,
+      }));
+
+      const groqResult = await queryGroqQwen(userMessage, {
+        systemInstruction: promptContext,
+        history: groqHistory,
+        maxTokens: 1000,
+        temperature: 0.3,
+      });
+
+      if (groqResult && groqResult.text) {
+        const { cleanMessage, actionCard } = extractActionCard(groqResult.text);
+        return {
+          message: cleanMessage,
+          actionCard,
+          model: groqResult.modelName || 'qwen-groq',
+        };
+      }
+    } catch (groqErr) {
+      console.warn('[Groq Qwen] Provider chat fell back to secondary tier:', groqErr.message);
+    }
+  }
+
+  // 2. Secondary Engine: Nugen Qwen
   try {
     const qwenUrl = process.env.NUGEN_API_URL || 'https://api.nugen.in/api/v3/inference/chat/completions';
     const qwenKey = process.env.NUGEN_API_KEY || 'nugen-d22a1d4c19c2d8b7';
@@ -1676,13 +1796,17 @@ ACTION_CARD_JSON:
     let actionCard = null;
     let cleanMessage = text;
 
-    const actionCardMatch = text.match(/ACTION_CARD_JSON:\s*(\{[\s\S]*?\})/);
+    const actionCardMatch =
+      text.match(/ACTION_CARD_JSON:\s*```(?:json)?\s*(\{[\s\S]*?\})\s*```/i) ||
+      text.match(/ACTION_CARD_JSON:\s*(\{[\s\S]*?\})/i);
+
     if (actionCardMatch && actionCardMatch[1]) {
       try {
-        actionCard = JSON.parse(actionCardMatch[1]);
-        cleanMessage = text.replace(/ACTION_CARD_JSON:\s*\{[\s\S]*?\}/, '').trim();
+        const rawJson = actionCardMatch[1].trim().replace(/,\s*([}\]])/g, '$1');
+        actionCard = JSON.parse(rawJson);
+        cleanMessage = text.replace(/ACTION_CARD_JSON:[\s\S]*$/, '').trim();
       } catch (err) {
-        console.warn('Failed to parse ActionCard JSON:', err.message);
+        console.warn('[ActionCard] Fallback JSON parse notice:', err.message);
       }
     }
 
