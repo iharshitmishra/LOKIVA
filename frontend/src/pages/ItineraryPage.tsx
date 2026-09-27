@@ -214,7 +214,7 @@ export function ItineraryPage() {
   const grandTotal = categoryBreakdown.tickets + categoryBreakdown.transit + categoryBreakdown.food;
 
   return (
-    <div className="min-h-screen bg-paper text-ink pb-20 pt-4 sm:pt-6">
+    <div className="min-h-screen bg-transparent text-ink pb-20 pt-4 sm:pt-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
         {/* Group Trip Mode: Cost Split Per Person Banner */}
         {isGroupMode && (

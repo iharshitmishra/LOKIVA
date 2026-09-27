@@ -981,7 +981,7 @@ export function AiGuidePage() {
   const inputDisplayValue = inputMessage || (isListening || isTranscribing ? (interimTranscript || '') : '');
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-ink pb-72 sm:pb-88 pt-6 sm:pt-8 relative overflow-hidden">
+    <div className="min-h-screen bg-transparent text-ink pb-72 sm:pb-88 pt-6 sm:pt-8 relative overflow-hidden">
       {/* Subtle radial warmth behind the concierge header */}
       <div
         className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[450px] bg-gradient-to-b from-[#F0A63B]/10 via-[#FAF7F2]/40 to-transparent blur-3xl -z-10"

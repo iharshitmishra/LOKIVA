@@ -251,10 +251,10 @@ export function ItineraryMapView({
           <button
             type="button"
             onClick={() => setSelectedDayIndex('all')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-meta font-bold transition cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-heading font-extrabold transition cursor-pointer ${
               selectedDayIndex === 'all'
-                ? 'bg-[#12213B] text-white shadow-2xs'
-                : 'bg-white text-ink hover:bg-[#FAF8F5] border border-[#E5DFD5]'
+                ? 'bg-gradient-to-r from-[#B84A27] to-[#D47A39] text-[#FFFDF9] shadow-2xs'
+                : 'bg-white text-[#3B2316] hover:bg-[#FAF8F5] border border-[#E5DFD5]'
             }`}
           >
             All Days
@@ -264,10 +264,10 @@ export function ItineraryMapView({
               key={day.dayNumber}
               type="button"
               onClick={() => setSelectedDayIndex(idx)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-meta font-bold transition cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-heading font-extrabold transition cursor-pointer ${
                 selectedDayIndex === idx
-                  ? 'bg-[#12213B] text-white shadow-2xs'
-                  : 'bg-white text-ink hover:bg-[#FAF8F5] border border-[#E5DFD5]'
+                  ? 'bg-gradient-to-r from-[#B84A27] to-[#D47A39] text-[#FFFDF9] shadow-2xs'
+                  : 'bg-white text-[#3B2316] hover:bg-[#FAF8F5] border border-[#E5DFD5]'
               }`}
             >
               Day {day.dayNumber}

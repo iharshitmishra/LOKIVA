@@ -214,32 +214,40 @@ export function HeroScrollExperience({ onOpenPlanner }: HeroScrollExperienceProp
   const videoRef = useRef<HTMLVideoElement>(null);
   const overlayTextRef = useRef<HTMLDivElement>(null);
 
-  // Auto-play landing video reliably and monitor scroll position
+  // Only play landing video when user scrolls down into it; paused showing 1st frame while at hero screen
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     video.muted = true;
     video.defaultMuted = true;
+    video.pause();
 
-    const playVideo = () => {
-      if (video && video.paused) {
-        video.muted = true;
-        video.play().catch(() => {});
+    const renderFirstFrame = () => {
+      if (video && video.currentTime === 0) {
+        try {
+          video.currentTime = 0.001;
+        } catch {
+          // Ignore
+        }
       }
     };
 
-    playVideo();
-    const timer = setTimeout(playVideo, 150);
+    if (video.readyState >= 2) {
+      renderFirstFrame();
+    } else {
+      video.addEventListener('loadeddata', renderFirstFrame, { once: true });
+      video.addEventListener('loadedmetadata', renderFirstFrame, { once: true });
+    }
 
-    const checkPlayback = () => {
+    const handleScrollPlayback = () => {
       const vid = videoRef.current;
       if (!vid) return;
       const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
       const vh = window.innerHeight;
 
-      // Play while within the hero pinned area
-      if (scrollY < vh * 2.2) {
+      // Only play when the user has scrolled down into the video area (scrollY > 50) and before leaving it
+      if (scrollY > 50 && scrollY < vh * 2.2) {
         if (vid.paused) {
           vid.muted = true;
           vid.play().catch(() => {});
@@ -251,16 +259,13 @@ export function HeroScrollExperience({ onOpenPlanner }: HeroScrollExperienceProp
       }
     };
 
-    window.addEventListener('scroll', checkPlayback, { passive: true });
-    window.addEventListener('resize', checkPlayback, { passive: true });
-    const events = ['click', 'touchstart', 'scroll', 'mousemove', 'mouseenter'];
-    events.forEach((ev) => window.addEventListener(ev, playVideo, { once: true, passive: true }));
+    window.addEventListener('scroll', handleScrollPlayback, { passive: true });
+    window.addEventListener('resize', handleScrollPlayback, { passive: true });
+    handleScrollPlayback();
 
     return () => {
-      clearTimeout(timer);
-      window.removeEventListener('scroll', checkPlayback);
-      window.removeEventListener('resize', checkPlayback);
-      events.forEach((ev) => window.removeEventListener(ev, playVideo));
+      window.removeEventListener('scroll', handleScrollPlayback);
+      window.removeEventListener('resize', handleScrollPlayback);
     };
   }, []);
 
@@ -524,9 +529,7 @@ export function HeroScrollExperience({ onOpenPlanner }: HeroScrollExperienceProp
       >
         <video
           ref={videoRef}
-          src="/landing_video.mp4"
-          poster="/lokiva_background.avif"
-          autoPlay
+          src="/landing_video.mp4#t=0.001"
           playsInline
           muted
           loop

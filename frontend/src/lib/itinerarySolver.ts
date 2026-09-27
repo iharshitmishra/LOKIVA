@@ -34,6 +34,10 @@ export interface GenerateTripOptions {
     wheelchair?: boolean;
     step_free?: boolean;
   };
+  corridorMode?: 'direct' | 'corridor';
+  corridorEvaluation?: any;
+  originCity?: string;
+  originState?: string;
 }
 
 // Haversine distance in kilometers between two geographic coordinates
@@ -846,6 +850,45 @@ export function generateDynamicTripPlan(options: GenerateTripOptions): {
       mealBudgetPerPerson: dailyMealPerPerson,
     };
 
+    // Partition and enrich with Geospatial Corridor Leg metadata
+    if (options.corridorMode === 'corridor' && options.corridorEvaluation) {
+      const evalData = options.corridorEvaluation;
+      const originDays = evalData.recommendedDaySplit?.originDays || 1;
+      const bridgeDays = evalData.recommendedDaySplit?.bridgeDays || 1;
+
+      if (d < originDays) {
+        rawDay.stateLeg = evalData.originNode?.stateName || 'Origin';
+        rawDay.stateCode = evalData.originNode?.stateCode || 'A';
+        rawDay.city = evalData.originNode?.primaryHubCity || city;
+        rawDay.title = `${evalData.originNode?.primaryHubCity || city} · Cultural Anchor Leg (Day ${d + 1})`;
+      } else if (d < originDays + bridgeDays) {
+        rawDay.stateLeg = evalData.intermediateNode?.stateName || 'Intermediate';
+        rawDay.stateCode = evalData.intermediateNode?.stateCode || 'B';
+        rawDay.city = evalData.intermediateNode?.primaryHubCity || city;
+        rawDay.isBridgeDay = true;
+        rawDay.title = `${evalData.intermediateNode?.primaryHubCity || 'Bridge Hub'} · En-Route Heritage Bridge (Day ${d + 1})`;
+
+        if (d === originDays) {
+          rawDay.isInterStateCrossing = true;
+          rawDay.corridorTransitSummary = `🚂 State Border Crossing: ${evalData.originNode?.primaryHubCity} (${evalData.originNode?.stateCode}) → ${evalData.intermediateNode?.primaryHubCity} (${evalData.intermediateNode?.stateCode}) · ${Math.round(evalData.chainedDistanceKm * 0.45)} km direct travel`;
+        }
+      } else {
+        rawDay.stateLeg = evalData.destinationNode?.stateName || state || 'Destination';
+        rawDay.stateCode = evalData.destinationNode?.stateCode || 'C';
+        rawDay.city = evalData.destinationNode?.primaryHubCity || city;
+        rawDay.title = `${evalData.destinationNode?.primaryHubCity || city} · Final Destination (Day ${d + 1})`;
+
+        if (d === originDays + bridgeDays) {
+          rawDay.isInterStateCrossing = true;
+          rawDay.corridorTransitSummary = `🚂 State Border Crossing: ${evalData.intermediateNode?.primaryHubCity} (${evalData.intermediateNode?.stateCode}) → ${evalData.destinationNode?.primaryHubCity} (${evalData.destinationNode?.stateCode}) · ${Math.round(evalData.chainedDistanceKm * 0.55)} km direct travel`;
+        }
+      }
+    } else {
+      rawDay.stateLeg = state || 'India';
+      rawDay.stateCode = (state || 'IN').slice(0, 2).toUpperCase();
+      rawDay.city = city;
+    }
+
     const { day: calculatedDay, metrics: dayMetrics } = recalculateDaySchedule(rawDay, safeTravelers);
     calculatedDay.metrics = dayMetrics;
     days.push(calculatedDay);
@@ -883,7 +926,9 @@ export function generateDynamicTripPlan(options: GenerateTripOptions): {
   }
 
   const tripDetails: ItineraryTripDetails = {
-    title: `Your ${daysCount}-Day ${city} Cultural Heritage Journey`,
+    title: options.corridorMode === 'corridor' && options.corridorEvaluation
+      ? `${options.corridorEvaluation.originNode?.stateName} → ${options.corridorEvaluation.intermediateNode?.stateName} → ${options.corridorEvaluation.destinationNode?.stateName} Connected Tour`
+      : `Your ${daysCount}-Day ${city} Journey`,
     destination: city,
     state: state || (candidates[0]?.state || 'India'),
     startDate: days[0]?.date || 'Today',
@@ -892,6 +937,12 @@ export function generateDynamicTripPlan(options: GenerateTripOptions): {
     totalBudgetLimit: budgetLimit,
     hotel: `${city} Heritage Suites`,
     pace,
+    corridorMode: options.corridorMode || 'direct',
+    corridorEvaluation: options.corridorEvaluation,
+    originCity: options.originCity || options.corridorEvaluation?.originNode?.primaryHubCity,
+    originState: options.originState || options.corridorEvaluation?.originNode?.stateName,
+    intermediateCity: options.corridorEvaluation?.intermediateNode?.primaryHubCity,
+    intermediateState: options.corridorEvaluation?.intermediateNode?.stateName,
   };
 
   const practicalInfo = resolvePracticalBriefingForDestination(

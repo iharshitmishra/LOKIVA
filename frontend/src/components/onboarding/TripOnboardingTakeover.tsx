@@ -520,6 +520,10 @@ export function TripOnboardingTakeover({
       interests: answers.interests,
       weatherPreference: answers.weather_preference,
       accessibility: answers.accessibility,
+      corridorMode: answers.is_multi_corridor_opted ? 'corridor' : 'direct',
+      corridorEvaluation: answers.corridor_evaluation,
+      originCity: answers.origin_city,
+      originState: answers.origin_state,
     });
 
     const mappedAnswers: TripContextAnswers = {

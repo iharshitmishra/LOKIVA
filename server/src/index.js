@@ -15,6 +15,7 @@ import { router as ingestionRouter } from './routes/ingestion.js';
 import { mediaRouter } from './routes/media.js';
 import { voiceRouter } from './routes/voice.js';
 import { paymentsRouter } from './routes/payments.js';
+import { cultureAssistantRouter } from './routes/cultureAssistant.js';
 import http from 'http';
 import { setupVoiceWebSocketServer } from './services/voiceStreamService.js';
 
@@ -49,6 +50,8 @@ app.use('/api/v1/payments', paymentsRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/v1/voice', voiceRouter);
 app.use('/voice', voiceRouter);
+app.use('/api/v1/culture-assistant', cultureAssistantRouter);
+app.use('/api/culture-assistant', cultureAssistantRouter);
 
 // Root and Health Endpoints
 app.get('/', (req, res) => {

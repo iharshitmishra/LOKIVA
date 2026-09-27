@@ -45,10 +45,25 @@ function AppShell() {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
   }, [location.pathname]);
 
+  const isDestinationsPage = location.pathname === '/destinations';
+
   return (
-    <div className="flex flex-col min-h-screen bg-paper text-ink font-sans selection:bg-marigold selection:text-ink">
+    <div className="relative flex flex-col min-h-screen bg-paper text-ink font-sans selection:bg-marigold selection:text-ink">
+      {/* Global Indian Cultural Doodle Pattern Background Texture (Excluded on Destinations Showcase) */}
+      {!isDestinationsPage && (
+        <div
+          className="pointer-events-none select-none fixed inset-0 opacity-[0.032] mix-blend-multiply z-0"
+          style={{
+            backgroundImage: `url('/assets/motifs/india-doodle-pattern.png')`,
+            backgroundRepeat: 'repeat',
+            backgroundSize: '480px 480px',
+          }}
+          aria-hidden="true"
+        />
+      )}
+
       <Navbar />
-      <main className={`flex-1 ${isFullBleedPage ? 'pt-0' : 'pt-16 sm:pt-20'}`}>
+      <main className={`relative z-10 flex-1 ${isFullBleedPage ? 'pt-0' : 'pt-16 sm:pt-20'}`}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/explore" element={<ExplorePage />} />

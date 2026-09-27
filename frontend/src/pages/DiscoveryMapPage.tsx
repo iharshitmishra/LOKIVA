@@ -164,7 +164,7 @@ export function DiscoveryMapPage() {
   const currentDossier = selectedState ? getStateDossier(selectedState) : null;
 
   return (
-    <div className="w-full min-h-screen bg-[#FAF7F2] text-[#12213B] selection:bg-[#C85A32] selection:text-white">
+    <div className="w-full min-h-screen bg-transparent text-[#12213B] selection:bg-[#C85A32] selection:text-white">
       {/* Top Dedicated Sub-Header Ribbon (Outside the map viewport) */}
       <header className="sticky top-0 z-30 w-full bg-[#FAF7F2]/95 backdrop-blur-md border-b border-[#E5DFD5] px-4 sm:px-8 py-2.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
