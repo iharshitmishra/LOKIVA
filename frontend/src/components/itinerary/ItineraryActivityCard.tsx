@@ -11,6 +11,9 @@ import {
   Sliders,
   Ticket,
   CheckCircle2,
+  AlertTriangle,
+  RefreshCw,
+  RotateCcw,
 } from 'lucide-react';
 import { ItineraryActivity, BookingStatus } from '../../types/itinerary';
 import { resolveImageUrl } from '../../lib/api';
@@ -31,6 +34,8 @@ interface ItineraryActivityCardProps {
   onMoveUp: () => void;
   onMoveDown: () => void;
   onRemove: () => void;
+  onReschedule?: () => void;
+  onUndoReschedule?: () => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   onClick?: () => void;
@@ -50,6 +55,8 @@ export function ItineraryActivityCard({
   onMoveUp,
   onMoveDown,
   onRemove,
+  onReschedule,
+  onUndoReschedule,
   onMouseEnter,
   onMouseLeave,
   onClick,
@@ -62,6 +69,8 @@ export function ItineraryActivityCard({
   const formattedIndex = String(index + 1).padStart(2, '0');
 
   const bookedReceipt = isPlaceBooked(activity.id) || isPlaceBooked(activity.title);
+  const isRescheduled = Boolean(activity.disruptionState?.previousStopTitle);
+  const isClosed = Boolean(activity.isClosed);
 
   return (
     <>
@@ -71,7 +80,9 @@ export function ItineraryActivityCard({
         onMouseLeave={onMouseLeave}
         onClick={onClick}
         className={`relative bg-[#FFFDF9]/90 backdrop-blur-xl border rounded-3xl p-5 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer ${
-          isActive
+          isClosed && !isRescheduled
+            ? 'border-[#F5D0B5] bg-[#FFFDF9] ring-2 ring-[#B84A27]/20'
+            : isActive
             ? 'border-[#B84A27] ring-2 ring-[#D47A39]/80 shadow-lg bg-[#FAF8F5]'
             : isHovered
             ? 'border-[#3B2316]/40 shadow-md bg-[#FFFDF9]'
@@ -84,12 +95,73 @@ export function ItineraryActivityCard({
         </div>
 
         <div className="relative z-10 space-y-4">
+          {/* Closure Advisory Banner */}
+          {isClosed && !isRescheduled && (
+            <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#FFF8EE] via-[#FAF0DF] to-[#FFF8EE] border-2 border-[#F2D5A7] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+              <div className="flex items-start gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#FAF0DF] border border-[#F2D5A7] flex items-center justify-center text-[#B84A27] shrink-0 mt-0.5">
+                  <AlertTriangle className="w-4 h-4 text-[#B84A27]" />
+                </div>
+                <div className="space-y-0.5">
+                  <span className="font-heading font-extrabold text-[#B84A27] uppercase tracking-wide block text-[11px]">
+                    ⚠️ VENUE CLOSURE ADVISORY: Temporarily Closed Today
+                  </span>
+                  <p className="text-[#7A5C49] font-sans">
+                    {activity.title} is temporarily closed today for scheduled maintenance or local rest hours. Swap with an open nearby cultural experience in the same time window (<strong>{activity.startTime} to {activity.endTime}</strong>).
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onReschedule?.();
+                }}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#B84A27] to-[#D47A39] hover:opacity-95 text-[#FFFDF9] text-xs font-heading font-bold uppercase tracking-wider transition cursor-pointer shadow-md shadow-[#B84A27]/20 flex items-center justify-center gap-1.5 shrink-0 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>⚡ Reschedule Slot</span>
+              </button>
+            </div>
+          )}
+
+          {/* Rescheduled Provenance Badge */}
+          {isRescheduled && (
+            <div className="p-3 rounded-2xl bg-[#F0FDF4] border border-emerald-200 flex items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2 text-emerald-900 font-sans text-xs">
+                <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span>
+                  ✓ <strong>Rescheduled from {activity.disruptionState?.previousStopTitle}</strong> (Reason: {activity.disruptionState?.reason === 'weather_rain' ? 'Rain Alert' : 'Venue Closed'}) · Slot <strong>{activity.startTime} to {activity.endTime}</strong> Preserved
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onUndoReschedule?.();
+                }}
+                className="px-3 py-1 rounded-xl bg-white border border-emerald-200 text-xs font-heading font-bold text-emerald-800 hover:bg-emerald-50 flex items-center gap-1.5 cursor-pointer shadow-2xs transition"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Undo Swap</span>
+              </button>
+            </div>
+          )}
+
           {/* Top Control Bar: Category on left, Reorder & Delete Actions on right */}
           <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#E6DAC6]">
             <div className="flex items-center gap-2 flex-wrap font-meta text-xs">
               <span className="px-2.5 py-0.5 rounded-full bg-[#FAF0DF] text-[#B84A27] font-heading font-extrabold uppercase tracking-wide border border-[#F2D5A7]">
                 {activity.category}
               </span>
+
+              {isClosed && !isRescheduled && (
+                <span className="px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-800 text-[10px] font-heading font-extrabold uppercase tracking-wide border border-rose-200">
+                  Closed Today · Swap Available
+                </span>
+              )}
 
               {bookedReceipt && (
                 <button
@@ -227,8 +299,20 @@ export function ItineraryActivityCard({
               ) : null}
             </div>
 
-            {/* Calibrate / Adjust Time & Duration Button */}
-            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+            {/* Calibrate / Adjust Time & Duration Button & Quick Swap Action */}
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              {isClosed && !isRescheduled && (
+                <button
+                  type="button"
+                  onClick={() => onReschedule?.()}
+                  className="text-[11px] text-[#B84A27] hover:text-[#9E3C1D] bg-[#FAF0DF] hover:bg-[#F2D5A7] px-2.5 py-1 rounded-xl border border-[#DFCBB2] flex items-center gap-1.5 cursor-pointer font-heading font-bold transition shadow-2xs"
+                  title="Swap with a nearby open place"
+                >
+                  <RefreshCw className="w-3 h-3 text-[#B84A27]" />
+                  <span>Swap Stop</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={() => onOpenChronoDial?.()}

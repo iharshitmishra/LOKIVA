@@ -45,6 +45,13 @@ interface ItineraryState {
   toggleCorridorMode: () => void;
   clearReplanMessage: () => void;
   deleteTrip: () => void;
+  swapActivity: (
+    dayNumber: number,
+    activityId: number,
+    replacement: any,
+    reason: string
+  ) => void;
+  undoSwapActivity: (dayNumber: number, activityId: number) => void;
 }
 
 async function buildFreshTrip(city: string = 'Jaipur', daysCount: number = 3) {
@@ -521,6 +528,136 @@ export const useItineraryStore = create<ItineraryState>((set, get) => ({
       isGenerating: false,
       lastReplanMessage: null,
     });
+  },
+
+  swapActivity: (
+    dayNumber: number,
+    activityId: number,
+    replacement: any,
+    reason: string
+  ) => {
+    const { days, tripDetails, feasibilityMetrics } = get();
+    const dayIndex = days.findIndex((d) => d.dayNumber === dayNumber);
+    if (dayIndex === -1) return;
+
+    const currentDay = days[dayIndex];
+    const activities = currentDay.activities.map((act) => {
+      if (act.id !== activityId) return act;
+
+      const originalSnapshot: Partial<ItineraryActivity> = {
+        id: act.id,
+        title: act.title,
+        category: act.category,
+        location: act.location,
+        description: act.description,
+        costPerPerson: act.costPerPerson,
+        photos: act.photos,
+        isClosed: act.isClosed,
+        closureReason: act.closureReason,
+      };
+
+      return {
+        ...act,
+        title: replacement.title,
+        category: replacement.category,
+        location: replacement.neighborhood || act.location,
+        description: `${replacement.whyItFitsInterval} ${replacement.openStatusLabel}.`,
+        photos: replacement.image ? [replacement.image] : act.photos,
+        costPerPerson: replacement.estAccessInr,
+        isClosed: false,
+        closureReason: undefined,
+        disruptionState: {
+          reason,
+          previousStopTitle: act.title,
+          swappedAtIso: new Date().toISOString(),
+          originalStop: originalSnapshot,
+        },
+      };
+    });
+
+    const { day: updatedDay, metrics } = recalculateDaySchedule(
+      { ...currentDay, activities },
+      tripDetails?.travelers || 2
+    );
+
+    const newDays = [...days];
+    newDays[dayIndex] = updatedDay;
+
+    const newMetrics = {
+      ...feasibilityMetrics,
+      [dayNumber]: metrics,
+    };
+
+    set({ days: newDays, feasibilityMetrics: newMetrics });
+
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          tripDetails,
+          days: newDays,
+          feasibilityMetrics: newMetrics,
+          practicalInfo: get().practicalInfo,
+        })
+      );
+    } catch {
+      // ignore
+    }
+  },
+
+  undoSwapActivity: (dayNumber: number, activityId: number) => {
+    const { days, tripDetails, feasibilityMetrics } = get();
+    const dayIndex = days.findIndex((d) => d.dayNumber === dayNumber);
+    if (dayIndex === -1) return;
+
+    const currentDay = days[dayIndex];
+    const activities = currentDay.activities.map((act) => {
+      if (act.id !== activityId) return act;
+      if (!act.disruptionState?.originalStop) return act;
+
+      const orig = act.disruptionState.originalStop;
+      return {
+        ...act,
+        title: orig.title || act.title,
+        category: orig.category || act.category,
+        location: orig.location || act.location,
+        description: orig.description || act.description,
+        photos: orig.photos || act.photos,
+        costPerPerson: orig.costPerPerson !== undefined ? orig.costPerPerson : act.costPerPerson,
+        isClosed: true,
+        closureReason: 'Scheduled Maintenance / Weekly Rest Hours (Closed Today)',
+        disruptionState: undefined,
+      };
+    });
+
+    const { day: updatedDay, metrics } = recalculateDaySchedule(
+      { ...currentDay, activities },
+      tripDetails?.travelers || 2
+    );
+
+    const newDays = [...days];
+    newDays[dayIndex] = updatedDay;
+
+    const newMetrics = {
+      ...feasibilityMetrics,
+      [dayNumber]: metrics,
+    };
+
+    set({ days: newDays, feasibilityMetrics: newMetrics });
+
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          tripDetails,
+          days: newDays,
+          feasibilityMetrics: newMetrics,
+          practicalInfo: get().practicalInfo,
+        })
+      );
+    } catch {
+      // ignore
+    }
   },
 
   clearReplanMessage: () => {

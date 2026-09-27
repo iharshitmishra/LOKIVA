@@ -42,8 +42,8 @@ const DISRUPTION_OPTIONS: Array<{
   {
     id: 'temple_or_shop_closed',
     icon: <Building className="w-4 h-4 text-[#B84A27]" />,
-    label: 'Temple / Artisan Shop / Venue is Closed',
-    description: 'Arrived at the location and found gates or workshops shut.',
+    label: 'Scheduled Maintenance / Venue is Closed',
+    description: 'Location is temporarily closed for maintenance or weekly rest hours.',
   },
   {
     id: 'gate_maintenance',

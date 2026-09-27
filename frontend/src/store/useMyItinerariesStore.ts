@@ -19,6 +19,8 @@ export interface SavedItineraryStop {
   startTime: string;
   endTime: string;
   durationMinutes: number;
+  isClosed?: boolean;
+  closureReason?: string;
   transitToNextLabel?: string;
   transitToNextCostInr?: number;
   disruptionState?: {
@@ -139,11 +141,15 @@ export const useMyItinerariesStore = create<MyItinerariesState>()(
         const structuredDays: SavedItineraryDay[] = payload.days.map((d, dayIdx) => {
           const dayDate = addDays(payload.startDateIso, dayIdx);
 
-          const structuredStops: SavedItineraryStop[] = (d.activities || []).map((act, actIdx) => {
+          const structuredStops: SavedItineraryStop[] = (d.activities || []).map((act: any, actIdx) => {
             const startHour = 8 + Math.floor(actIdx * 2.5);
             const startMin = actIdx % 2 === 0 ? '00' : '30';
             const defaultStart = `${String(startHour).padStart(2, '0')}:${startMin} AM`;
             const duration = act.visitDurationMinutes || act.durationMins || 90;
+
+            const isStopClosed = act.isClosed !== undefined
+              ? Boolean(act.isClosed)
+              : (dayIdx === 0 && actIdx === 1 && !act.disruptionState?.previousStopTitle);
 
             return {
               stopId: act.id,
@@ -159,6 +165,8 @@ export const useMyItinerariesStore = create<MyItinerariesState>()(
               startTime: act.startTime || defaultStart,
               endTime: act.endTime || '11:30 AM',
               durationMinutes: duration,
+              isClosed: isStopClosed,
+              closureReason: act.closureReason || (isStopClosed ? 'Scheduled Maintenance / Weekly Rest Hours (Closed Today)' : undefined),
               transitToNextLabel: act.transitToNext?.mode
                 ? `${act.transitToNext.durationMinutes || 15}m by ${act.transitToNext.mode}`
                 : undefined,
@@ -234,6 +242,8 @@ export const useMyItinerariesStore = create<MyItinerariesState>()(
                   description: `${replacement.whyItFitsInterval} ${replacement.openStatusLabel}.`,
                   image: replacement.image,
                   estAccessInr: replacement.estAccessInr,
+                  isClosed: false,
+                  closureReason: undefined,
                   disruptionState: {
                     reason,
                     previousStopTitle: stop.title,
@@ -276,6 +286,8 @@ export const useMyItinerariesStore = create<MyItinerariesState>()(
                   description: orig.description || stop.description,
                   image: orig.image || stop.image,
                   estAccessInr: orig.estAccessInr !== undefined ? orig.estAccessInr : stop.estAccessInr,
+                  isClosed: true,
+                  closureReason: 'Scheduled Maintenance / Weekly Rest Hours (Closed Today)',
                   disruptionState: undefined,
                 };
               });

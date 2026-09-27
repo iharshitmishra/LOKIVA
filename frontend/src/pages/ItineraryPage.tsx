@@ -16,8 +16,15 @@ import { ShareItineraryModal } from '../components/itinerary/ShareItineraryModal
 import { EditTripModal } from '../components/itinerary/EditTripModal';
 import { AddActivityModal } from '../components/itinerary/AddActivityModal';
 import { DeleteTripModal } from '../components/itinerary/DeleteTripModal';
+import { OnGroundRescheduleModal } from '../components/itinerary/OnGroundRescheduleModal';
 import { RegionalIntelligenceBento } from '../components/itinerary/RegionalIntelligenceBento';
 import { INDIAN_STATES_AND_CITIES } from '../data/places';
+import { ItineraryActivity } from '../types/itinerary';
+import { SavedItineraryStop } from '../store/useMyItinerariesStore';
+import {
+  DisruptionReason,
+  IntervalReplacementCandidate,
+} from '../services/rescheduleEngineHooks';
 import {
   CheckCircle2,
   X,
@@ -74,6 +81,8 @@ export function ItineraryPage() {
     generateTrip,
     clearReplanMessage,
     deleteTrip,
+    swapActivity,
+    undoSwapActivity,
   } = useItineraryStore();
 
   // Modal states
@@ -81,6 +90,10 @@ export function ItineraryPage() {
   const [isEditTripModalOpen, setIsEditTripModalOpen] = useState(false);
   const [isAddActivityModalOpen, setIsAddActivityModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [rescheduleStop, setRescheduleStop] = useState<{
+    dayNumber: number;
+    activity: ItineraryActivity;
+  } | null>(null);
   const [addAfterIndex, setAddAfterIndex] = useState<number | undefined>(undefined);
 
   // Generator control bar states
@@ -430,6 +443,8 @@ export function ItineraryPage() {
                         onRemoveActivity={(dayNum, actId) => deleteActivity(dayNum, actId)}
                         onAddActivityClick={(dayNum, afterIdx) => handleOpenAddModal(dayNum, afterIdx)}
                         onSetStartTime={(dayNum, startTime) => setDayStartTime(dayNum, startTime)}
+                        onRescheduleActivity={(dayNum, act) => setRescheduleStop({ dayNumber: dayNum, activity: act })}
+                        onUndoRescheduleActivity={(dayNum, actId) => undoSwapActivity(dayNum, actId)}
                         onStopHover={(id) => setHoveredStopId(id)}
                         onStopSelect={(id) => setActiveStopId(id)}
                       />
@@ -753,6 +768,45 @@ export function ItineraryPage() {
         tripDetails={tripDetails}
         onConfirmDelete={handleDeleteTripConfirm}
       />
+
+      {rescheduleStop && (
+        <OnGroundRescheduleModal
+          isOpen={Boolean(rescheduleStop)}
+          onClose={() => setRescheduleStop(null)}
+          city={rescheduleStop.activity.city || tripDetails?.destination || inputCity}
+          dayNumber={rescheduleStop.dayNumber}
+          stop={{
+            stopId: rescheduleStop.activity.id,
+            title: rescheduleStop.activity.title,
+            category: rescheduleStop.activity.category,
+            neighborhood: rescheduleStop.activity.location,
+            location: rescheduleStop.activity.location,
+            description: rescheduleStop.activity.description,
+            image: rescheduleStop.activity.photos?.[0],
+            estAccessInr: rescheduleStop.activity.costPerPerson,
+            dateIso: activeDay?.date || new Date().toISOString().split('T')[0],
+            formattedDateLabel: activeDay?.date || 'Today',
+            startTime: rescheduleStop.activity.startTime,
+            endTime: rescheduleStop.activity.endTime,
+            durationMinutes:
+              rescheduleStop.activity.visitDurationMinutes ||
+              rescheduleStop.activity.durationMins ||
+              60,
+            isClosed: rescheduleStop.activity.isClosed,
+            closureReason: rescheduleStop.activity.closureReason,
+          }}
+          initialReason="temple_or_shop_closed"
+          onSwapConfirmed={(candidate, reason) => {
+            swapActivity(
+              rescheduleStop.dayNumber,
+              rescheduleStop.activity.id,
+              candidate,
+              reason
+            );
+            setRescheduleStop(null);
+          }}
+        />
+      )}
     </div>
   );
 }

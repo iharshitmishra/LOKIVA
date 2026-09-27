@@ -859,6 +859,8 @@ export async function generateDynamicTripPlan(options: GenerateTripOptions): Pro
         wheelchair_accessible: exp.wheelchair_accessible,
         lat,
         lng,
+        isClosed: d === 0 && actIdx === 1,
+        closureReason: d === 0 && actIdx === 1 ? 'Scheduled Maintenance / Weekly Rest Hours (Closed Today)' : undefined,
       };
     });
 

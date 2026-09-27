@@ -38,6 +38,8 @@ interface ItineraryTimelineProps {
   onRemoveActivity: (dayNumber: number, activityId: number) => void;
   onAddActivityClick: (dayNumber: number, afterIndex?: number) => void;
   onSetStartTime?: (dayNumber: number, startTime: string) => void;
+  onRescheduleActivity?: (dayNumber: number, activity: ItineraryActivity) => void;
+  onUndoRescheduleActivity?: (dayNumber: number, activityId: number) => void;
   onStopHover?: (stopId: number | null) => void;
   onStopSelect?: (stopId: number) => void;
 }
@@ -71,6 +73,8 @@ export function ItineraryTimeline({
   onRemoveActivity,
   onAddActivityClick,
   onSetStartTime,
+  onRescheduleActivity,
+  onUndoRescheduleActivity,
   onStopHover,
   onStopSelect,
 }: ItineraryTimelineProps) {
@@ -345,6 +349,8 @@ export function ItineraryTimeline({
                     onMoveUp={() => onMoveActivity(day.dayNumber, index, index - 1)}
                     onMoveDown={() => onMoveActivity(day.dayNumber, index, index + 1)}
                     onRemove={() => onRemoveActivity(day.dayNumber, activity.id)}
+                    onReschedule={() => onRescheduleActivity?.(day.dayNumber, activity)}
+                    onUndoReschedule={() => onUndoRescheduleActivity?.(day.dayNumber, activity.id)}
                   />
                 </div>
               </div>

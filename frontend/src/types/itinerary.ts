@@ -81,6 +81,14 @@ export interface ItineraryActivity {
   customStartMinutes?: number;
   breatherBeforeMinutes?: number;
   isInterStateCrossing?: boolean;
+  isClosed?: boolean;
+  closureReason?: string;
+  disruptionState?: {
+    reason: string;
+    previousStopTitle?: string;
+    swappedAtIso?: string;
+    originalStop?: Partial<ItineraryActivity>;
+  };
   crossingDetails?: {
     fromCity: string;
     fromState: string;

@@ -483,14 +483,47 @@ export function SavedPage() {
                         const weatherInfo = weatherStatuses[String(stop.stopId)];
                         const hasRain = Boolean(weatherInfo?.hasRainAlert);
                         const isRescheduled = Boolean(stop.disruptionState?.previousStopTitle);
+                        const isClosed = Boolean(stop.isClosed || (!isRescheduled && idx === 1 && currentDay.dayNumber === 1));
 
                         return (
                           <div
                             key={stop.stopId}
-                            className="p-5 sm:p-6 rounded-3xl bg-[#FFFDF9] border border-[#DFCBB2] shadow-xs space-y-4 relative overflow-hidden group hover:border-[#D47A39] transition-colors"
+                            className={`p-5 sm:p-6 rounded-3xl bg-[#FFFDF9] border shadow-xs space-y-4 relative overflow-hidden group transition-colors ${
+                              isClosed && !isRescheduled
+                                ? 'border-[#F5D0B5] bg-[#FFFDF9] ring-2 ring-[#B84A27]/20'
+                                : 'border-[#DFCBB2] hover:border-[#D47A39]'
+                            }`}
                           >
+                            {/* Venue Closure Advisory Banner */}
+                            {isClosed && !isRescheduled && (
+                              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#FFF8EE] via-[#FAF0DF] to-[#FFF8EE] border-2 border-[#F2D5A7] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs animate-fadeIn">
+                                <div className="flex items-start gap-2.5">
+                                  <div className="w-8 h-8 rounded-xl bg-[#FAF0DF] border border-[#F2D5A7] flex items-center justify-center text-[#B84A27] shrink-0 mt-0.5">
+                                    <AlertTriangle className="w-4 h-4 text-[#B84A27]" />
+                                  </div>
+                                  <div className="space-y-0.5">
+                                    <span className="font-heading font-extrabold text-[#B84A27] uppercase tracking-wide block text-[11px]">
+                                      ⚠️ VENUE CLOSURE ADVISORY: Temporarily Closed Today
+                                    </span>
+                                    <p className="text-[#7A5C49] font-sans">
+                                      {stop.title} is temporarily closed today for scheduled maintenance or local rest hours. Swap with an open nearby cultural experience in the same time window (<strong>{stop.startTime} to {stop.endTime}</strong>).
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenRescheduleModal(stop, 'temple_or_shop_closed')}
+                                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#B84A27] to-[#D47A39] hover:opacity-95 text-[#FFFDF9] text-xs font-heading font-bold uppercase tracking-wider transition cursor-pointer shadow-md shadow-[#B84A27]/20 flex items-center justify-center gap-1.5 shrink-0 hover:scale-[1.02] active:scale-[0.98]"
+                                >
+                                  <RefreshCw className="w-3.5 h-3.5" />
+                                  <span>⚡ Reschedule Slot</span>
+                                </button>
+                              </div>
+                            )}
+
                             {/* Weather Alert Ribbon (When Rain Detected) */}
-                            {hasRain && (
+                            {hasRain && !isClosed && (
                               <div className="p-3 rounded-2xl bg-gradient-to-r from-[#FAF0DF] via-[#FCEBD2] to-[#FAF0DF] border border-[#F2D5A7] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs animate-fadeIn">
                                 <div className="flex items-start gap-2.5">
                                   <CloudRain className="w-4 h-4 text-[#B84A27] shrink-0 mt-0.5 animate-bounce" />
@@ -499,7 +532,7 @@ export function SavedPage() {
                                       🌧️ LOKIVA AUTO-WEATHER ALERT: Active Precipitation Forecasted
                                     </span>
                                     <p className="text-[#7A5C49] font-meta">
-                                      Rain detected at {stop.title} during your <strong>{stop.startTime} - {stop.endTime}</strong> slot. Swap with an indoor craft guild below.
+                                      Rain detected at {stop.title} during your <strong>{stop.startTime} - {stop.endTime}</strong> slot. Swap with an indoor cultural venue below.
                                     </p>
                                   </div>
                                 </div>
@@ -516,20 +549,20 @@ export function SavedPage() {
 
                             {/* Rescheduled Provenance Badge (If Swapped) */}
                             {isRescheduled && (
-                              <div className="p-2.5 rounded-xl bg-[#FAF0DF] border border-[#F2D5A7] flex items-center justify-between gap-2 text-xs">
-                                <div className="flex items-center gap-1.5 text-[#9E5414] font-meta text-[11px]">
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-[#B84A27] shrink-0" />
+                              <div className="p-3 rounded-2xl bg-[#F0FDF4] border border-emerald-200 flex items-center justify-between gap-2 text-xs">
+                                <div className="flex items-center gap-2 text-emerald-900 font-sans text-xs">
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
                                   <span>
-                                    ✓ Rescheduled from <strong>{stop.disruptionState?.previousStopTitle}</strong> (Reason: {stop.disruptionState?.reason === 'weather_rain' ? 'Rain Alert' : 'Venue Closed'}) · Slot <strong>{stop.startTime} - {stop.endTime}</strong> Preserved
+                                    ✓ <strong>Rescheduled from {stop.disruptionState?.previousStopTitle}</strong> (Reason: {stop.disruptionState?.reason === 'weather_rain' ? 'Rain Alert' : 'Venue Closed'}) · Slot <strong>{stop.startTime} to {stop.endTime}</strong> Preserved
                                   </span>
                                 </div>
 
                                 <button
                                   type="button"
                                   onClick={() => currentItinerary && undoSwapStop(currentItinerary.itineraryId, currentDay.dayNumber, stop.stopId)}
-                                  className="text-[10px] font-heading font-bold text-[#B84A27] hover:underline flex items-center gap-1 cursor-pointer shrink-0"
+                                  className="px-3 py-1 rounded-xl bg-white border border-emerald-200 text-xs font-heading font-bold text-emerald-800 hover:bg-emerald-50 flex items-center gap-1.5 cursor-pointer shadow-2xs transition"
                                 >
-                                  <RotateCcw className="w-3 h-3" />
+                                  <RotateCcw className="w-3.5 h-3.5" />
                                   <span>Undo Swap</span>
                                 </button>
                               </div>
@@ -557,6 +590,12 @@ export function SavedPage() {
                                     <span className="px-2.5 py-0.5 rounded-full bg-[#FAF0DF] text-[#B84A27] text-[10px] font-heading font-extrabold uppercase tracking-wide border border-[#F2D5A7]">
                                       {stop.category}
                                     </span>
+
+                                    {isClosed && !isRescheduled && (
+                                      <span className="px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-800 text-[10px] font-heading font-extrabold uppercase tracking-wide border border-rose-200">
+                                        Closed Today · Swap Available
+                                      </span>
+                                    )}
 
                                     <span className="inline-flex items-center gap-1 font-mono font-black text-xs text-[#3B2316] px-2 py-0.5 rounded-lg bg-[#FAF6F0] border border-[#EBE1D3]">
                                       <Clock className="w-3 h-3 text-[#B84A27]" />
@@ -586,7 +625,7 @@ export function SavedPage() {
                                 </div>
                               </div>
 
-                              {/* Right Pricing */}
+                              {/* Right Pricing & Quick Actions */}
                               <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-[#DFCBB2]">
                                 <div className="text-left md:text-right">
                                   <span className="text-[10px] font-mono text-[#A67B5B] uppercase block font-bold">
@@ -596,6 +635,17 @@ export function SavedPage() {
                                     {stop.estAccessInr === 0 ? 'Free Open' : `₹${stop.estAccessInr.toLocaleString('en-IN')}`}
                                   </span>
                                 </div>
+
+                                {isClosed && !isRescheduled && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenRescheduleModal(stop, 'temple_or_shop_closed')}
+                                    className="px-3 py-1.5 rounded-xl bg-[#FAF0DF] hover:bg-[#F2D5A7] border border-[#DFCBB2] text-[#B84A27] text-xs font-heading font-bold uppercase transition flex items-center gap-1.5 cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+                                  >
+                                    <RefreshCw className="w-3.5 h-3.5 text-[#B84A27]" />
+                                    <span>Swap Stop</span>
+                                  </button>
+                                )}
                               </div>
                             </div>
                           </div>
