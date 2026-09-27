@@ -44,6 +44,7 @@ interface ItineraryState {
   generateTrip: (options: GenerateTripOptions) => void;
   toggleCorridorMode: () => void;
   clearReplanMessage: () => void;
+  deleteTrip: () => void;
 }
 
 async function buildFreshTrip(city: string = 'Jaipur', daysCount: number = 3) {
@@ -78,6 +79,22 @@ async function buildFreshTrip(city: string = 'Jaipur', daysCount: number = 3) {
 
 function createInitialState(): any {
   try {
+    const isDeleted = localStorage.getItem('lokiva_itinerary_deleted') === 'true';
+    if (isDeleted) {
+      return {
+        tripDetails: null,
+        days: [],
+        selectedDay: 1,
+        activeStopId: null,
+        hoveredStopId: null,
+        viewMode: 'timeline' as ItineraryViewMode,
+        feasibilityMetrics: {},
+        practicalInfo: null,
+        isGenerating: false,
+        lastReplanMessage: null,
+      };
+    }
+
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
@@ -121,6 +138,9 @@ const initialState = createInitialState();
 // This handles the async weather-aware trip generation
 setTimeout(async () => {
   try {
+    const isDeleted = typeof localStorage !== 'undefined' && localStorage.getItem('lokiva_itinerary_deleted') === 'true';
+    if (isDeleted) return;
+
     const state = useItineraryStore.getState();
     if (!state.tripDetails || state.days.length === 0) {
       const fresh = await buildFreshTrip('Jaipur', 3);
@@ -431,6 +451,7 @@ export const useItineraryStore = create<ItineraryState>((set, get) => ({
       });
 
       try {
+        localStorage.removeItem('lokiva_itinerary_deleted');
         localStorage.setItem(
           STORAGE_KEY,
           JSON.stringify({
@@ -479,6 +500,26 @@ export const useItineraryStore = create<ItineraryState>((set, get) => ({
       corridorEvaluation: corridorEval,
       originCity: tripDetails.originCity || corridorEval.originNode.primaryHubCity,
       originState: origin,
+    });
+  },
+
+  deleteTrip: () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.setItem('lokiva_itinerary_deleted', 'true');
+    } catch {
+      // ignore
+    }
+    set({
+      tripDetails: null as any,
+      days: [],
+      selectedDay: 1,
+      activeStopId: null,
+      hoveredStopId: null,
+      feasibilityMetrics: {},
+      practicalInfo: null as any,
+      isGenerating: false,
+      lastReplanMessage: null,
     });
   },
 

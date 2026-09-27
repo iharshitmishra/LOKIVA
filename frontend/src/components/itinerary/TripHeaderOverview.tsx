@@ -9,6 +9,7 @@ import {
   Pencil,
   Share2,
   Printer,
+  Trash2,
   Ticket,
   Utensils,
   Car,
@@ -27,6 +28,7 @@ interface TripHeaderOverviewProps {
   onEditTrip: () => void;
   onShare: () => void;
   onPrint: () => void;
+  onDeleteTrip?: () => void;
 }
 
 export function TripHeaderOverview({
@@ -36,6 +38,7 @@ export function TripHeaderOverview({
   onEditTrip,
   onShare,
   onPrint,
+  onDeleteTrip,
 }: TripHeaderOverviewProps) {
   const travelersCount = Math.max(1, tripDetails.travelers || 2);
   const perPersonCost = Math.round(totalCost / travelersCount);
@@ -230,6 +233,17 @@ export function TripHeaderOverview({
               >
                 <Printer className="w-4 h-4 text-[#7A5C49]" />
               </button>
+
+              {onDeleteTrip && (
+                <button
+                  type="button"
+                  onClick={onDeleteTrip}
+                  className="p-2.5 bg-[#FAF6F0] hover:bg-rose-50 border border-[#E6DAC6] hover:border-rose-300 text-[#7A5C49] hover:text-rose-600 rounded-xl transition flex items-center justify-center cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+                  title="Delete Itinerary & Start New"
+                >
+                  <Trash2 className="w-4 h-4 text-rose-600" />
+                </button>
+              )}
             </div>
           </div>
         </div>
