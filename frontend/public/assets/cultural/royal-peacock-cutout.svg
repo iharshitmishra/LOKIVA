@@ -1,0 +1,100 @@
+<svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Tail fan: seven eyed feathers radiating from behind the body -->
+  <g transform="rotate(-60 200 255)">
+    <path d="M200 255 C 183 205, 182 148, 200 106 C 218 148, 217 205, 200 255 Z" fill="#1F7A6C" stroke="#12213B" stroke-width="3.5" stroke-linejoin="round"/>
+    <line x1="200" y1="250" x2="200" y2="120" stroke="#FAF7F2" stroke-width="1.6" opacity="0.7"/>
+    <circle cx="200" cy="104" r="16" fill="#0E5A4E" stroke="#12213B" stroke-width="3"/>
+    <circle cx="200" cy="104" r="10.5" fill="#F0A63B"/>
+    <circle cx="200" cy="104" r="5.5" fill="#12213B"/>
+    <circle cx="200" cy="104" r="2.2" fill="#F0A63B"/>
+  </g>
+  <g transform="rotate(-40 200 255)">
+    <path d="M200 255 C 183 205, 182 148, 200 106 C 218 148, 217 205, 200 255 Z" fill="#1F7A6C" stroke="#12213B" stroke-width="3.5" stroke-linejoin="round"/>
+    <line x1="200" y1="250" x2="200" y2="120" stroke="#FAF7F2" stroke-width="1.6" opacity="0.7"/>
+    <circle cx="200" cy="104" r="16" fill="#0E5A4E" stroke="#12213B" stroke-width="3"/>
+    <circle cx="200" cy="104" r="10.5" fill="#F0A63B"/>
+    <circle cx="200" cy="104" r="5.5" fill="#12213B"/>
+    <circle cx="200" cy="104" r="2.2" fill="#F0A63B"/>
+  </g>
+  <g transform="rotate(-20 200 255)">
+    <path d="M200 255 C 183 205, 182 148, 200 106 C 218 148, 217 205, 200 255 Z" fill="#1F7A6C" stroke="#12213B" stroke-width="3.5" stroke-linejoin="round"/>
+    <line x1="200" y1="250" x2="200" y2="120" stroke="#FAF7F2" stroke-width="1.6" opacity="0.7"/>
+    <circle cx="200" cy="104" r="16" fill="#0E5A4E" stroke="#12213B" stroke-width="3"/>
+    <circle cx="200" cy="104" r="10.5" fill="#F0A63B"/>
+    <circle cx="200" cy="104" r="5.5" fill="#12213B"/>
+    <circle cx="200" cy="104" r="2.2" fill="#F0A63B"/>
+  </g>
+  <g>
+    <path d="M200 255 C 183 205, 182 148, 200 106 C 218 148, 217 205, 200 255 Z" fill="#1F7A6C" stroke="#12213B" stroke-width="3.5" stroke-linejoin="round"/>
+    <line x1="200" y1="250" x2="200" y2="120" stroke="#FAF7F2" stroke-width="1.6" opacity="0.7"/>
+    <circle cx="200" cy="104" r="16" fill="#0E5A4E" stroke="#12213B" stroke-width="3"/>
+    <circle cx="200" cy="104" r="10.5" fill="#F0A63B"/>
+    <circle cx="200" cy="104" r="5.5" fill="#12213B"/>
+    <circle cx="200" cy="104" r="2.2" fill="#F0A63B"/>
+  </g>
+  <g transform="rotate(20 200 255)">
+    <path d="M200 255 C 183 205, 182 148, 200 106 C 218 148, 217 205, 200 255 Z" fill="#1F7A6C" stroke="#12213B" stroke-width="3.5" stroke-linejoin="round"/>
+    <line x1="200" y1="250" x2="200" y2="120" stroke="#FAF7F2" stroke-width="1.6" opacity="0.7"/>
+    <circle cx="200" cy="104" r="16" fill="#0E5A4E" stroke="#12213B" stroke-width="3"/>
+    <circle cx="200" cy="104" r="10.5" fill="#F0A63B"/>
+    <circle cx="200" cy="104" r="5.5" fill="#12213B"/>
+    <circle cx="200" cy="104" r="2.2" fill="#F0A63B"/>
+  </g>
+  <g transform="rotate(40 200 255)">
+    <path d="M200 255 C 183 205, 182 148, 200 106 C 218 148, 217 205, 200 255 Z" fill="#1F7A6C" stroke="#12213B" stroke-width="3.5" stroke-linejoin="round"/>
+    <line x1="200" y1="250" x2="200" y2="120" stroke="#FAF7F2" stroke-width="1.6" opacity="0.7"/>
+    <circle cx="200" cy="104" r="16" fill="#0E5A4E" stroke="#12213B" stroke-width="3"/>
+    <circle cx="200" cy="104" r="10.5" fill="#F0A63B"/>
+    <circle cx="200" cy="104" r="5.5" fill="#12213B"/>
+    <circle cx="200" cy="104" r="2.2" fill="#F0A63B"/>
+  </g>
+  <g transform="rotate(60 200 255)">
+    <path d="M200 255 C 183 205, 182 148, 200 106 C 218 148, 217 205, 200 255 Z" fill="#1F7A6C" stroke="#12213B" stroke-width="3.5" stroke-linejoin="round"/>
+    <line x1="200" y1="250" x2="200" y2="120" stroke="#FAF7F2" stroke-width="1.6" opacity="0.7"/>
+    <circle cx="200" cy="104" r="16" fill="#0E5A4E" stroke="#12213B" stroke-width="3"/>
+    <circle cx="200" cy="104" r="10.5" fill="#F0A63B"/>
+    <circle cx="200" cy="104" r="5.5" fill="#12213B"/>
+    <circle cx="200" cy="104" r="2.2" fill="#F0A63B"/>
+  </g>
+
+  <!-- Body -->
+  <ellipse cx="200" cy="290" rx="27" ry="37" fill="#1F7A6C" stroke="#12213B" stroke-width="4"/>
+  <path d="M181 282 Q200 294 219 282" stroke="#FAF7F2" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+  <path d="M183 300 Q200 310 217 300" stroke="#FAF7F2" stroke-width="2" opacity="0.4" stroke-linecap="round"/>
+  <path d="M186 256 Q200 265 214 256" stroke="#F0A63B" stroke-width="3.5" stroke-linecap="round"/>
+
+  <!-- Neck -->
+  <path d="M200 256 C 195 226, 205 198, 200 164" stroke="#12213B" stroke-width="17" stroke-linecap="round"/>
+  <path d="M200 256 C 195 226, 205 198, 200 164" stroke="#1F7A6C" stroke-width="11.5" stroke-linecap="round"/>
+
+  <!-- Head -->
+  <circle cx="200" cy="150" r="13.5" fill="#1F7A6C" stroke="#12213B" stroke-width="3.5"/>
+  <path d="M211 145 L228 151 L211 155 Z" fill="#F0A63B" stroke="#12213B" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="206" cy="146" r="3.8" fill="#FAF7F2" stroke="#12213B" stroke-width="1.5"/>
+  <circle cx="206.8" cy="146" r="1.9" fill="#12213B"/>
+
+  <!-- Crest -->
+  <g stroke="#12213B" stroke-width="4" stroke-linecap="round">
+    <line x1="196" y1="138" x2="190" y2="116"/>
+    <line x1="200" y1="137" x2="200" y2="112"/>
+    <line x1="204" y1="138" x2="210" y2="116"/>
+  </g>
+  <g fill="#1F7A6C" stroke="#12213B" stroke-width="2.5">
+    <circle cx="190" cy="113" r="4.5"/>
+    <circle cx="200" cy="109" r="4.5"/>
+    <circle cx="210" cy="113" r="4.5"/>
+  </g>
+  <g fill="#F0A63B">
+    <circle cx="190" cy="113" r="1.8"/>
+    <circle cx="200" cy="109" r="1.8"/>
+    <circle cx="210" cy="113" r="1.8"/>
+  </g>
+
+  <!-- Legs -->
+  <g stroke="#12213B" stroke-width="3.5" stroke-linecap="round">
+    <line x1="192" y1="324" x2="190" y2="348"/>
+    <line x1="208" y1="324" x2="210" y2="348"/>
+    <line x1="184" y1="348" x2="196" y2="348"/>
+    <line x1="204" y1="348" x2="216" y2="348"/>
+  </g>
+</svg>

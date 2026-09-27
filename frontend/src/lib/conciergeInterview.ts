@@ -16,6 +16,7 @@
  */
 
 export type BriefDimension =
+  | 'destination'
   | 'companions'
   | 'timeBudget'
   | 'interests'
@@ -24,7 +25,8 @@ export type BriefDimension =
   | 'startTime'
   | 'crowdVibe'
   | 'accessibility'
-  | 'dietary';
+  | 'dietary'
+  | 'weatherConcern';
 
 export interface TripBrief {
   destination: string | null;
@@ -38,6 +40,7 @@ export interface TripBrief {
   crowdVibe: string | null;
   accessibility: string | null;
   dietary: string | null;
+  weatherConcern: string | null;
 }
 
 export interface BriefOption {
@@ -68,11 +71,28 @@ export const EMPTY_BRIEF: TripBrief = {
   crowdVibe: null,
   accessibility: null,
   dietary: null,
+  weatherConcern: null,
 };
 
 // Canonical interest keys intentionally mirror the categories and tags stored
 // on the experiences table, so the ranking engine can match them directly.
 export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
+  {
+    id: 'destination',
+    required: true,
+    question: 'Where in India are you heading?',
+    rationale: 'I need to know your destination to curate relevant experiences for you.',
+    options: [
+      { label: 'Jaipur', value: 'Jaipur', emoji: '\u{1F3F8}', hint: 'Pink City' },
+      { label: 'Varanasi', value: 'Varanasi', emoji: '\u{1FAA6}', hint: 'Banaras' },
+      { label: 'Goa', value: 'Goa', emoji: '\u{1F3D6}\uFE0F', hint: 'Beaches' },
+      { label: 'Mumbai', value: 'Mumbai', emoji: '\u{1F3D9}\uFE0F', hint: 'City of Dreams' },
+      { label: 'Delhi', value: 'Delhi', emoji: '\u{1F3DB}\uFE0F', hint: 'Capital' },
+      { label: 'Udaipur', value: 'Udaipur', emoji: '\u{1F30A}', hint: 'City of Lakes' },
+      { label: 'Kochi', value: 'Kochi', emoji: '\u{1F3D6}\uFE0F', hint: 'Queen of Arabian Sea' },
+      { label: 'Agra', value: 'Agra', emoji: '\u{1F3DB}\uFE0F', hint: 'Taj Mahal' },
+    ],
+  },
   {
     id: 'companions',
     required: true,
@@ -185,6 +205,18 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
       { label: 'No restriction', value: 'No restriction', emoji: '\u{1F37F}\uFE0F' },
     ],
   },
+  {
+    id: 'weatherConcern',
+    required: false,
+    question: 'How do you feel about rain or extreme heat?',
+    rationale: 'I can prioritize indoor venues or plan around weather windows.',
+    options: [
+      { label: 'Avoid rain', value: 'Avoid rain', emoji: '\u{1F327}\uFE0F' },
+      { label: 'Avoid heat', value: 'Avoid heat', emoji: '\u{1F321}\uFE0F' },
+      { label: 'Either is fine', value: 'Either is fine', emoji: '\u{1F324}\uFE0F' },
+      { label: 'No preference', value: 'No preference', emoji: '\u{1F32A}\uFE0F' },
+    ],
+  },
 ];
 
 export const INTEREST_LABELS: Record<string, string> = INTERVIEW_QUESTIONS.find(
@@ -239,6 +271,39 @@ const DIETARY_RULES: Array<{ value: string; re: RegExp }> = [
   { value: 'Vegetarian', re: /\b(vegetarian|veg only|veg\b|shakahari| Jain\b)\b/i },
   { value: 'No restriction', re: /\b(no restriction|no preference|eat anything|non veg|nonveg)\b/i },
 ];
+
+const WEATHER_RULES: Array<{ value: string; re: RegExp }> = [
+  { value: 'Avoid rain', re: /\b(avoid rain|rain concern|scared of rain|hate rain|monsoon issue|get wet|stay dry)\b/i },
+  { value: 'Avoid heat', re: /\b(avoid heat|too hot|heat concern|can\'t handle hot|sun issue|heatstroke)\b/i },
+  { value: 'Either is fine', re: /\b(either is fine|don\'t care about weather|any weather|weather doesn\'t matter)\b/i },
+];
+
+// Major Indian cities used to harvest a destination from free text.
+const DESTINATION_KEYWORDS: string[] = [
+  'jaipur', 'udaipur', 'jodhpur', 'jaisalmer', 'varanasi', 'banaras', 'kashi',
+  'agra', 'delhi', 'mumbai', 'bombay', 'pune', 'kochi', 'cochin',
+  'munnar', 'alleppey', 'alappuzha', 'goa', 'panaji', 'hampi',
+  'mysuru', 'mysore', 'bengaluru', 'bangalore', 'amritsar', 'srinagar',
+  'dharamshala', 'shimla', 'rishikesh', 'haridwar', 'kolkata', 'calcutta',
+  'chennai', 'madras', 'madurai', 'hyderabad', 'ahmedabad', 'amdavad',
+  'kutch', 'bhuj', 'pushkar', 'mount abu', 'aurangabad', 'lucknow',
+  'kanpur', 'allahabad', 'prayagraj', 'amritsar', 'chandigarh', 'manali',
+  'nainital', 'mussoorie', 'ooty', 'coorg', 'wayanad', 'kumarakom',
+  'pondicherry', 'puducherry', 'tiruchirappalli', 'thanjavur', 'kodaikanal',
+  'matheran', 'lonavala', 'mahabaleshwar', 'alibaug', 'daman', 'diu',
+  'silvassa', 'gangtok', 'darjeeling', 'shillong', 'guwahati', 'imphal',
+  'agartala', 'aizawl', 'kohima', 'itanagar', 'shimla', 'dehradun',
+  'ranchi', 'bhubaneswar', 'puri', 'konark', 'ranchi', 'gwalior',
+  'orchha', 'khajuraho', 'sanchi', 'ujjain', 'indore', 'bhopal',
+  'nagpur', 'aurangabad', 'nashik', 'shirdi', 'tirupati', 'vijayawada',
+  'visakhapatnam', 'vizag', 'tirupati', 'warangal', 'kurnool', 'kakinada',
+];
+
+const capitalizeCity = (raw: string): string =>
+  raw
+    .split(/\s+/)
+    .map((w) => (w.length ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(' ');
 
 const INTEREST_RULES: Array<{ value: string; re: RegExp }> = [
   {
@@ -306,6 +371,17 @@ const timeTierFromHours = (hours: number): string | null => {
 export function harvestBriefFromText(text: string, base: TripBrief = EMPTY_BRIEF): TripBrief {
   const next: TripBrief = { ...base, interests: [...(base.interests || [])] };
   if (!text || typeof text !== 'string') return next;
+
+  // Destination: harvest a known city from the traveler's own words
+  if (!next.destination) {
+    const lower = text.toLowerCase();
+    for (const city of DESTINATION_KEYWORDS) {
+      if (new RegExp(`\\b${city}\\b`, 'i').test(lower)) {
+        next.destination = capitalizeCity(city);
+        break;
+      }
+    }
+  }
 
   // Companions and group size
   if (!next.companions) {
@@ -412,6 +488,16 @@ export function harvestBriefFromText(text: string, base: TripBrief = EMPTY_BRIEF
     }
   }
 
+  // Weather concern
+  if (!next.weatherConcern) {
+    for (const rule of WEATHER_RULES) {
+      if (rule.re.test(text)) {
+        next.weatherConcern = rule.value;
+        break;
+      }
+    }
+  }
+
   // Interests are additive
   for (const rule of INTEREST_RULES) {
     if (rule.re.test(text) && !next.interests.includes(rule.value)) {
@@ -436,6 +522,8 @@ export const isDimensionAnswered = (brief: TripBrief, id: BriefDimension): boole
       return brief.dietary !== null && brief.dietary !== 'No restriction';
     case 'crowdVibe':
       return brief.crowdVibe !== null && brief.crowdVibe !== 'Balanced';
+    case 'weatherConcern':
+      return brief.weatherConcern !== null && brief.weatherConcern !== 'No preference';
     default:
       return Boolean((brief as unknown as Record<string, unknown>)[id]);
   }
@@ -544,6 +632,8 @@ export function answerToSentence(
 ): string {
   const where = destination ? ` in ${destination}` : '';
   switch (question.id) {
+    case 'destination':
+      return `I am heading to ${values[0]}.`;
     case 'companions': {
       const size = COMPANION_RULES.find((r) => r.value === values[0])?.size;
       const who =
@@ -584,6 +674,12 @@ export function answerToSentence(
       return values[0] === 'No restriction'
         ? `No food restrictions${where}.`
         : `${values[0]} food${where}.`;
+    case 'weatherConcern':
+      return values[0] === 'No preference'
+        ? `No weather preference${where}.`
+        : values[0] === 'Either is fine'
+        ? `I am fine with any weather${where}.`
+        : `I would like to ${values[0].toLowerCase()}${where}.`;
     default:
       return `${values.join(', ')}${where}.`;
   }
@@ -641,13 +737,17 @@ export function buildBriefSummary(brief: TripBrief): string {
   if (brief.crowdVibe) parts.push(`Crowd preference: ${brief.crowdVibe}`);
   if (brief.accessibility) parts.push(`Mobility: ${brief.accessibility}`);
   if (brief.dietary) parts.push(`Food: ${brief.dietary}`);
+  if (brief.weatherConcern) parts.push(`Weather concern: ${brief.weatherConcern}`);
   return parts.join('\n');
 }
 
 /** The single message that triggers the final, fully grounded curation pass. */
-export function buildCurationPrompt(brief: TripBrief): string {
+export function buildCurationPrompt(brief: TripBrief, weatherContext?: string | null): string {
   const where = brief.destination ? ` in ${brief.destination}` : '';
-  return `Here is my complete brief${where}, please curate it now.\n\n${buildBriefSummary(brief)}\n\nGive me the best matches for this exact brief. Rank them, then tell me in one short line each why it fits, what it costs, and the best time to go.`;
+  const weatherBlock = weatherContext
+    ? `\n\nLIVE WEATHER CONTEXT (real-time, use this to factor live conditions into recommendations):\n${weatherContext}\n`
+    : '';
+  return `Here is my complete brief${where}, please curate it now.\n\n${buildBriefSummary(brief)}${weatherBlock}\n\nGive me the best matches for this exact brief. Rank them, then tell me in one short line each why it fits, what it costs, and the best time to go.`;
 }
 
 /** Structured profile handed to the concierge endpoint for grounding and ranking. */
@@ -668,6 +768,7 @@ export function briefToProfilePayload(brief: TripBrief): Record<string, unknown>
     crowd_preference: brief.crowdVibe,
     accessibility: brief.accessibility,
     dietary: brief.dietary,
+    weather_concern: brief.weatherConcern,
     summary: buildBriefSummary(brief),
   };
 }
@@ -679,6 +780,9 @@ export function buildQuestionSpokenText(
   total: number,
   destination: string | null
 ): string {
+  if (question.id === 'destination') {
+    return `Step ${step} of ${total}. ${question.question} ${question.rationale}`;
+  }
   const where = destination ? ` ${destination}` : '';
   return `Step ${step} of ${total}. ${question.question}${where ? `, in${where}` : ''}. ${question.rationale}`;
 }

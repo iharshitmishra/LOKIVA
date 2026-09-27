@@ -247,6 +247,8 @@ export const api = {
      * verified experiences, so recommendations match the confirmed brief.
      */
     trip_profile?: Record<string, unknown> | null;
+    weather_context?: any;
+    weather_advisory?: string;
   }): Promise<{
     reply: string;
     tokens_used: number;
@@ -277,7 +279,7 @@ export const api = {
     }
 
     // Instant high-fidelity local concierge fallback
-    return generateLocalConciergeResponse(data.message, data.city);
+    return await generateLocalConciergeResponse(data.message, data.city);
   },
 
   async checkAIHealth(): Promise<{

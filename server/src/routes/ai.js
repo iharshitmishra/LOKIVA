@@ -8,6 +8,51 @@ import {
   generateDayPlanWithGemini,
 } from '../services/geminiService.js';
 import { buildRouteOptions } from '../services/routeBuilder.js';
+import { fetchCurrentWeather } from '../services/weatherService.js';
+
+/**
+ * Normalize weather data from any source (frontend, backend fetch, simulated)
+ * into a consistent format for the AI prompt and scoring algorithm.
+ */
+function normalizeWeatherContext(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+
+  // Frontend format (WeatherContextForAI from openMeteoService)
+  if (raw.currentCondition !== undefined || raw.currentTempCelsius !== undefined) {
+    return {
+      currentCondition: raw.currentCondition || 'Clear Sky',
+      currentTempCelsius: Number(raw.currentTempCelsius) || 28,
+      todaySummary: raw.todaySummary || '',
+      rainExpected: Boolean(raw.rainExpected),
+      peakRainProbability: Number(raw.peakRainProbability) || 0,
+      hourlyHighlights: Array.isArray(raw.hourlyHighlights) ? raw.hourlyHighlights : [],
+      weatherAdvisory: raw.weatherAdvisory || '',
+      aiPromptContext: raw.aiPromptContext || '',
+      is_live: Boolean(raw.is_live),
+    };
+  }
+
+  // Backend weatherService format (fetchCurrentWeather)
+  if (raw.temp_c !== undefined || raw.condition !== undefined) {
+    const isRaining = Boolean(raw.will_rain_soon);
+    const temp = Number(raw.temp_c) || 28;
+    return {
+      currentCondition: raw.condition || 'Clear Sky',
+      currentTempCelsius: temp,
+      todaySummary: `Current: ${raw.condition || 'Clear Sky'} at ${temp}°C.`,
+      rainExpected: isRaining,
+      peakRainProbability: isRaining ? 80 : 10,
+      hourlyHighlights: [],
+      weatherAdvisory: isRaining
+        ? `Rain expected in ${raw.location_name || 'the area'}. Recommend indoor alternatives and rain gear.`
+        : `Pleasant weather in ${raw.location_name || 'the area'} (${raw.condition || 'Clear Sky'}, ${temp}°C). Good conditions for outdoor exploration.`,
+      aiPromptContext: `Current: ${raw.condition || 'Clear Sky'} at ${temp}°C.`,
+      is_live: Boolean(raw.is_live),
+    };
+  }
+
+  return null;
+}
 
 export const aiRouter = express.Router();
 
@@ -32,6 +77,7 @@ aiRouter.post('/day-plan', async (req, res) => {
       food_preferences,
       mobility,
       vibe,
+      weather_context,
     } = req.body;
 
     const plan = await generateDayPlanWithGemini({
@@ -43,6 +89,7 @@ aiRouter.post('/day-plan', async (req, res) => {
       food_preferences,
       mobility,
       vibe,
+      weatherContext: weather_context || null,
     });
 
     res.json(plan);
@@ -208,6 +255,7 @@ aiRouter.post('/concierge', async (req, res) => {
       city: requestedCity,
       state = 'India',
       trip_profile: tripProfile = null,
+      weather_context = null,
     } = req.body;
     if (!message) return res.status(400).json({ detail: 'Message is required' });
 
@@ -240,7 +288,8 @@ aiRouter.post('/concierge', async (req, res) => {
       }
     }
 
-    // Do not use requestedCity if it was defaulted to 'Mumbai' without user input
+    // Only use requestedCity if the user explicitly mentioned a city in their current message
+    // Do not use it if it was defaulted by the frontend without user input
     const cleanRequestedCity = requestedCity && requestedCity.trim() && requestedCity.toLowerCase() !== 'mumbai'
       ? requestedCity.trim()
       : null;
@@ -253,9 +302,16 @@ aiRouter.post('/concierge', async (req, res) => {
         ? confirmedProfile.destination.trim()
         : null;
 
+    // Only use cityInUserHistory or cleanRequestedCity if the user explicitly mentioned a city in their current message
+    // or if there's a confirmed brief with a destination
+    const hasExplicitCityInMessage = mentionedInMessage !== null;
+    const hasConfirmedDestination = profileCity !== null;
+
     let activeCity = isRegionalOrGeneral
       ? null
-      : (mentionedInMessage || cleanRequestedCity || cityInUserHistory || profileCity || null);
+      : (hasExplicitCityInMessage || hasConfirmedDestination)
+        ? (mentionedInMessage || profileCity || cleanRequestedCity || cityInUserHistory || null)
+        : null;
     // Intent starts from the raw prompt, then the confirmed brief overrides it
     const intent = mergeTripProfile(parseIntentFromPrompt(message), confirmedProfile);
 
@@ -269,6 +325,7 @@ aiRouter.post('/concierge', async (req, res) => {
           city: null,
           availableExperiences: [],
           tripProfile: confirmedProfile,
+          weatherContext: weather_context || null,
         });
       } catch (aiErr) {
         console.warn('AI Concierge (general) model unavailable, using fallback:', aiErr.message);
@@ -329,9 +386,25 @@ aiRouter.post('/concierge', async (req, res) => {
       [activeCity.toLowerCase()]
     );
 
-    // Score experiences based on extracted intent
+    // Fetch real-time weather for the active city if not provided by frontend.
+    // This ensures the AI always has weather context for recommendations.
+    let effectiveWeatherContext = normalizeWeatherContext(weather_context);
+    if (!effectiveWeatherContext) {
+      try {
+        // Use the first experience's coordinates as a proxy for the city center
+        const cityLat = cityExps[0]?.latitude || 28.6139;
+        const cityLng = cityExps[0]?.longitude || 77.209;
+        const rawWeather = await fetchCurrentWeather(cityLat, cityLng, activeCity);
+        effectiveWeatherContext = normalizeWeatherContext(rawWeather);
+      } catch (weatherErr) {
+        console.warn('[Concierge] Weather fetch failed, continuing without weather:', weatherErr.message);
+      }
+    }
+
+    // Score experiences based on extracted intent, using real weather data
+    const isRaining = effectiveWeatherContext?.rainExpected || false;
     const scoredExperiences = cityExps.map((exp) => {
-      const { score, match_reasons } = scoreExperience(exp, intent, null, { is_raining: false });
+      const { score, match_reasons } = scoreExperience(exp, intent, null, { is_raining: isRaining });
       return {
         experience: {
           ...exp,
@@ -384,6 +457,7 @@ aiRouter.post('/concierge', async (req, res) => {
         availableExperiences: topRecommendations.map((r) => r.experience),
         tripProfile: confirmedProfile,
         routeOptions,
+        weatherContext: effectiveWeatherContext,
       });
     } catch (aiErr) {
       console.warn('AI Concierge model unavailable, using contextual fallback:', aiErr.message);
@@ -413,7 +487,7 @@ aiRouter.post('/concierge', async (req, res) => {
 // POST /ai/chat - legacy endpoint (falls back to rule-based if Gemini not configured)
 aiRouter.post('/chat', async (req, res) => {
   try {
-    const { message, chat_history = [], city = 'Jaipur' } = req.body;
+    const { message, chat_history = [], city = 'Jaipur', weather_context = null } = req.body;
     if (!message) return res.status(400).json({ detail: 'Message is required' });
 
     // Check if Gemini is configured
@@ -445,6 +519,7 @@ aiRouter.post('/chat', async (req, res) => {
       chatHistory: chat_history,
       city,
       availableExperiences: cityExps,
+      weatherContext: weather_context || null,
     });
 
     const intent = await extractTravelIntent(message);

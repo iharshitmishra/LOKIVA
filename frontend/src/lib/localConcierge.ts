@@ -7,6 +7,59 @@ import {
   INDIAN_STATES_AND_CITIES,
 } from '../data/places';
 import { resolveImageUrl } from './api';
+import { fetchWeatherContextForAI } from '../services/openMeteoService';
+
+function sanitizeUiText(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/[\u2014\u2015]/g, ', ')
+    .replace(/[\u2013]/g, '-')
+    .replace(/--+/g, '-')
+    .trim();
+}
+
+async function fetchAIReply(
+  message: string,
+  city: string,
+  groupSize: number,
+  budget: number | null,
+  travelerType: string,
+  interests: string[],
+  weatherContext?: string,
+  weatherAdvisory?: string
+): Promise<string | null> {
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('lokiva_token') : null;
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch('/api/v1/ai/concierge', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        message,
+        city: city || undefined,
+        group_size: groupSize,
+        budget: budget || undefined,
+        traveler_type: travelerType,
+        interests,
+        weather_context: weatherContext || undefined,
+        weather_advisory: weatherAdvisory || undefined,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.reply) {
+        return sanitizeUiText(data.reply as string);
+      }
+    }
+  } catch (err) {
+    console.warn('[LOKIVA AI] AI API call failed:', err);
+  }
+
+  return null;
+}
 
 interface LocalConciergeResult {
   reply: string;
@@ -76,10 +129,10 @@ const KNOWN_DESTINATIONS = [
   { city: 'Kutch', state: 'Gujarat', aliases: ['kutch', 'rann of kutch', 'bhuj', 'nirona'] },
 ];
 
-export function generateLocalConciergeResponse(
+export async function generateLocalConciergeResponse(
   message: string,
   existingCity?: string
-): LocalConciergeResult {
+): Promise<LocalConciergeResult> {
   const q = message.toLowerCase().trim();
 
   // 1. Detect Destination (City and State)
@@ -109,6 +162,9 @@ export function generateLocalConciergeResponse(
   }
 
   const isDestinationKnown = Boolean(detectedCity);
+
+  // Fetch live weather for the destination to ground recommendations
+  const weatherContext = detectedCity ? await fetchWeatherContextForAI(detectedCity) : null;
 
   // 2. Detect Group Size
   let groupSize = 1;
@@ -191,39 +247,53 @@ export function generateLocalConciergeResponse(
     };
   });
 
-  // 5. Generate Dynamic Logical Response
-  const perPerson = budget && groupSize > 0 ? Math.round(budget / groupSize) : null;
-  const perPersonText = perPerson ? `(₹${perPerson.toLocaleString('en-IN')} per traveler)` : '';
-  const totalBudgetText = budget ? `₹${budget.toLocaleString('en-IN')}` : 'a tailored budget range';
+  // 5. Try live AI API inference first
+  const aiReply = await fetchAIReply(
+    message,
+    detectedCity,
+    groupSize,
+    budget,
+    groupSize > 1 ? 'Group' : 'Solo',
+    ['culture', 'heritage', 'food'],
+    weatherContext?.aiPromptContext,
+    weatherContext?.weatherAdvisory
+  );
 
-  let reply = '';
+  let reply = aiReply;
 
-  if (isDestinationKnown) {
-    reply = `Welcome to **${detectedCity}**, ${detectedState || 'India'}.\n\n`;
+  // If live AI API is unreachable or returned empty, use the logical fallback generator
+  if (!reply) {
+    const perPerson = budget && groupSize > 0 ? Math.round(budget / groupSize) : null;
+    const perPersonText = perPerson ? `(₹${perPerson.toLocaleString('en-IN')} per traveler)` : '';
+    const totalBudgetText = budget ? `₹${budget.toLocaleString('en-IN')}` : 'a tailored budget range';
 
-    if (budget) {
-      reply += `I have tailored a high-value cultural plan for your group of **${groupSize} traveler${groupSize > 1 ? 's' : ''}** with a total budget of **${totalBudgetText}** ${perPersonText}.\n\n`;
+    if (isDestinationKnown) {
+      reply = `Welcome to **${detectedCity}**, ${detectedState || 'India'}.\n\n`;
+
+      if (budget) {
+        reply += `I have tailored a high-value cultural plan for your group of **${groupSize} traveler${groupSize > 1 ? 's' : ''}** with a total budget of **${totalBudgetText}** ${perPersonText}.\n\n`;
+      } else {
+        reply += `I have curated the signature cultural anchor points in **${detectedCity}** for your party of **${groupSize}**.\n\n`;
+      }
+
+      reply += `### Recommended Circuit Highlights:\n`;
+      topPlaces.forEach((p, i) => {
+        const costText = p.price > 0 ? `₹${p.price * groupSize} for ${groupSize}` : 'Free Entry';
+        reply += `${i + 1}. **${p.title}** (${p.category}): ${p.tagline || p.description.slice(0, 90)}... [${costText}]\n`;
+      });
+
+      reply += `\n**Practical Travel & Budget Advice:** Your allocation covers entry access, authentic local food stops, and intra-city transit with comfortable buffers remaining.\n\nWould you like me to build a sequential hourly route or focus on specific artisanal workshops?`;
     } else {
-      reply += `I have curated the signature cultural anchor points in **${detectedCity}** for your party of **${groupSize}**.\n\n`;
+      // General Pan-India Inquiry
+      reply = `Welcome to LOKIVA AI Cultural Concierge.\n\n`;
+      if (budget) {
+        reply += `For your party of **${groupSize} traveler${groupSize > 1 ? 's' : ''}** with a budget of **${totalBudgetText}** ${perPersonText}, India offers diverse heritage corridors: royal architectural citadels, coastal backwaters, Himalayan nature retreats, or sacred river traditions.\n\n`;
+      } else {
+        reply += `I can help you curate immersive journeys across India's living cultural traditions, artisan guilds, and regional culinary trails.\n\n`;
+      }
+
+      reply += `Which specific city or region would you like to explore (for example: Mumbai, Panvel, Kochi, Varanasi, Jaipur, or Shimla)? Share your destination and timeline, and I will curate a precise circuit!`;
     }
-
-    reply += `### Recommended Circuit Highlights:\n`;
-    topPlaces.forEach((p, i) => {
-      const costText = p.price > 0 ? `₹${p.price * groupSize} for ${groupSize}` : 'Free Entry';
-      reply += `${i + 1}. **${p.title}** (${p.category}): ${p.tagline || p.description.slice(0, 90)}... [${costText}]\n`;
-    });
-
-    reply += `\n**Practical Travel & Budget Advice:** Your allocation covers entry access, authentic local food stops, and intra-city transit with comfortable buffers remaining.\n\nWould you like me to build a sequential hourly route or focus on specific artisanal workshops?`;
-  } else {
-    // General Pan-India Inquiry
-    reply = `Welcome to LOKIVA AI Cultural Concierge.\n\n`;
-    if (budget) {
-      reply += `For your party of **${groupSize} traveler${groupSize > 1 ? 's' : ''}** with a budget of **${totalBudgetText}** ${perPersonText}, India offers diverse heritage corridors: royal architectural citadels, coastal backwaters, Himalayan nature retreats, or sacred river traditions.\n\n`;
-    } else {
-      reply += `I can help you curate immersive journeys across India's living cultural traditions, artisan guilds, and regional culinary trails.\n\n`;
-    }
-
-    reply += `Which specific city or region would you like to explore (for example: Mumbai, Panvel, Kochi, Varanasi, Jaipur, or Shimla)? Share your destination and timeline, and I will curate a precise circuit!`;
   }
 
   const extracted_intent: StructuredIntent = {
@@ -238,7 +308,7 @@ export function generateLocalConciergeResponse(
   };
 
   return {
-    reply,
+    reply: sanitizeUiText(reply),
     tokens_used: 120,
     model: 'lokiva-concierge-v2',
     extracted_intent,

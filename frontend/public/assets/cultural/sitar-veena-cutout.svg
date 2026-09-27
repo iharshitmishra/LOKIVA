@@ -1,0 +1,57 @@
+<svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sitarGourd" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F7C475"/>
+      <stop offset="1" stop-color="#E89A2B"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Neck, frets, pegs, headstock -->
+  <g transform="rotate(12 200 170)">
+    <rect x="185" y="58" width="30" height="215" rx="15" fill="#1F7A6C" stroke="#12213B" stroke-width="4"/>
+    <g stroke="#F0A63B" stroke-width="3.5" stroke-linecap="round">
+      <path d="M188 90 Q200 99 212 90"/>
+      <path d="M188 114 Q200 123 212 114"/>
+      <path d="M188 138 Q200 147 212 138"/>
+      <path d="M188 162 Q200 171 212 162"/>
+      <path d="M188 186 Q200 195 212 186"/>
+      <path d="M188 210 Q200 219 212 210"/>
+      <path d="M188 234 Q200 243 212 234"/>
+    </g>
+    <g stroke="#FAF7F2" stroke-width="1.6" opacity="0.95" stroke-linecap="round">
+      <line x1="193" y1="64" x2="193" y2="268"/>
+      <line x1="200" y1="64" x2="200" y2="268"/>
+      <line x1="207" y1="64" x2="207" y2="268"/>
+    </g>
+    <g stroke="#12213B" stroke-width="3.5" stroke-linecap="round">
+      <line x1="185" y1="98" x2="175" y2="98"/>
+      <line x1="185" y1="138" x2="175" y2="138"/>
+      <line x1="185" y1="178" x2="175" y2="178"/>
+      <line x1="215" y1="118" x2="225" y2="118"/>
+      <line x1="215" y1="158" x2="225" y2="158"/>
+    </g>
+    <g fill="#C1443B" stroke="#12213B" stroke-width="3">
+      <circle cx="173" cy="98" r="7.5"/>
+      <circle cx="173" cy="138" r="7.5"/>
+      <circle cx="173" cy="178" r="7.5"/>
+      <circle cx="227" cy="118" r="7.5"/>
+      <circle cx="227" cy="158" r="7.5"/>
+    </g>
+    <path d="M200 60 C 194 42, 205 29, 221 33 C 234 36, 236 50, 226 58 C 219 64, 208 63, 200 60 Z" fill="#C1443B" stroke="#12213B" stroke-width="3.5" stroke-linejoin="round"/>
+    <circle cx="221" cy="45" r="4.5" fill="#F0A63B" stroke="#12213B" stroke-width="2.5"/>
+  </g>
+
+  <!-- Gourd resonator (in front of the neck base) -->
+  <circle cx="165" cy="308" r="72" fill="url(#sitarGourd)" stroke="#12213B" stroke-width="5"/>
+  <circle cx="165" cy="308" r="50" stroke="#C1443B" stroke-width="2.5" opacity="0.45"/>
+  <g fill="#F0A63B" stroke="#12213B" stroke-width="2">
+    <circle cx="165" cy="258" r="4"/>
+    <circle cx="215" cy="308" r="4"/>
+    <circle cx="115" cy="308" r="4"/>
+    <circle cx="165" cy="358" r="4"/>
+  </g>
+  <path d="M118 262 A 62 62 0 0 1 152 238" stroke="#FAF7F2" stroke-width="7" stroke-linecap="round" opacity="0.55"/>
+  <circle cx="165" cy="308" r="17" fill="#12213B"/>
+  <circle cx="165" cy="308" r="9" fill="#F0A63B"/>
+  <rect x="141" y="334" width="48" height="11" rx="5.5" fill="#12213B"/>
+</svg>

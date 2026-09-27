@@ -33,6 +33,7 @@ import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { VerifyPassPage } from './pages/VerifyPassPage';
 import { CulturalPassportReceiptModal } from './components/pass/CulturalPassportReceiptModal';
+import { WeatherSimulator } from './components/admin/WeatherSimulator';
 
 function AppShell() {
   const location = useLocation();
@@ -138,6 +139,9 @@ function AppShell() {
 
       {/* Global Cultural Passport Receipt & QR Modal */}
       <CulturalPassportReceiptModal />
+
+      {/* Weather Simulator - Persistent on all pages */}
+      <WeatherSimulator />
     </div>
   );
 }

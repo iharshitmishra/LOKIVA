@@ -46,8 +46,8 @@ interface ItineraryState {
   clearReplanMessage: () => void;
 }
 
-function buildFreshTrip(city: string = 'Jaipur', daysCount: number = 3) {
-  const plan = generateDynamicTripPlan({
+async function buildFreshTrip(city: string = 'Jaipur', daysCount: number = 3) {
+  const plan = await generateDynamicTripPlan({
     city,
     state: 'Rajasthan',
     daysCount,
@@ -76,13 +76,12 @@ function buildFreshTrip(city: string = 'Jaipur', daysCount: number = 3) {
   };
 }
 
-function createInitialState() {
+function createInitialState(): any {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed && Array.isArray(parsed.days) && parsed.days.length > 0) {
-        const fresh = buildFreshTrip(parsed.tripDetails?.destination || 'Jaipur', parsed.days.length);
         const metricsMap: Record<number, DayFeasibilityMetrics> = parsed.feasibilityMetrics || {};
 
         parsed.days.forEach((d: ItineraryDay) => {
@@ -93,7 +92,6 @@ function createInitialState() {
         });
 
         return {
-          ...fresh,
           ...parsed,
           feasibilityMetrics: metricsMap,
         };
@@ -102,10 +100,46 @@ function createInitialState() {
   } catch {
     // fallback
   }
-  return buildFreshTrip('Jaipur', 3);
+  // Return minimal default state; buildFreshTrip will be called async
+  return {
+    tripDetails: null,
+    days: [],
+    selectedDay: 1,
+    activeStopId: null,
+    hoveredStopId: null,
+    viewMode: 'timeline' as ItineraryViewMode,
+    feasibilityMetrics: {},
+    practicalInfo: null,
+    isGenerating: false,
+    lastReplanMessage: null,
+  };
 }
 
 const initialState = createInitialState();
+
+// Async: load fresh trip data after store initialization
+// This handles the async weather-aware trip generation
+setTimeout(async () => {
+  try {
+    const state = useItineraryStore.getState();
+    if (!state.tripDetails || state.days.length === 0) {
+      const fresh = await buildFreshTrip('Jaipur', 3);
+      const metricsMap: Record<number, DayFeasibilityMetrics> = {};
+      fresh.days.forEach((d) => {
+        const { metrics } = recalculateDaySchedule(d, 2);
+        metricsMap[d.dayNumber] = metrics;
+      });
+      useItineraryStore.setState({
+        tripDetails: fresh.tripDetails,
+        days: fresh.days,
+        feasibilityMetrics: metricsMap,
+        practicalInfo: fresh.practicalInfo,
+      });
+    }
+  } catch (err) {
+    console.warn('[ItineraryStore] Failed to load fresh trip:', err);
+  }
+}, 100);
 
 export const useItineraryStore = create<ItineraryState>((set, get) => ({
   ...initialState,
@@ -374,10 +408,10 @@ export const useItineraryStore = create<ItineraryState>((set, get) => ({
     }
   },
 
-  generateTrip: (options: GenerateTripOptions) => {
+  generateTrip: async (options: GenerateTripOptions) => {
     set({ isGenerating: true });
     try {
-      const plan = generateDynamicTripPlan(options);
+      const plan = await generateDynamicTripPlan(options);
       const metricsMap: Record<number, DayFeasibilityMetrics> = {};
       plan.days.forEach((d) => {
         const { metrics } = recalculateDaySchedule(d, options.travelers || 2);
