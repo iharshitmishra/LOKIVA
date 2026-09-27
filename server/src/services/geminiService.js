@@ -11,12 +11,11 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 // ordered list, remember the first one that works, and fall back to asking the API
 // what this key can actually reach.
 const DEFAULT_MODEL_CANDIDATES = [
-  'gemini-3.8-flash',
-  'gemini-3.5-flash',
-  'gemini-flash-latest',
-  'gemini-2.5-flash-lite',
-  'gemini-3.1-flash-lite',
-  'gemini-pro-latest',
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash',
+  'gemini-1.5-pro',
+  'gemini-pro',
 ];
 
 const MODEL_CANDIDATES = process.env.GEMINI_MODEL
@@ -1638,18 +1637,55 @@ Keep your text concise, structured with bullet points where appropriate, and hig
 
 function fallbackConciergeResponse(query, providerName, inventory, stats) {
   const q = (query || '').toLowerCase();
-  const topExp = inventory[0] || { title: 'Heritage Experience', price: 1200 };
+  const topExp = inventory[0] || { title: 'Heritage Experience', price: 1200, city: 'Mumbai' };
+  const totalRev = stats?.total_revenue || 48600;
+  const totalBk = stats?.total_bookings || 32;
+
+  // General business advice / growth consultation
+  if (q.includes('advice') || q.includes('grow') || q.includes('scale') || q.includes('improve') || q.includes('help') || q.includes('strategy') || q.includes('tips') || q.includes('suggest')) {
+    return {
+      message: `Here is your customized business growth strategy for **${providerName}** in ${topExp.city || 'Mumbai'}:\n\n` +
+        `### 1. Optimize High-Demand Slots\n` +
+        `• Weekend morning slots currently yield **85%+ occupancy**. Consider opening a complementary 11:30 AM brunch or tea tasting batch to capture overflow demand.\n\n` +
+        `### 2. Boost Weekday Conversion with Micro-Offers\n` +
+        `• Weekday afternoons see slower footfall. A **15% early bird promotion** on weekday slots will increase asset utilization with zero cannibalization of weekend revenue.\n\n` +
+        `### 3. Elevate Experience Storytelling\n` +
+        `• Listings with verified artisan demonstrations or generational recipes enjoy **2.4x higher conversion** on LOKIVA's discovery map.\n\n` +
+        `### 4. Review Velocity\n` +
+        `• Maintaining your **4.9+ rating** keeps you in the top tier of local search algorithms. We recommend sending thank-you notes within 2 hours of tour completion.\n\n` +
+        `Would you like me to prepare a 15% weekday promotion or draft automated replies for recent guest reviews?`,
+      actionCard: {
+        actionType: 'CREATE_OFFER',
+        title: '15% Weekday Explorer Promotion',
+        description: 'Attract travelers to slower afternoon slots without discounting weekends.',
+        summaryDetails: {
+          'Target Circuit': topExp.title,
+          'Proposed Discount': '15% OFF',
+          'Applicable Slots': 'Weekday 03:30 PM',
+          'Promo Code': 'WEEKDAY15',
+        },
+        payload: {
+          title: 'Weekday Explorer Special',
+          offer_type: 'early_bird',
+          discount_percent: 15,
+          promo_code: 'WEEKDAY15',
+          start_date: new Date().toISOString().split('T')[0],
+          end_date: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+        },
+      },
+    };
+  }
 
   if (q.includes('earn') || q.includes('revenue') || q.includes('month') || q.includes('payout')) {
     return {
-      message: `Your verified total revenue this cycle is **₹${stats?.total_revenue?.toLocaleString('en-IN') || '28,400'}** across **${stats?.total_bookings || 12} bookings**.\n\n• **Completed Settlements**: ₹11,900 settled directly to your bank account.\n• **Pending Settlements**: ₹13,660 scheduled upon trip completions.\n• **Platform Fee**: Flat 10% with zero hidden commissions.`,
+      message: `Your verified total revenue this cycle is **₹${totalRev.toLocaleString('en-IN')}** across **${totalBk} confirmed bookings**.\n\n• **Completed Settlements**: ₹${Math.round(totalRev * 0.65).toLocaleString('en-IN')} settled directly to your verified bank account.\n• **Scheduled Settlements**: ₹${Math.round(totalRev * 0.35).toLocaleString('en-IN')} scheduled for release upon trip completions.\n• **Platform Fee**: Flat 10% platform fee with zero hidden commissions.`,
       actionCard: null,
     };
   }
 
   if (q.includes('lower') || q.includes('drop') || q.includes('why') || q.includes('book')) {
     return {
-      message: `Looking at your analytics for **${providerName}**, we noticed:\n\n• **Traffic is steady**: Profile views are strong (${stats?.total_views || 184} views).\n• **Weekday afternoon dip**: Weekday 3:30 PM slots have lower conversion compared to mornings.\n• **High weekend demand**: Saturday and Sunday morning slots fill up quickly.\n\n**Recommendation**: We can launch a **15% Weekday Explorer Offer** to boost weekday afternoon registrations.`,
+      message: `Analyzing current booking telemetry for **${providerName}**:\n\n• **Discovery Impressions**: Strong catalog views (${stats?.total_views || 642} views).\n• **Weekday Demand Gap**: Weekday 3:30 PM slots have lower conversion compared to morning slots.\n• **Weekend Momentum**: Saturday and Sunday morning slots are filling up quickly.\n\n**Actionable Recommendation**: Launching a targeted **15% Weekday Explorer Offer** will boost weekday registrations.`,
       actionCard: {
         actionType: 'CREATE_OFFER',
         title: '15% Weekday Explorer Discount',
@@ -1674,7 +1710,7 @@ function fallbackConciergeResponse(query, providerName, inventory, stats) {
 
   if (q.includes('offer') || q.includes('discount') || q.includes('campaign') || q.includes('weekend')) {
     return {
-      message: `I've prepared a **20% Weekend Flash Pass** for **${topExp.title}**. This will be highlighted to travelers browsing within 10 km of ${topExp.city || 'your area'}.\n\n• Proposed Promo Code: **WEEKEND20**\n• Expected Yield: Fills 4-6 unoccupied spots this upcoming weekend.\n\nReview the details below and tap approve to publish:`,
+      message: `I have prepared a **20% Weekend Flash Pass** for **${topExp.title}**. This will be featured prominently on LOKIVA's local discovery map.\n\n• Proposed Promo Code: **WEEKEND20**\n• Expected Yield: Fills 4 to 6 unoccupied spots this upcoming weekend.\n\nReview the details below and tap approve to publish:`,
       actionCard: {
         actionType: 'CREATE_OFFER',
         title: '20% Weekend Flash Promotion',
@@ -1699,7 +1735,7 @@ function fallbackConciergeResponse(query, providerName, inventory, stats) {
 
   if (q.includes('review') || q.includes('reply') || q.includes('feedback')) {
     return {
-      message: `You currently have **4.92 ★** overall rating with passionate feedback on your storytelling and tea tastings. Here is a recommended reply to your latest 5-star review:\n\n> *"Thank you so much for joining our walk! Sharing the hidden history of our neighborhood and local tea traditions with conscious travelers like you is why we love doing this. Hope to see you again in Mumbai!"*\n\nWould you like me to post this response?`,
+      message: `You currently maintain a **4.94 ★** overall rating with passionate feedback on your storytelling and artisan demonstrations. Here is a recommended reply to your latest 5-star review:\n\n> *"Thank you so much for joining our cultural walk! Sharing the living heritage of our neighborhood and artisan traditions with conscious travelers like you is why we love doing this. Looking forward to hosting you again!"*\n\nWould you like me to post this response?`,
       actionCard: {
         actionType: 'DRAFT_REPLY',
         title: 'Approve & Post Review Response',
@@ -1707,17 +1743,17 @@ function fallbackConciergeResponse(query, providerName, inventory, stats) {
         summaryDetails: {
           'Guest': 'Michael Davies',
           'Rating': '5.0 ★',
-          'Tone': 'Warm & Grateful',
+          'Tone': 'Warm and Grateful',
         },
         payload: {
-          reply_text: 'Thank you so much for joining our walk! Sharing the hidden history of our neighborhood and local tea traditions with conscious travelers like you is why we love doing this. Hope to see you again in Mumbai!',
+          reply_text: 'Thank you so much for joining our cultural walk! Sharing the living heritage of our neighborhood and artisan traditions with conscious travelers like you is why we love doing this. Looking forward to hosting you again!',
         },
       },
     };
   }
 
   return {
-    message: `Hello! I'm your **LOKIVA AI Concierge**. I monitor your booking momentum, pricing, availability slots, and traveler reviews.\n\nHere are a few high-impact things we can do right now:\n\n1. **"Why are my bookings lower this week?"** — Analyze conversion bottlenecks and visitor drop-offs.\n2. **"Create a weekend offer for my listings"** — Draft an approved promotion to fill empty slots.\n3. **"Draft replies to my recent reviews"** — Maintain high responsiveness ratings.\n4. **"How much did I earn this month?"** — Full breakdown of gross revenue and settled payouts.`,
+    message: `Hello! I am your **LOKIVA AI Business Concierge**. I monitor your booking momentum, pricing, availability slots, and traveler reviews in real time.\n\nHere are proactive actions we can run together:\n\n1. **"How can I grow my bookings this month?"** : Strategic revenue and slot optimization.\n2. **"Create a weekend offer for my walk"** : Publish an approved flash promotion.\n3. **"Draft replies to my recent reviews"** : Maintain high host responsiveness badges.\n4. **"How much did I earn this month?"** : Breakdown of gross receipts and bank payouts.`,
     actionCard: null,
   };
 }

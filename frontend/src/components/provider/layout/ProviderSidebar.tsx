@@ -221,11 +221,9 @@ export function ProviderSidebar({ isMobileOpen, onMobileClose }: ProviderSidebar
                     <button
                       key={item.id}
                       onClick={() => handleSelectTab(item.id)}
-                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-heading transition-all ${
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-heading transition-all cursor-pointer ${
                         isActive
-                          ? item.isAi
-                            ? 'bg-linear-to-r from-[#12213B] to-[#1E3A8A] text-white font-bold shadow-xs'
-                            : 'bg-[#12213B] text-white font-bold shadow-xs'
+                          ? 'bg-[#FAF4ED] text-[#C85A32] font-bold border border-[#E8DEC8] shadow-2xs'
                           : item.isAi
                           ? 'text-[#C85A32] hover:bg-[#FAF4ED] font-semibold'
                           : 'text-[#556275] hover:text-[#12213B] hover:bg-[#FAF7F2] font-medium'
@@ -235,7 +233,7 @@ export function ProviderSidebar({ isMobileOpen, onMobileClose }: ProviderSidebar
                         <Icon
                           className={`w-4 h-4 ${
                             isActive
-                              ? 'text-white'
+                              ? 'text-[#C85A32]'
                               : item.isAi
                               ? 'text-[#C85A32]'
                               : 'text-[#556275]'

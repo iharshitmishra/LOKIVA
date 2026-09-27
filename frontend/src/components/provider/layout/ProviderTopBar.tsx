@@ -98,13 +98,13 @@ export function ProviderTopBar({ onMobileMenuOpen }: ProviderTopBarProps) {
         {/* AI Concierge Trigger Button */}
         <button
           onClick={() => setActiveTab('concierge')}
-          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-heading font-bold transition shadow-2xs ${
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-heading font-bold transition shadow-2xs cursor-pointer ${
             activeTab === 'concierge'
-              ? 'bg-[#12213B] text-white'
+              ? 'bg-[#C85A32] text-white shadow-xs'
               : 'bg-[#FAF4ED] hover:bg-[#F5ECE0] text-[#C85A32] border border-[#E8DEC8]'
           }`}
         >
-          <Sparkles className="w-3.5 h-3.5 text-[#C85A32]" />
+          <Sparkles className={`w-3.5 h-3.5 ${activeTab === 'concierge' ? 'text-white' : 'text-[#C85A32]'}`} />
           <span className="hidden sm:inline">Ask AI Concierge</span>
         </button>
 
