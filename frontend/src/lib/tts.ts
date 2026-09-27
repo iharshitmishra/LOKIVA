@@ -399,6 +399,7 @@ export function speakWithElevenLabsOrFallback(options: SpeakOptions): PlaybackCo
   // Latency handling: notify UI immediately to show active speaking state
   onStart?.();
 
+  // Clean text and handle empty case
   const cleanText = cleanTextForSpeech(text);
   if (!cleanText) {
     onEnd?.();
@@ -448,6 +449,19 @@ export function speakWithElevenLabsOrFallback(options: SpeakOptions): PlaybackCo
       onEnd?.();
     }
   };
+
+  // If hosted TTS is explicitly known to be unconfigured, immediately use browser speech
+  if (cachedHostedConfigured === false) {
+    fallbackToBrowser();
+    return {
+      stop: () => {
+        isCancelled = true;
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+        }
+      },
+    };
+  }
 
   // Attempt ElevenLabs hosted synthesis
   (async () => {

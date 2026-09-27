@@ -14,6 +14,7 @@ import { reviewsRouter } from './routes/reviews.js';
 import { router as ingestionRouter } from './routes/ingestion.js';
 import { mediaRouter } from './routes/media.js';
 import { voiceRouter } from './routes/voice.js';
+import { ttsRouter } from './routes/tts.js';
 import { digitalTwinRouter } from './routes/digitalTwin.js';
 import { paymentsRouter } from './routes/payments.js';
 import { cultureAssistantRouter } from './routes/cultureAssistant.js';
@@ -52,6 +53,10 @@ app.use('/api/v1/payments', paymentsRouter);
 app.use('/api/payments', paymentsRouter);
 app.use('/api/v1/voice', voiceRouter);
 app.use('/voice', voiceRouter);
+app.use('/api/v1/voice', ttsRouter);
+app.use('/voice', ttsRouter);
+app.use('/api/v1/tts', ttsRouter);
+app.use('/tts', ttsRouter);
 app.use('/api/v1/culture-assistant', cultureAssistantRouter);
 app.use('/api/culture-assistant', cultureAssistantRouter);
 

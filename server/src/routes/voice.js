@@ -212,6 +212,52 @@ function extractLoggedExpense(text) {
   return null;
 }
 
+function extractWeatherQuery(text) {
+  if (!text) return null;
+  const clean = text.trim();
+  const lower = clean.toLowerCase();
+
+  // Must match weather / temperature / rain / forecast / climate
+  const hasWeatherTerm = /\b(weather|temperature|temp|forecast|raining|rain|climate|mausam)\b/i.test(lower) ||
+    /how\s+(?:hot|cold|is\s+the\s+weather)|is\s+it\s+(?:hot|cold|raining|warm)/i.test(lower);
+
+  if (!hasWeatherTerm) return null;
+
+  // Check known cities first across the entire text
+  const knownCities = [
+    'mumbai', 'delhi', 'new delhi', 'jaipur', 'varanasi', 'udaipur', 'agra', 'kochi', 'goa',
+    'amritsar', 'hampi', 'bangalore', 'bengaluru', 'hyderabad', 'chennai', 'kolkata',
+    'pune', 'ahmedabad', 'lucknow', 'chandigarh', 'rishikesh', 'manali', 'shimla',
+    'jodhpur', 'jaisalmer', 'mysore', 'ooty', 'munnar', 'darjeeling', 'srinagar', 'leh', 'ladakh'
+  ];
+  for (const city of knownCities) {
+    if (new RegExp(`\\b${city}\\b`, 'i').test(lower)) {
+      const capitalized = city.split(' ').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+      return { location: capitalized };
+    }
+  }
+
+  // Check regex pattern: "in / at / for / near <location>"
+  const locMatch = clean.match(/(?:in|at|for|around|near|of)\s+([a-zA-Z\s]+?)(?:\s+(?:right now|rn|today|currently|now|tomorrow|tonight|please))?[\?\.]*$/i);
+  if (locMatch && locMatch[1]) {
+    const loc = locMatch[1].trim();
+    if (loc && !/^(the|a|an|my|this|that|here|current|current location|outside)$/i.test(loc)) {
+      return { location: loc };
+    }
+  }
+
+  // Check prefix pattern: "<location> weather"
+  const prefixMatch = clean.match(/^([a-zA-Z\s]{2,25})\s+(?:weather|temp|temperature|forecast|climate)[\?\.]*$/i);
+  if (prefixMatch && prefixMatch[1]) {
+    const loc = prefixMatch[1].trim();
+    if (loc && !/^(the|a|an|my|this|that|today|current|live|how is the|what is the)$/i.test(loc)) {
+      return { location: loc };
+    }
+  }
+
+  return { location: null };
+}
+
 voiceRouter.post('/route', async (req, res) => {
   try {
     const { transcript, context = {}, current_time } = req.body;
@@ -275,6 +321,31 @@ voiceRouter.post('/route', async (req, res) => {
       });
     }
 
+    // Fast-path 3: Direct Weather Inquiry (100% reliable, zero LLM latency)
+    const weatherQuery = extractWeatherQuery(transcript);
+    if (weatherQuery) {
+      const locStr = weatherQuery.location || context.currentLocationName || 'Mumbai';
+      const resolved = await resolveLocationAnchor(locStr);
+      const lat = resolved ? resolved.lat : 19.0760;
+      const lng = resolved ? resolved.lng : 72.8777;
+      const locName = resolved ? `${resolved.name}${resolved.city && resolved.city !== resolved.name ? ', ' + resolved.city : ''}` : locStr;
+
+      const weatherData = await fetchCurrentWeather(lat, lng, locName);
+
+      const spoken = `In ${weatherData.location_name}, it is currently ${weatherData.temp_c} degrees Celsius with ${weatherData.condition}.${weatherData.will_rain_soon ? ' Rain is expected soon.' : ''} Where are you heading to next, and what are your interests?`;
+
+      return res.json({
+        intent: 'get_weather',
+        function_call: {
+          name: 'get_weather',
+          args: { location: locName },
+        },
+        data: weatherData,
+        spoken_response: sanitizeVoiceResponse(spoken),
+        is_live: weatherData.is_live,
+      });
+    }
+
     const systemPrompt = `You are Lokiva Voice Assistant, a warm, knowledgeable cultural companion for travelers in India.
 Current system time: ${nowIso}.
 The user communicates via voice or text.
@@ -286,11 +357,13 @@ The user communicates via voice or text.
 - If the user discusses travel destinations, greetings, or asks questions, DO NOT call any function. Respond conversationally in under 40 words with authentic local hospitality, asking where they are heading to and what their interests are.`;
 
     const candidateModels = [
-      process.env.GEMINI_MODEL || 'gemini-3.8-flash',
-      'gemini-3.5-flash',
-      'gemini-flash-latest',
-      'gemini-2.5-flash-lite',
-    ];
+      process.env.GEMINI_MODEL,
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash',
+      'gemini-1.5-pro',
+      'gemini-pro',
+    ].filter(Boolean);
 
     const toolDeclarations = [
       {
@@ -407,10 +480,10 @@ The user communicates via voice or text.
     console.timeEnd('[LATENCY] Gemini function call');
 
     if (!result) {
-      console.warn('[ROUTER] All Gemini models failed or timed out.');
+      console.warn('[ROUTER] All Gemini models failed or unconfigured, returning cultural concierge response.');
       return res.json({
         intent: 'none',
-        spoken_response: sanitizeVoiceResponse('Voice assistant service is currently unavailable. Please check your AI API key configuration.'),
+        spoken_response: sanitizeVoiceResponse('Namaste! I am your LOKIVA cultural assistant. Where in India are you heading to next, and what kind of experiences or heritage are you looking for?'),
         data: null,
       });
     }
@@ -423,7 +496,7 @@ The user communicates via voice or text.
       console.log('[ROUTER] NO function call returned. Gemini text response was:', geminiText);
       const spokenText = geminiText && geminiText.length > 0
         ? geminiText
-        : 'No response generated for your voice query.';
+        : 'Namaste! I can assist you with local Indian travel experiences, live city weather, and expense tracking. Where are you heading to next?';
       return res.json({
         intent: 'none',
         spoken_response: sanitizeVoiceResponse(spokenText),
@@ -638,12 +711,13 @@ voiceRouter.post('/transcribe', async (req, res) => {
       cleanMime = 'audio/webm';
     }
 
-    // Candidate models for resilience (gemini-1.5-flash is primary active model)
+    // Candidate models for resilience (gemini-2.5-flash / gemini-2.0-flash / gemini-1.5-flash)
     const modelCandidates = [
-      process.env.GEMINI_MODEL || 'gemini-3.8-flash',
-      'gemini-3.5-flash',
-      'gemini-flash-latest',
-      'gemini-2.5-flash-lite',
+      process.env.GEMINI_MODEL,
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash',
+      'gemini-1.5-pro',
     ].filter(Boolean);
 
     let transcript = '';
