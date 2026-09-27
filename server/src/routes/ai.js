@@ -243,7 +243,8 @@ aiRouter.post('/concierge', async (req, res) => {
       }
     }
 
-    // Do not use requestedCity if it was defaulted to 'Mumbai' without user input
+    // Only use requestedCity if the user explicitly mentioned a city in their current message
+    // Do not use it if it was defaulted by the frontend without user input
     const cleanRequestedCity = requestedCity && requestedCity.trim() && requestedCity.toLowerCase() !== 'mumbai'
       ? requestedCity.trim()
       : null;
@@ -256,9 +257,16 @@ aiRouter.post('/concierge', async (req, res) => {
         ? confirmedProfile.destination.trim()
         : null;
 
+    // Only use cityInUserHistory or cleanRequestedCity if the user explicitly mentioned a city in their current message
+    // or if there's a confirmed brief with a destination
+    const hasExplicitCityInMessage = mentionedInMessage !== null;
+    const hasConfirmedDestination = profileCity !== null;
+
     let activeCity = isRegionalOrGeneral
       ? null
-      : (mentionedInMessage || cleanRequestedCity || cityInUserHistory || profileCity || null);
+      : (hasExplicitCityInMessage || hasConfirmedDestination)
+        ? (mentionedInMessage || profileCity || cleanRequestedCity || cityInUserHistory || null)
+        : null;
     // Intent starts from the raw prompt, then the confirmed brief overrides it
     const intent = mergeTripProfile(parseIntentFromPrompt(message), confirmedProfile);
 

@@ -746,7 +746,7 @@ ${usableRoutes
 
   const clarificationRule = hasConfirmedBrief
     ? "7. The traveler already confirmed the brief above. Curate straight away and do not ask any further setup questions. If something is genuinely missing, ask at most ONE short question of 15 words or fewer, never a numbered list."
-    : "7. If a detail that would materially change the shortlist is missing (time window, who they are travelling with, or what they want most), ask exactly ONE focused question of 15 words or fewer at the end of your reply. Never send a numbered questionnaire, never ask three questions at once, and never re-ask something the traveler already told you.";
+    : "7. QUESTION POLICY: Only ask a question if the user's message is genuinely vague and lacks the minimum information needed to provide a useful recommendation. If the user has provided a destination AND at least one of (time frame, budget, interests, or companions), do NOT ask any questions. Provide recommendations directly. Only ask a question if the user's message is extremely vague (e.g., just 'hi', 'I want to travel', 'suggest places' with no destination or context). When you do ask, ask exactly ONE focused question of 15 words or fewer at the end of your reply. Never send a numbered questionnaire, never ask three questions at once, and never re-ask something the traveler already told you.";
 
   const weatherBlock = weatherContext
     ? `LIVE WEATHER DATA for ${city} (Open-Meteo real-time, fetched just now):

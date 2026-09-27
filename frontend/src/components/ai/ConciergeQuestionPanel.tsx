@@ -86,11 +86,11 @@ export const ConciergeQuestionPanel: React.FC<ConciergeQuestionPanelProps> = ({
       animate={{ opacity: 1, y: 0 }}
       exit={shouldReduceMotion ? undefined : { opacity: 0, y: 8 }}
       transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-      className="w-full bg-white rounded-3xl border border-[#E5DFD5] border-t-2 border-t-[#C1443B] shadow-lg overflow-hidden"
+      className="w-full bg-white rounded-2xl border border-[#E5DFD5] border-t-2 border-t-[#C1443B] shadow-md overflow-hidden"
     >
       {/* Live brief of everything confirmed so far */}
       {knownLabels.length > 0 && (
-        <div className="px-4 sm:px-5 pt-3.5 pb-3 border-b border-dashed border-[#E5DFD5] bg-[#FAF7F2]">
+        <div className="px-3 sm:px-4 pt-2.5 pb-2 border-b border-dashed border-[#E5DFD5] bg-[#FAF7F2]">
           <div className="flex items-center justify-between gap-3">
             <span className="text-[10px] font-heading font-extrabold uppercase tracking-widest text-[#C1443B] flex items-center gap-1.5">
               <Compass className="w-3 h-3" />
@@ -128,7 +128,7 @@ export const ConciergeQuestionPanel: React.FC<ConciergeQuestionPanelProps> = ({
       )}
 
       {/* Question body */}
-      <div className="px-4 sm:px-5 py-4 space-y-3.5">
+      <div className="px-3 sm:px-4 py-3 space-y-2.5">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1.5 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
@@ -164,7 +164,7 @@ export const ConciergeQuestionPanel: React.FC<ConciergeQuestionPanelProps> = ({
         </div>
 
         {/* Option chips */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
           {question.options.map((option) => {
             const isSelected = isMulti ? pending.includes(option.value) : false;
             return (
@@ -176,21 +176,21 @@ export const ConciergeQuestionPanel: React.FC<ConciergeQuestionPanelProps> = ({
                 transition={{ duration: 0.14 }}
                 onClick={() => handleChipClick(option.value)}
                 disabled={isBusy}
-                className={`flex items-center gap-2 px-3 py-2 rounded-2xl border text-left transition shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-left transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                   isSelected
                     ? 'bg-[#FAF5EE] border-[#C1443B] text-ink'
                     : 'bg-white border-[#E5DFD5] hover:border-[#F0A63B] text-ink'
                 }`}
               >
                 <span
-                  className={`w-6 h-6 rounded-lg flex items-center justify-center text-[11px] flex-shrink-0 ${
+                  className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] flex-shrink-0 ${
                     isSelected ? 'bg-[#C1443B] text-white' : 'bg-[#FAF7F2] text-ink'
                   }`}
                 >
                   {option.emoji || <Check className="w-3 h-3" />}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-xs font-heading font-bold leading-tight">{option.label}</span>
+                  <span className="block text-[11px] font-heading font-bold leading-tight">{option.label}</span>
                   {option.hint && (
                     <span className="hidden sm:block text-[10px] font-mono text-dusk-600 leading-tight mt-0.5">
                       {option.hint}
@@ -204,12 +204,12 @@ export const ConciergeQuestionPanel: React.FC<ConciergeQuestionPanelProps> = ({
         </div>
 
         {/* Footer controls */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-dashed border-[#E5DFD5]">
+        <div className="flex flex-wrap items-center justify-between gap-1.5 pt-1 border-t border-dashed border-[#E5DFD5]">
           <button
             type="button"
             onClick={() => onSkip(question)}
             disabled={isBusy}
-            className="inline-flex items-center gap-1.5 text-[11px] font-heading font-bold text-dusk-600 hover:text-ink transition cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-1 text-[10px] font-heading font-bold text-dusk-600 hover:text-ink transition cursor-pointer disabled:opacity-50"
           >
             <HelpCircle className="w-3.5 h-3.5" />
             <span>Skip this</span>
@@ -224,7 +224,7 @@ export const ConciergeQuestionPanel: React.FC<ConciergeQuestionPanelProps> = ({
                   setPending([]);
                 }}
                 disabled={!canConfirm || isBusy}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-ink/40 text-ink rounded-xl text-[11px] font-heading font-bold transition shadow-xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-ink/40 text-ink rounded-lg text-[10px] font-heading font-bold transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <span>Confirm {pending.length > 0 ? `(${pending.length})` : ''}</span>
               </button>
@@ -234,7 +234,7 @@ export const ConciergeQuestionPanel: React.FC<ConciergeQuestionPanelProps> = ({
                 type="button"
                 onClick={onCurateNow}
                 disabled={isBusy}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#12213B] hover:bg-[#1D2E49] text-white rounded-xl text-[11px] font-heading font-bold transition shadow-xs cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-[#12213B] hover:bg-[#1D2E49] text-white rounded-lg text-[10px] font-heading font-bold transition cursor-pointer disabled:opacity-50"
               >
                 <Wand2 className="w-3.5 h-3.5 text-[#F0A63B]" />
                 <span>{isRefine ? 'Done, curate' : 'Curate now'}</span>

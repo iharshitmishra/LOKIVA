@@ -20,12 +20,12 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { AudioWaveformVisualizer } from '../components/voice/AudioWaveformVisualizer';
 import { VoiceRecordingSheet } from '../components/voice/VoiceRecordingSheet';
 import { FormattedMessageContent } from '../components/ui/FormattedMessageContent';
-import { TypewriterText } from '../components/ui/TypewriterText';
 import { nearestCity, requestCurrentPosition } from '../lib/geo';
 import { ConciergeQuestionPanel } from '../components/ai/ConciergeQuestionPanel';
 import { RouteBoard } from '../components/ai/RouteBoard';
 import { RoutePlan } from '../lib/routePlanner';
 import { fetchWeatherContextForAI, WeatherContextForAI } from '../services/openMeteoService';
+import { useWeatherSimulationStore } from '../store/useWeatherSimulationStore';
 import {
   TripBrief,
   InterviewQuestion,
@@ -814,9 +814,6 @@ export function AiGuidePage() {
 
   const isSendingRef = useRef(false);
 
-  // The assistant reply currently being typed out word by word
-  const [typingMessageId, setTypingMessageId] = useState<string | null>(null);
-
   // "Use my location" flow state
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -827,15 +824,6 @@ export function AiGuidePage() {
     const t = setTimeout(() => setLocationError(null), 6000);
     return () => clearTimeout(t);
   }, [locationError]);
-
-  // Type the welcome message out on first load, like a live agent
-  useEffect(() => {
-    if (messages.length === 1 && messages[0]?.id === 'welcome-msg' && !typingMessageId) {
-      setTypingMessageId('welcome-msg');
-    }
-    // Only run on mount: restored chats never re-animate history
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // ===========================================================================
   // Unified send handler (typed, chip tap, voice, interview curation)
@@ -997,23 +985,40 @@ export function AiGuidePage() {
           setDiscoverMode(false);
         }
         // 3. Live Weather Sensor Inquiry (typed or spoken)
-        const context: UserSessionContext = {
-          currentLocationName: currentCity ? currentCity : 'Jaipur',
-          activeTripDeadlines: [],
-          currentItinerary: null,
-        };
-        const routeResult = await routeVoiceInput(textToSend, context);
-        detectedIntent = routeResult.intent;
-        botContent = routeResult.spoken_response;
-        spokenText = routeResult.spoken_response;
-        if (routeResult.intent === 'get_weather' && routeResult.data) {
-          weatherData = routeResult.data as WeatherData;
+        // Ask for a destination instead of assuming one
+        if (!currentCity && !tripBriefRef.current.destination) {
+          setDiscoverMode(true);
+          setPendingQuestionId('destination');
+          botContent =
+            'I can check the live weather for you. First, which city in India are you heading to?';
+          spokenText = botContent;
+        } else {
+          const context: UserSessionContext = {
+            currentLocationName: currentCity || tripBriefRef.current.destination || undefined,
+            activeTripDeadlines: [],
+            currentItinerary: null,
+          };
+          const routeResult = await routeVoiceInput(textToSend, context);
+          detectedIntent = routeResult.intent;
+          botContent = routeResult.spoken_response;
+          spokenText = routeResult.spoken_response;
+          if (routeResult.intent === 'get_weather' && routeResult.data) {
+            weatherData = routeResult.data as WeatherData;
+          }
         }
       } else {
         // 4. Cultural Concierge for destination exploration, questions, itineraries, greetings
         setDiscoverMode(true);
+        const activeBrief = tripBriefRef.current;
+
+        // If we do not know the destination, ask instead of assuming one
+        if (!activeBrief.destination && !currentCity) {
+          setPendingQuestionId('destination');
+          botContent =
+            'I would love to help you explore! First, where in India are you heading? Pick a city or type your own.';
+          spokenText = botContent;
+        } else {
         try {
-          const activeBrief = tripBriefRef.current;
           const hasBrief =
             Boolean(activeBrief.destination) ||
             Boolean(activeBrief.companions) ||
@@ -1024,10 +1029,28 @@ export function AiGuidePage() {
             activeBrief.interests.length > 0;
 
           // Fetch live weather for the destination to ground concierge recommendations
+          // Check if admin weather simulation is active - if so, use simulated values
           const destCity = currentCity || activeBrief.destination || undefined;
-          const weatherContext: WeatherContextForAI | null = destCity
-            ? await fetchWeatherContextForAI(destCity)
-            : null;
+          const { isSimulationActive, simulatedWeather, simulationCity } = useWeatherSimulationStore();
+          let weatherContext: WeatherContextForAI | null = null;
+
+          if (isSimulationActive && simulatedWeather) {
+            // Use simulated weather data, overriding real-time API
+            // Present it as real weather data to the AI
+            const simCity = simulationCity || simulatedWeather.city;
+            weatherContext = {
+              ...simulatedWeather,
+              city: destCity || simCity,
+              aiPromptContext: `LIVE WEATHER DATA for ${destCity || simCity} (Open-Meteo real-time):
+Current conditions: ${simulatedWeather.currentCondition} at ${simulatedWeather.currentTempCelsius}\u00B0C.
+${simulatedWeather.todaySummary}
+Rain expected: ${simulatedWeather.rainExpected ? `YES - peak probability ${simulatedWeather.peakRainProbability}%` : 'No significant rain expected'}
+Hourly highlights: ${simulatedWeather.hourlyHighlights.slice(0, 6).map(h => `${h.time}: ${h.condition}, ${h.temp}\u00B0C, ${h.rainProb}% rain`).join('; ')}`,
+            };
+          } else if (destCity) {
+            // Use real-time Open-Meteo API data
+            weatherContext = await fetchWeatherContextForAI(destCity);
+          }
 
           const chatRes = await api.chatWithConcierge({
             message: textToSend,
@@ -1052,6 +1075,7 @@ export function AiGuidePage() {
           botContent = fallbackRes.reply;
           spokenText = fallbackRes.reply;
           recommendations = fallbackRes.suggested_experiences || [];
+        }
         }
       }
 
@@ -1104,7 +1128,6 @@ export function AiGuidePage() {
       };
 
       setMessages((prev) => [...prev, botMsg]);
-      setTypingMessageId(botMsgId);
 
       // STRICT REQUIREMENT: After every answer through chat or mic, deliver response in both chat and audio
       if (cleanSpokenText) {
@@ -1277,6 +1300,12 @@ export function AiGuidePage() {
       updateTripBrief(() => nextBrief);
       setSkippedQuestions((prev) => prev.filter((id) => id !== question.id));
       setPendingQuestionId(null);
+
+      // Keep the active destination selector in sync when the traveler
+      // answers the destination question, so the UI reflects the choice.
+      if (question.id === 'destination' && values[0]) {
+        setCurrentCity(values[0]);
+      }
 
       const destination = nextBrief.destination || currentCity;
 
@@ -1528,16 +1557,8 @@ export function AiGuidePage() {
                           </div>
                         </div>
 
-                        {/* Text content: assistant replies type out word by word like a live agent */}
-                        {isUser ? (
-                          <FormattedMessageContent content={msg.content} isUser={isUser} />
-                        ) : (
-                          <TypewriterText
-                            content={msg.content}
-                            animate={msg.id === typingMessageId}
-                            onDone={() => setTypingMessageId((cur) => (cur === msg.id ? null : cur))}
-                          />
-                        )}
+                        {/* Text content: all messages render instantly without animation */}
+                        <FormattedMessageContent content={msg.content} isUser={isUser} />
 
                         {/* Weather data card - distinct inset panel */}
                         {msg.weatherData && (
@@ -1834,7 +1855,7 @@ export function AiGuidePage() {
 
         {/* Fixed Input Bar */}
         <div ref={composerRef} className="fixed bottom-0 left-0 right-0 bg-paper/95 backdrop-blur-md border-t border-paper-300 p-2.5 sm:p-4 z-40">
-          <div className="max-w-4xl mx-auto space-y-2">
+          <div className="max-w-4xl mx-auto space-y-1.5">
             {!isAuthenticated ? (
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 py-1 px-2">
                 <div className="flex items-center gap-2 text-xs font-sans text-dusk-700 text-center sm:text-left">
@@ -1859,101 +1880,85 @@ export function AiGuidePage() {
               </div>
             ) : (
               <>
-                {/* Active Destination selector row */}
-                {!currentCity ? (
-                  <div className="space-y-1.5">
-                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full scrollbar-none [-webkit-overflow-scrolling:touch] text-xs">
-                    <span className="text-dusk-600 font-mono text-[10px] uppercase tracking-wider flex-shrink-0 font-bold">
-                      Destination:
-                    </span>
-                    <motion.button
-                      type="button"
-                      whileHover={shouldReduceMotion ? undefined : { y: -1.5, scale: 1.02 }}
-                      whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
-                      transition={{ duration: 0.15 }}
-                      onClick={handleUseLocation}
-                      disabled={isLocating}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#F0A63B] rounded-full text-xs font-heading font-medium text-ink transition flex-shrink-0 shadow-xs cursor-pointer disabled:opacity-60 disabled:cursor-wait"
-                    >
-                      {isLocating ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin text-[#C1443B]" />
-                      ) : (
-                        <LocateFixed className="w-3.5 h-3.5 text-[#C1443B]" />
-                      )}
-                      <span>{isLocating ? 'Detecting...' : 'Use my location'}</span>
-                    </motion.button>
-                    {['Jaipur', 'Varanasi', 'Goa', 'Mumbai', 'Delhi', 'Kochi', 'Udaipur'].map((city) => (
+                {/* Compact destination + interest prompt row */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 max-w-full scrollbar-none [-webkit-overflow-scrolling:touch]">
+                  {!currentCity ? (
+                    <>
+                      <span className="text-dusk-600 font-mono text-[10px] uppercase tracking-wider flex-shrink-0 font-bold">
+                        Destination:
+                      </span>
                       <motion.button
-                        key={city}
                         type="button"
-                        whileHover={shouldReduceMotion ? undefined : { y: -1.5, scale: 1.02 }}
                         whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
                         transition={{ duration: 0.15 }}
-                        onClick={() => {
-                          unlockAudio();
-                          setCurrentCity(city);
-                          handleSend(`I want to explore ${city}. What authentic experiences do you recommend?`, false);
-                        }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#F0A63B] rounded-full text-xs font-heading font-medium text-ink transition flex-shrink-0 shadow-xs cursor-pointer"
+                        onClick={handleUseLocation}
+                        disabled={isLocating}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#F0A63B] rounded-full text-[10px] font-heading font-medium text-ink transition flex-shrink-0 cursor-pointer disabled:opacity-60 disabled:cursor-wait"
                       >
-                        <span className="w-4 h-4 rounded-full bg-teal-50 text-teal flex items-center justify-center text-[10px]">
-                          <MapPin className="w-2.5 h-2.5" />
-                        </span>
-                        <span>{city}</span>
+                        {isLocating ? (
+                          <Loader2 className="w-3 h-3 animate-spin text-[#C1443B]" />
+                        ) : (
+                          <LocateFixed className="w-3 h-3 text-[#C1443B]" />
+                        )}
+                        <span>{isLocating ? 'Locating...' : 'Use my location'}</span>
                       </motion.button>
-                    ))}
-                  </div>
-                  {locationError && (
-                    <div className="flex items-center gap-2 text-[11px] font-sans font-semibold text-amber-800 bg-amber-50/80 border border-amber-200/80 rounded-xl px-3 py-1.5">
-                      <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span>{locationError}</span>
-                    </div>
-                  )}
-                  </div>
-                ) : (
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs font-mono px-1">
-                      <span className="flex items-center gap-1.5 text-teal font-bold">
-                        <MapPin className="w-3.5 h-3.5 text-teal flex-shrink-0" />
-                        <span>
-                          Active Destination: <strong>{currentCity}</strong>
+                      {['Jaipur', 'Varanasi', 'Goa', 'Mumbai', 'Delhi', 'Kochi', 'Udaipur'].map((city) => (
+                        <motion.button
+                          key={city}
+                          type="button"
+                          whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
+                          transition={{ duration: 0.15 }}
+                          onClick={() => {
+                            unlockAudio();
+                            setCurrentCity(city);
+                            handleSend(`I want to explore ${city}. What authentic experiences do you recommend?`, false);
+                          }}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#F0A63B] rounded-full text-[10px] font-heading font-medium text-ink transition flex-shrink-0 cursor-pointer"
+                        >
+                          <MapPin className="w-2.5 h-2.5 text-teal" />
+                          <span>{city}</span>
+                        </motion.button>
+                      ))}
+                      {locationError && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-sans font-semibold text-amber-800 bg-amber-50/80 border border-amber-200/80 rounded-lg px-2 py-0.5 flex-shrink-0">
+                          <AlertTriangle className="w-3 h-3 flex-shrink-0" />
+                          <span>{locationError}</span>
                         </span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-[#E5DFD5] rounded-full text-[10px] font-heading font-bold text-teal flex-shrink-0">
+                        <MapPin className="w-2.5 h-2.5" />
+                        <span>{currentCity}</span>
                       </span>
                       <button
                         type="button"
                         onClick={() => setCurrentCity(null)}
-                        className="hover:underline text-[11px] text-[#C1443B] font-heading font-bold cursor-pointer"
+                        className="text-[10px] text-[#C1443B] font-heading font-bold hover:underline flex-shrink-0 cursor-pointer"
                       >
-                        Change destination
+                        Change
                       </button>
-                    </div>
-                    {/* Interest chips for active city */}
-                    <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 max-w-full scrollbar-none [-webkit-overflow-scrolling:touch] text-xs">
-                      <span className="text-dusk-600 font-mono text-[10px] uppercase tracking-wider flex-shrink-0 font-bold">
-                        Interests:
-                      </span>
+                      <span className="w-px h-3 bg-[#E5DFD5] flex-shrink-0" />
                       {INTEREST_OPTIONS.map((item, i) => (
                         <motion.button
                           key={i}
                           type="button"
-                          whileHover={shouldReduceMotion ? undefined : { y: -1.5, scale: 1.02 }}
                           whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
                           transition={{ duration: 0.15 }}
                           onClick={() => {
                             unlockAudio();
                             handleSend(`Show me ${item.interest} in ${currentCity}`, false);
                           }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#F0A63B] rounded-full text-xs font-heading font-medium text-ink transition flex-shrink-0 shadow-xs cursor-pointer"
+                          className="inline-flex items-center gap-1 px-2 py-0.5 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#F0A63B] rounded-full text-[10px] font-heading font-medium text-ink transition flex-shrink-0 cursor-pointer"
                         >
-                          <span className="w-4 h-4 rounded-full bg-paper-100 flex items-center justify-center text-[11px]">
-                            {item.icon}
-                          </span>
+                          <span className="text-[11px]">{item.icon}</span>
                           <span>{item.label}</span>
                         </motion.button>
                       ))}
-                    </div>
-                  </div>
-                )}
+                    </>
+                  )}
+                </div>
 
                 {/* Concierge interview: one clarifying question at a time */}
                 <AnimatePresence initial={false} mode="wait">
@@ -1975,7 +1980,7 @@ export function AiGuidePage() {
                   )}
                 </AnimatePresence>
 
-                {/* Compact brief summary once the interview is complete */}
+                {/* Compact brief summary once the interview is complete  
                 {showBriefStrip && !showInterviewPanel && (
                   <motion.button
                     type="button"
@@ -1983,32 +1988,30 @@ export function AiGuidePage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
                     onClick={handleResumeInterview}
-                    className="w-full flex items-center justify-between gap-3 px-3.5 py-2.5 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#F0A63B] rounded-2xl shadow-xs transition cursor-pointer text-left"
+                    className="w-full flex items-center justify-between gap-2 px-3 py-1.5 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#F0A63B] rounded-xl transition cursor-pointer text-left"
                   >
-                    <span className="flex items-center gap-2 min-w-0">
-                      <span className="w-6 h-6 rounded-lg bg-[#FAF7F2] border border-[#E5DFD5] text-[#C1443B] flex items-center justify-center flex-shrink-0">
-                        <Wand2 className="w-3.5 h-3.5" />
-                      </span>
+                    <span className="flex items-center gap-1.5 min-w-0">
+                      <Wand2 className="w-3.5 h-3.5 text-[#C1443B] flex-shrink-0" />
                       <span className="min-w-0">
                         <span className="block text-[10px] font-heading font-extrabold uppercase tracking-widest text-[#C1443B]">
                           Travel brief locked
                         </span>
-                        <span className="block text-[11px] font-mono text-dusk-600 truncate">
-                          {interviewProgress.answered} details captured, curated for your exact trip
+                        <span className="block text-[10px] font-mono text-dusk-600 truncate">
+                          {interviewProgress.answered} details captured
                         </span>
                       </span>
                     </span>
-                    <span className="flex items-center gap-1 text-[11px] font-heading font-bold text-ink flex-shrink-0">
+                    <span className="flex items-center gap-0.5 text-[10px] font-heading font-bold text-ink flex-shrink-0">
                       <span>Tune</span>
-                      <ArrowRight className="w-3.5 h-3.5 text-[#C1443B]" />
+                      <ArrowRight className="w-3 h-3 text-[#C1443B]" />
                     </span>
                   </motion.button>
-                )}
+                )} */}
 
                 {/* Suggestion chips - horizontally scrollable from central config.
                     Hidden while the interview is asking, so the question owns the composer. */}
                 {!showInterviewPanel && (
-                  <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none [-webkit-overflow-scrolling:touch]">
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none [-webkit-overflow-scrolling:touch]">
                     <span className="text-dusk-600 font-mono text-[10px] uppercase tracking-wider flex-shrink-0 font-bold hidden sm:block">
                       Try:
                     </span>
@@ -2016,7 +2019,6 @@ export function AiGuidePage() {
                       <motion.button
                         key={idx}
                         type="button"
-                        whileHover={shouldReduceMotion ? undefined : { y: -1.5, scale: 1.02 }}
                         whileTap={shouldReduceMotion ? undefined : { scale: 0.97 }}
                         transition={{ duration: 0.15 }}
                         onClick={() => {
@@ -2024,12 +2026,10 @@ export function AiGuidePage() {
                           handleSend(suggestion.query, false);
                         }}
                         disabled={isLoading}
-                        className="inline-flex items-center gap-1.5 px-3 py-1 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#C1443B]/60 rounded-full text-xs font-heading font-medium text-ink transition flex-shrink-0 shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 bg-white hover:bg-[#FAF7F2] border border-[#E5DFD5] hover:border-[#C1443B]/60 rounded-full text-[10px] font-heading font-medium text-ink transition flex-shrink-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {suggestion.icon && (
-                          <span className="w-4 h-4 rounded-full bg-paper-100 flex items-center justify-center text-[11px]">
-                            {suggestion.icon}
-                          </span>
+                          <span className="text-[11px]">{suggestion.icon}</span>
                         )}
                         <span>{suggestion.label}</span>
                       </motion.button>

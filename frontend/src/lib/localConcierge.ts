@@ -9,6 +9,43 @@ import {
 import { resolveImageUrl } from './api';
 import { fetchWeatherContextForAI } from '../services/openMeteoService';
 
+async function fetchAIReply(
+  message: string,
+  city: string,
+  groupSize: number,
+  budget: number | null,
+  travelerType: string,
+  interests: string[]
+): Promise<string> {
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('lokiva_token') : null;
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch('/api/v1/ai/concierge', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        message,
+        city: city || undefined,
+        group_size: groupSize,
+        budget: budget || undefined,
+        traveler_type: travelerType,
+        interests,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.reply) return data.reply as string;
+    }
+  } catch (err) {
+    console.warn('[LOKIVA AI] AI API call failed:', err);
+  }
+
+  return `I'd love to help you plan your trip! Could you tell me more about what you're looking for?`;
+}
+
 interface LocalConciergeResult {
   reply: string;
   tokens_used: number;
@@ -80,15 +117,30 @@ export async function generateLocalConciergeResponse(
   }
 
   if (!detectedCity) {
-    detectedCity = 'Jaipur';
-    detectedState = 'Rajasthan';
+    // No destination detected, ask the AI API for a clarifying response
+    const aiReply = await fetchAIReply(message, '', 1, undefined, 'Solo', []);
+    return {
+      reply: aiReply,
+      tokens_used: 50,
+      model: 'lokiva-concierge-v2',
+      extracted_intent: {
+        city: '',
+        state: '',
+        destination: '',
+        budget: undefined,
+        group_size: 1,
+        traveler_type: 'Solo',
+        raw_query: message,
+        interests: [],
+      },
+      suggested_experiences: [],
+      context_destination: '',
+      state: 'India',
+    };
   }
 
   // Fetch live weather for the destination to ground recommendations
-  const liveWeather = await fetchWeatherContextForAI(detectedCity);
-  const weatherNote = liveWeather
-    ? ` Current conditions: ${liveWeather.currentCondition} at ${liveWeather.currentTempCelsius}°C.${liveWeather.rainExpected ? ` Rain likely (${liveWeather.peakRainProbability}% probability), so indoor alternatives are prioritized.` : ' No rain expected, good conditions for outdoor exploration.'}`
-    : '';
+  await fetchWeatherContextForAI(detectedCity);
 
   // 2. Detect Group Size
   let groupSize = 1;
@@ -172,27 +224,15 @@ export async function generateLocalConciergeResponse(
     };
   });
 
-  // 5. Generate Warm Editorial Markdown Response
-  const perPerson = budget && groupSize > 0 ? Math.round(budget / groupSize) : null;
-  const perPersonText = perPerson ? `(₹${perPerson.toLocaleString('en-IN')} per traveler)` : '';
-  const totalBudgetText = budget ? `₹${budget.toLocaleString('en-IN')}` : 'a budget-friendly range';
-
-  let reply = `Padharo mhare desh! Welcome to **${detectedCity}**, ${detectedState || 'India'}.\n\n`;
-
-  if (budget) {
-    reply += `I have tailored a high-value cultural plan for your group of **${groupSize} travelers** with a total budget of **${totalBudgetText}** ${perPersonText}.\n\n`;
-  } else {
-    reply += `I have curated the top cultural anchor points in **${detectedCity}** for your party of **${groupSize}**.\n\n`;
-  }
-
-  reply += `### Recommended Circuit Highlights:\n`;
-  reply += `**Weather Brief:**${weatherNote}\n\n`;
-  topPlaces.forEach((p, i) => {
-    const costText = p.price > 0 ? `₹${p.price * groupSize} for ${groupSize}` : 'Free Entry';
-    reply += `${i + 1}. **${p.title}** (${p.category}) - ${p.tagline || p.description.slice(0, 90)}... [${costText}]\n`;
-  });
-
-  reply += `\n**Budget Tip:** Your ₹${budget ? budget.toLocaleString('en-IN') : '10,000'} allocation covers entry access, signature street gastronomy (like Rawat Pyaaz Kachoris and kulhad lassi), and local e-rickshaw transit with comfortable buffers remaining.\n\n${liveWeather?.rainExpected ? '**Rain Advisory:** Based on live forecast data, I recommend carrying waterproof gear and prioritizing covered indoor venues (museums, artisan workshops, heritage havelis) during peak rain hours. I have already biased the recommendations below toward weather-appropriate experiences.' : '**Weather Outlook:** Conditions look favorable for outdoor exploration. I have balanced the itinerary with a mix of open-air and covered experiences.'}\n\nWould you like me to generate a complete multi-day itinerary or customize specific workshop stops?`;
+  // 5. Generate AI-Powered Response
+  const reply = await fetchAIReply(
+    message,
+    detectedCity,
+    groupSize,
+    budget,
+    groupSize > 1 ? 'Group' : 'Solo',
+    ['culture', 'heritage', 'food']
+  );
 
   const extracted_intent: StructuredIntent = {
     city: detectedCity,
